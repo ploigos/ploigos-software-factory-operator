@@ -1,0 +1,94 @@
+---
+# This tells the playbooks to not try to include default-named vars files
+common_included: yes
+
+
+################################################################################
+# The following variables are especially important to pay attention to if you're
+# using an RHPDS-provisioned cluster and some of it needs to be updated every
+# time you provision a cluster to match information from the email you receive.
+#
+# NOTE: IF A VARIABLE IS COMMENTED, IT LIKELY DEFAULTS TO THE OPPOSITE
+################################################################################
+
+# The name of the cluster.
+# IF PROVISIONING:
+#   This value will be in your DNS entries and should conform to valid DNS characters.
+# IF RHPDS:
+#   This should be the first part of your cluster's base address
+#   e.g. for cluster-nisky-c592.nisky-c592.example.opentlc.com, this would be
+#         cluster-nisky-c592
+cluster_name: cluster-04a7
+
+# The base subdomain to use for your cluster.
+# IF PROVISIONING:
+#   Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created
+# IF RHPDS:
+#   This should be the rest of your cluster's base address
+openshift_base_domain: 04a7.example.opentlc.comexample.com
+
+################################################################################
+# DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily
+#   throughout all the various roles
+_tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
+full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
+cluster_router: '{{ ".".join([ "apps", full_cluster_name ]) }}'
+tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
+################################################################################
+
+# The path to the kubeconfig file for the cluster you're using for the workshop.
+#   The default value is what's configured if you're provisioning the workshop
+#   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
+#   credentials with oc.
+#   NOTE: Do not use ~ or other shell-expandable variables
+# kubeconfig: '{{ ansible_env["HOME"] }}/.kube/config'
+#   NOTE: IF YOU ARE USING run-container.sh:
+# *** DO NOT CHANGE THIS - IT WILL BE PUT HERE BY THE RUN SCRIPT ***
+
+
+
+#kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+
+# The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
+#   for RHPDS clusters, or those being used with the container workflow, you
+#   should specify the absolute path of the oc client. The value commented out
+#   below is the location inside the container for that workflow.
+# oc_cli: '/usr/local/bin/oc'
+
+
+#oc_cli: '{{ tmp_dir }}/oc'
+
+
+################################################################################
+# The remaining variables are to customize your deployment configuration beyond
+#   what is required for the workshop to function. You should read through and
+#   understand them, but they aren't necessary to minimally deploy.
+################################################################################
+
+# A list of manually created users:
+manual_users:
+  - username: opentlc-mgr
+    password: r3dh4t1!
+    admin: yes
+
+# A specially designated user for administering workshop content
+workshop_admin:
+  username: workshop-admin
+  password: RedHatAdmin1
+  admin: yes
+
+# The number of users created, as a string
+number_of_users: "3"
+user_password: openshift
+
+# Generate a sequence of users
+sequence_users: |
+  {%- for username in lookup("sequence", "1-" + number_of_users + ":user%0i", wantlist=True) %}
+    - username: {{ username }}
+      password: {{ user_password }}
+  {% endfor -%}
+
+# The users to create in OpenShift
+openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
+# The users to create workshop projects/integrations for
+workshop_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'

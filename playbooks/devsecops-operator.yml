@@ -9,22 +9,12 @@
   pre_tasks:
     - name: Look for default defined common variables
       include_vars: ../vars/common.yml
-      when: common_included is not defined or not common_included
-
-    - fail:
-        msg: Unable to continue without common variables set
-      when: common_included is not defined or not common_included
-
+      
     - name: Look for default defined devsecops variables
       include_vars: ../vars/devsecops.yml
-      when: devsecops_included is not defined or not devsecops_included
-
-    - fail:
-        msg: Unable to continue without devsecops variables set
-      when: devsecops_included is not defined or not devsecops_included
-
+      
     # Individual adjustment tasks have their own toggles
-    - include_role:
-        name: cluster-adjuster
+    # - include_role:
+    #     name: cluster-adjuster
   roles:
     - role: devsecops
