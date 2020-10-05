@@ -1,19 +1,16 @@
 ---
 - name: Create registry secrets for every user account for registry.redhat.io
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "registry_secrets.yml.j2")|from_yaml }}'
 
 - name: Create registry secrets for every user account in Quay
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "quay_secrets.yml.j2")|from_yaml }}'
   register: quay_secrets
   when: deploy_quay|default(true)
 
 - name: Wait for pipeline accounts to exist
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: ServiceAccount
     namespace: '{{ item[0] }}-{{ item[1] }}'

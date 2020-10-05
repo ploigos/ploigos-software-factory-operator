@@ -1,7 +1,6 @@
 ---
 - name: Subscribe to openshift-pipelines-operator
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: operators.coreos.com/v1alpha1
       kind: Subscription

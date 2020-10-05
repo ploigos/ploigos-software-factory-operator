@@ -1,7 +1,6 @@
 ---
 - name: Generate projects per-user
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
 
 - include_role:

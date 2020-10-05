@@ -1,5 +1,4 @@
 ---
 - name: Add redhatgov catalog source
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'

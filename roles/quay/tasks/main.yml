@@ -1,12 +1,10 @@
 ---
 - name: Subscribe to Quay Enterprise
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "quay.yml.j2")|from_yaml }}'
 
 - name: Deploy Quay Enterprise via CR
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "quay_cr.yml.j2")|from_yaml }}'
   register: quay_deployment
   until: not quay_deployment.failed
@@ -36,7 +34,6 @@
 
 - name: Subscribe to container-security operator
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: operators.coreos.com/v1alpha1
       kind: Subscription
