@@ -1,7 +1,6 @@
 ---
 - name: Ensure namespace exists
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
@@ -13,7 +12,6 @@
 
 - name: Wait for gitea-operator package manifest to be available
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: packages.operators.coreos.com/v1
     kind: PackageManifest
     namespace: openshift-marketplace
@@ -25,12 +23,10 @@
 
 - name: Subscribe to Gitea
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "gitea-subscription.yml.j2")|from_yaml }}'
 
 - name: Create Gitea from a CR
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ gitea_project_name }}'
     definition:
       apiVersion: redhatgov.io/v1alpha1
@@ -44,7 +40,6 @@
 
 - name: Wait for Gitea to finish being created
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Pod
     namespace: '{{ gitea_project_name }}'

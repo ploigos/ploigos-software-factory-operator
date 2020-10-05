@@ -1,6 +1,5 @@
 - name: Ensure namespace exists
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
@@ -12,13 +11,11 @@
 
 - name: Create Username Distribution Deployment
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ username_distribution_project_name }}'
     definition: "{{ lookup('template', 'username-distribution.yml.j2')|from_yaml }}"
 
 - name: Wait for Username Distribution to finish being created
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Pod
     namespace: '{{ username_distribution_project_name }}'

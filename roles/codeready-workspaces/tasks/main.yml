@@ -1,7 +1,6 @@
 ---
 - name: Ensure namespace exists
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
@@ -13,12 +12,10 @@
 
 - name: Subscribe to CodeReady Workspaces
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "crw-subscription.yml.j2")|from_yaml }}'
 
 - name: Deploy CodeReady Workspaces
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "crw-cr.yml.j2")|from_yaml }}'
   register: codeready_workspaces_deployment
   until: not codeready_workspaces_deployment.failed
@@ -27,7 +24,6 @@
 
 - name: Wait for Codeready route to be created by the Operator
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: route.openshift.io/v1
     kind: Route
     namespace: '{{ crw_project_name }}'
@@ -62,7 +58,6 @@
 
 - name: Get Che Identity Secret
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Secret
     name: che-identity-secret
@@ -71,7 +66,6 @@
 
 - name: Get Postgres Pod
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Pod
     label_selectors:

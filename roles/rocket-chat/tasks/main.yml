@@ -1,6 +1,5 @@
 - name: Ensure namespace exists
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
@@ -33,7 +32,6 @@
       mongodb_keyfile_value: "{{ lookup('password', '/dev/null length=756') | b64encode }}"
   - name: create secret
     k8s:
-      kubeconfig: '{{ kubeconfig }}'
       namespace: '{{ rocketchat_project_name }}'
       definition: "{{ lookup('template', 'mongodb-secret.yml.j2') }}"
   when:
@@ -41,13 +39,11 @@
 
 - name: Create MongoDB Deployment
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ rocketchat_project_name }}'
     definition: "{{ lookup('template', 'mongodb.yml.j2')|from_yaml }}"
 
 - name: Wait for MongoDB to finish being created
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Pod
     namespace: '{{ rocketchat_project_name }}'
@@ -60,13 +56,11 @@
 
 - name: Create rocket-chat Secret
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ rocketchat_project_name }}'
     definition: "{{ lookup('template', 'rocketchat-secret.yml.j2') }}"
 
 - name: Create Rocket.Chat Deployment
   k8s:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ rocketchat_project_name }}'
     definition: "{{ lookup('template', 'rocketchat.yml.j2')|from_yaml }}"
 

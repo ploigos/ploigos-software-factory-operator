@@ -1,6 +1,5 @@
 - name: Get UID for {{ user.username }}
   k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
     kind: User
     name: "{{ user.username }}"
   register: user_object
@@ -52,7 +51,6 @@
 
 - name: Link {{ user.username }} Keycloak and OCP accounts
   community.kubernetes.k8s_exec:
-    kubeconfig: '{{ kubeconfig }}'
     namespace: "{{ crw_project_name }}"
     pod: '{{ postgres_pod_name }}'
     command: psql -d keycloak -c "UPDATE federated_identity SET token=$${{ link_token }}$$ WHERE federated_username=$${{ user.username }}$$;"
