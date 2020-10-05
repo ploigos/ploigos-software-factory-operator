@@ -1,0 +1,95 @@
+---
+- name: Create the redhatgov.io/v1alpha1.Gitea
+  k8s:
+    state: present
+    namespace: '{{ namespace }}'
+    definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
+    wait: yes
+    wait_timeout: 300
+    wait_condition:
+      type: Running
+      reason: Successful
+      status: "True"
+  vars:
+    cr_file: 'redhatgov_v1alpha1_gitea_molecule.yaml'
+
+- name: Wait for Gitea Ingress to answer
+  uri:
+    url: http://localhost:30080
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 5
+
+- name: Remove the redhatgov.io/v1alpha1.Gitea
+  k8s:
+    state: absent
+    namespace: '{{ namespace }}'
+    definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
+  vars:
+    cr_file: 'redhatgov_v1alpha1_gitea_molecule.yaml'
+
+- name: Attempt to apply an invalid configurations for Gitea
+  k8s:
+    state: present
+    namespace: '{{ namespace }}'
+    definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml | combine(cr_fault) }}"
+    wait: yes
+    wait_timeout: 300
+    wait_condition:
+      type: Running
+      reason: Successful
+      status: "True"
+  vars:
+    cr_file: 'redhatgov_v1alpha1_gitea_molecule.yaml'
+  loop:
+  - spec: # invalid expose.kind
+      gitea:
+        expose:
+          kind: Faulty
+  - spec: # invalid expose.ssl type
+      gitea:
+        expose:
+          ssl: a string
+  - spec: # invalid resources.cpu.request type
+      gitea:
+        resources:
+          cpu:
+            request: 1
+  - spec: # invalid persistent type
+      persistent: a string
+  loop_control:
+    loop_var: cr_fault
+  ignore_errors: true
+  register: faulty_crs
+
+- name: Verify that the CR failed to be created
+  assert:
+    that: False not in (faulty_crs | json_query('results[].failed') | list)
+
+- name: Apply the Gitea CR in an alternate namespace
+  k8s:
+    state: present
+    namespace: '{{ namespace }}-alt'
+    definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml | combine(namespace_mod) }}"
+    wait: yes
+    wait_timeout: 300
+    wait_condition:
+      type: Running
+      reason: Successful
+      status: "True"
+  vars:
+    cr_file: 'redhatgov_v1alpha1_gitea_molecule.yaml'
+    namespace_mod:
+      metadata:
+        namespace: '{{ namespace }}-alt'
+        name: gitea-sample-alt
+  ignore_errors: true
+  register: namespace_modded_cr
+
+- name: Verify that Gitea failed to be created from the CR when appropriate
+  assert:
+    that: namespace_modded_cr.failed == (scope == "namespace")
+
+# TODO:
+#   - Validate Gitea can be used

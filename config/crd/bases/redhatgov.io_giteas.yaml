@@ -1,0 +1,205 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: devsecopses.redhatgov.io
+spec:
+  group: redhatgov.io
+  names:
+    kind: DevSecOps
+    listKind: DevSecOpsList
+    plural: devsecops
+    singular: devsecops
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Devsecops is the Schema for the devsecopses API
+        properties:
+          apiVersion:
+            description: |
+              APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |
+              Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the desired state of DevSecOps
+            type: object
+            properties:
+              persistent:
+                description: |
+                  Defines whether your DevSecOps instance should retain state when the Pods are
+                  terminated and restarted
+                type: boolean
+                default: True
+              devsecops:
+                description: Defines the desired state of the DevSecOps Deployment
+                type: object
+                properties:
+                  expose:
+                    description: Defines the ways in which DevSecOps should be exposed
+                    type: object
+                    properties:
+                      kind:
+                        description: The kind of resource to use to expose DevSecOps
+                        type: string
+                        enum:
+                        - Route
+                        - Ingress
+                        - None
+                        default: Route
+                      uri:
+                        description: The URI that should be exposed for DevSecOps (do not include protocol)
+                        type: string
+                        pattern: ^[^{}/ :\\]+(?::\d+)?$
+                      ssl:
+                        description: Defines SSL/TLS state, if your IngressController/Router supports it
+                        type: boolean
+                        default: True
+                  image:
+                    description: Defines the ways in which the DevSecOps image should be sourced and managed
+                    type: object
+                    properties:
+                      src:
+                        description: Defines the registry source and image name for the DevSecOps image
+                        type: string
+                        default: quay.io/redhatgov/devsecops
+                      tag:
+                        description: Defines the specific tag to use for the DevSecOps image
+                        type: string
+                        default: latest
+                      pullPolicy:
+                        description: |
+                          Defines the pullPolicy that should be applied to the image on the Deployment resource
+                        type: string
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        - Never
+                        default: IfNotPresent
+                  volumeSize:
+                    description: |
+                      Defines the size of the volume, measured in bytes, that should be requested for DevSecOps's data
+                      directory
+                    type: string
+                    pattern: ^[0-9]+[EPTGMK]?i?$
+                    default: 1Gi
+                  resources:
+                    description: Defines the resource constraints that should apply to DevSecOps
+                    type: object
+                    properties:
+                      cpu:
+                        description: Defines the CPU constraints that should apply to DevSecOps
+                        type: object
+                        properties:
+                          request:
+                            description: |
+                              How much CPU, measured in cores or millicores, should DevSecOps be expected to always
+                              have access to
+                            type: string
+                            pattern: ^[0-9]+m?$
+                            default: 200m
+                          limit:
+                            description: How much CPU, measured in cores or millicores, should DevSecOps be limited to
+                            type: string
+                            pattern: ^[0-9]+m?$
+                            default: 500m
+                      memory:
+                        description: Defines the memory constraints that should apply to DevSecOps
+                        type: object
+                        properties:
+                          request:
+                            description: |
+                              How much memory, measured in bytes, should DevSecOps be expected to always have access to
+                            type: string
+                            pattern: ^[0-9]+[EPTGMK]?i?$
+                            default: 512Mi
+                          limit:
+                            description: How much memory, measured in bytes, should DevSecOps be limited to
+                            type: string
+                            pattern: ^[0-9]+[EPTGMK]?i?$
+                            default: 512Mi
+              postgresql:
+                description: Defines the desired state of the Postgresql Deployment that supports DevSecOps
+                type: object
+                properties:
+                  image:
+                    description: Defines the ways in which the Postgresql image should be sourced and managed
+                    type: object
+                    properties:
+                      src:
+                        description: Defines the registry source and image name for the Postgresql image
+                        type: string
+                        default: registry.redhat.io/rhel8/postgresql-10
+                      tag:
+                        description: Defines the specific tag to use for the Postgresql image
+                        type: string
+                        default: latest
+                  volumeSize:
+                    description: |
+                      Defines the size of the volume, measured in bytes, that should be requested for Postgresql's
+                      database directory
+                    type: string
+                    pattern: ^[0-9]+[EPTGMK]?i?$
+                    default: 1Gi
+          status:
+            description: Status defines the observed state of DevSecOps
+            type: object
+            properties:
+              conditions:
+                description: The conditions reported by the Ansible operator
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ansibleResult:
+                      description: The result reported from the last playbook run
+                      type: object
+                      properties:
+                        changed:
+                          description: The number of tasks that resulted in a change
+                          type: integer
+                        completion:
+                          description: The time of completion
+                          type: string
+                        failures:
+                          description: The number of tasks that failed
+                          type: integer
+                        ok:
+                          description: The number of tasks that completed without change
+                          type: integer
+                        skipped:
+                          description: The number of tasks that were skipped
+                          type: integer
+                    lastTransitionTime:
+                      description: The last time the playbook was invoked following a watch
+                      type: string
+                      format: date-time
+                    message:
+                      description: The last message reported from the Ansible Operator SDK
+                      type: string
+                    reason:
+                      description: The reason the status was updated
+                      type: string
+                    status:
+                      description: The boolean return value of the playbook execution, as a string
+                      type: string
+                    type:
+                      description: The type of status change event
+                      type: string
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

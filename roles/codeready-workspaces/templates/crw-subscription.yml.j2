@@ -1,0 +1,22 @@
+# OperatorGroup for OLM configuration
+- apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: {{ crw_project_name }}-operatorgroup
+    namespace: {{ crw_project_name }}
+  spec:
+    targetNamespaces:
+    - {{ crw_project_name }}
+
+# Subscription to trigger OLM installation
+- apiVersion: operators.coreos.com/v1alpha1
+  kind: Subscription
+  metadata:
+    name: codeready-workspaces
+    namespace: {{ crw_project_name }}
+  spec:
+    channel: latest
+    installPlanApproval: Automatic
+    name: codeready-workspaces
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace

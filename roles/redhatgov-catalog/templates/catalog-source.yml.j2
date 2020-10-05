@@ -1,0 +1,17 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: redhatgov-operators
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: {{ naps_operator_index_image }}
+  displayName: Red Hat NAPS Community Operators
+  publisher: RedHatGov
+  icon:
+    base64data: ""
+    mediatype: ""
+  updateStrategy:
+    registryPoll:
+      interval: 30m

@@ -1,0 +1,30 @@
+---
+- name: Create the new TLS secrets
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: openshift-ingress
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: router-certs
+      type: kubernetes.io/tls
+      stringData:
+        tls.crt: |
+          {{ lookup("file", byo_cert_fullchain_path) }}
+        tls.key: |
+          {{ lookup("file", byo_cert_key_path) }}
+
+- name: Update ingress controller to use new certs
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: openshift-ingress-operator
+    merge_type: merge
+    definition:
+      kind: IngressController
+      metadata:
+        name: default
+      spec:
+        defaultCertificate:
+          name: router-certs

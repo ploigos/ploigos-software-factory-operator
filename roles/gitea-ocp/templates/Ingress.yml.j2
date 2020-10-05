@@ -1,0 +1,21 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: "{{ _gitea_name }}"
+  namespace: "{{ _gitea_namespace }}"
+  labels:
+    app: "{{ _gitea_name }}"
+spec:
+{% if _gitea_ssl|bool %}
+  tls:
+  - hosts:
+    - "{{ _gitea_expose_uri }}"
+{% endif %}
+  rules:
+  - host: "{{ _gitea_expose_uri }}"
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: "{{ _gitea_name }}"
+          servicePort: 3000

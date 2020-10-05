@@ -1,0 +1,4 @@
+---
+sonarqube_project_name: devsecops
+sonarqube_project_display: DevSecOps Common Resources
+sonarqube_password: '{{ lookup("password", tmp_dir + "/sonarqube.password chars=ascii_letters,digits") }}'

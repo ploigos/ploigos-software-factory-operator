@@ -1,0 +1,116 @@
+---
+- name: Create/update htpasswd file for users
+  shell: |
+    cd {{ tmp_dir }}
+    [ -f users.htpasswd ] || touch users.htpasswd
+    if htpasswd -v -b users.htpasswd '{{ user.username }}' '{{ user.password }}' &>/dev/null; then
+        echo ok
+    else
+        htpasswd -B -b users.htpasswd '{{ user.username }}' '{{ user.password }}' &>/dev/null && echo changed || echo failed
+    fi
+  register: htpasswd
+  changed_when: '"changed" in htpasswd.stdout_lines'
+  failed_when: '"failed" in htpasswd.stdout_lines'
+  loop: '{{ openshift_users }}'
+  loop_control:
+    loop_var: user
+    label: '{{ user.username }}'
+
+- name: Create/update the htpasswd secret
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: openshift-config
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        labels:
+          type: htpasswd
+        name: htpass-secret
+      type: Opaque
+      stringData:
+        htpasswd: '{{ lookup("file", tmp_dir + "/users.htpasswd") }}'
+
+- name: Create/update OAuth CR
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    apply: yes
+    definition:
+      apiVersion: v1
+      kind: OAuth
+      metadata:
+        name: cluster
+        labels:
+          type: htpasswd
+      spec:
+        identityProviders:
+        - name: htpasswd
+          mappingMethod: claim
+          type: HTPasswd
+          htpasswd:
+            fileData:
+              name: htpass-secret
+
+- name: Enable admin on appropriate users
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    apply: yes
+    definition: |
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: custom-admin-binding
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      {% for user in openshift_users %}
+      {% if user.admin is defined and user.admin %}
+      - apiGroup: rbac.authorization.k8s.io
+        kind: User
+        name: {{ user.username }}
+      {% endif %}
+      {% endfor %}
+
+# This is easier than jumping through API hoops myself to get to the token.
+- name: Login with a new admin to cache that token
+  shell: |
+    export KUBECONFIG='{{ kubeconfig }}'
+    oc='{{ oc_cli }}'
+    admin_user='{{ workshop_admin.username }}'
+    admin_password='{{ workshop_admin.password }}'
+    if [ $($oc --insecure-skip-tls-verify=true whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
+    else
+        echo ok
+    fi
+  register: oc_login
+  changed_when: oc_login.stdout_lines|last == "changed"
+  failed_when: oc_login.stdout_lines|last == "failed"
+  until: not oc_login.failed
+  retries: 5
+  delay: 30
+
+- name: Delete the generated kubeadmin secrets
+  k8s:
+    state: absent
+    kubeconfig: '{{ kubeconfig }}'
+    apply: yes
+    namespace: kube-system
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: kubeadmin
+  when: full_cluster_name != "crc.testing"
+
+- name: Create User objects for each HTPasswd user
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    apply: yes
+    definition: '{{ lookup("template", "users.yml.j2")|from_yaml }}'

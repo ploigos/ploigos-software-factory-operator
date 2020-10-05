@@ -1,0 +1,47 @@
+---
+- name: Generate projects per-user
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
+
+- include_role:
+    name: quay
+  when: deploy_quay
+- include_role:
+    name: gitea
+  when: deploy_gitea
+- include_role:
+    name: sonarqube
+  when: deploy_sonarqube
+- include_role:
+    name: nexus
+  when: deploy_nexus
+- include_role:
+    name: codeready-workspaces
+  when: deploy_crw
+- include_role:
+    name: username-distribution
+  when: deploy_username_distribution
+- include_role:
+    name: rocket-chat
+  when: deploy_rocketchat
+- include_role:
+    name: workshop-spawner
+  when: deploy_workshop
+
+- include_role:
+    name: tekton
+  when:
+    - deploy_pipeline
+    - pipeline_style == 'tekton'
+- include_role:
+    name: tekton-pipeline
+  when:
+    - deploy_pipeline
+    - pipeline_style == 'tekton'
+
+- include_role:
+    name: jenkins
+  when:
+    - deploy_pipeline
+    - pipeline_style == 'jenkins'

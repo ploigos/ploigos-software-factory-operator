@@ -1,0 +1,15 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: DevSecOps
+metadata:
+  name: devsecops-testing
+spec:
+  postgresql:
+    image:
+      src: postgres
+      tag: '10'
+  devsecops:
+    expose:
+      ssl: false
+      kind: Ingress
+      uri: localhost
+  persistent: false

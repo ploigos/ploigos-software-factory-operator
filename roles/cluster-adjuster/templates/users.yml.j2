@@ -1,0 +1,8 @@
+{% for user in openshift_users %}
+- apiVersion: user.openshift.io/v1
+  kind: User
+  identities:
+  - 'htpasswd:{{ user.username }}'
+  metadata:
+    name: '{{ user.username }}'
+{% endfor %}

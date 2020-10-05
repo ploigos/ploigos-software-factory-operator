@@ -1,0 +1,45 @@
+= gitea-ocp
+
+== Requirements
+
+This role is designed to set up Gitea on an OpenShift or Kubernetes cluster cluster. The intended use for this role is in an Operator.
+
+This role also requires a PostgreSQL Database to be running in the same Namespace as the Gitea Server. This database needs to be set up first.
+
+== Role Variables
+
+[cols="2,1,1,4",options="header"]
+|====
+|Variable Name                  |Default                      |Required     |Description
+|_gitea_state                   |present                      |No           |`present` to install, `absent` to remove
+|_gitea_namespace               |gitea                        |No           |Project Name to install Gitea into
+|_gitea_name                    |gitea                        |No           |Name of the Gitea service
+|_gitea_postgresql_service_name |postgresql                   |Yes          |Name of the PostgreSQL service to connect (should be listening on port 5432)
+|_gitea_postgresql_database_name|sonardb                      |Yes          |Name of Database to connect to
+|_gitea_postgresql_user         |sonar                        |Yes          |Database User Name
+|_gitea_postgresql_password     |sonar                        |Yes          |Database Password
+|_gitea_persistent              |True                         |No           |Whether to make a PVC for Gitea
+|_gitea_volume_size             |1Gi                          |No           |Size of Persistent Volume to be created
+|_gitea_memory_request          |512Mi                        |No           |Minimum Memory Requirement
+|_gitea_memory_limit            |512Mi                        |No           |Maximum Memory Requirement
+|_gitea_cpu_request             |200m                         |No           |Minimum CPU Requirement
+|_gitea_cpu_limit               |500m                         |No           |Maximum CPU Requirement
+|_gitea_wait_for_init           |True                         |No           |Wait for the database pod to be running and ready
+|_gitea_image                   |quay.io/redhatgov/gitea      |No           |Container image for Gitea
+|_gitea_image_tag               |latest                       |No           |Tag for Gitea container image
+|_gitea_image_pull_policy       |IfNotPresent                 |No           |pullPolicy for Gitea container image
+|_gitea_expose_method           |Route                        |No           |Options include `Route`, `Ingress`, and `None`
+|_gitea_expose_uri              |""                           |No           |The URI to expose via Route/Ingress.
+|_gitea_ssl                     |True                         |No           |Set up HTTPS for the Gitea Route/Ingress
+|====
+
+== Dependencies
+
+* k8s module.
+* Running PostgreSQL database listening on port 5432
+* Working .kube/config configuration.
+* The Project/Namespace must exist
+
+== License
+
+BSD

@@ -1,0 +1,24 @@
+# permissions for end users to edit devsecops.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: devsecops-editor-role
+rules:
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - devsecops
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - devsecops/status
+  verbs:
+  - get

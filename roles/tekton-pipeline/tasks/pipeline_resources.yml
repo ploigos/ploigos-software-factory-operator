@@ -1,0 +1,20 @@
+---
+- name: Define the build and deploy tasks
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "tasks.yml.j2")|from_yaml }}'
+
+- name: Define pipeline resources
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "resources.yml.j2")|from_yaml }}'
+
+- name: Define pipelines
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "pipelines_s2i_maven.yml.j2")|from_yaml }}'
+
+- name: Kick off maven pipeline runs
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "maven_pipelinerun.yml.j2")|from_yaml }}'
