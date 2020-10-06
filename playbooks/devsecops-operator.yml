@@ -7,6 +7,20 @@
 
 - hosts: localhost
   pre_tasks:
+    - name: Get cluster dns
+      k8s_info:
+        api_version: config.openshift.io/v1
+        kind: DNS
+        namespace: openshift-config
+        name: cluster
+      register: cluster_dns
+    
+    - set_fact:
+        cluster_name: '{{ (cluster_dns.resources|first).spec.baseDomain.split(".")[0] }}'
+
+    - set_fact:
+        openshift_base_domain: "{{ (cluster_dns.resources|first).spec.baseDomain.replace(cluster_name + '.','') }}"
+
     - name: Look for default defined common variables
       include_vars: ../vars/common.yml
       
