@@ -20,12 +20,14 @@ common_included: yes
 #         cluster-nisky-c592
 cluster_name: cluster-04a7
 
+# TODO: oc get dns cluster -n openshift-config -o yaml 
+
 # The base subdomain to use for your cluster.
 # IF PROVISIONING:
 #   Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created
 # IF RHPDS:
 #   This should be the rest of your cluster's base address
-openshift_base_domain: 04a7.example.opentlc.comexample.com
+openshift_base_domain: 04a7.example.opentlc.com
 
 ################################################################################
 # DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily

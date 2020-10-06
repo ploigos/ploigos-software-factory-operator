@@ -2,4 +2,6 @@ apiVersion: redhatgov.io/v1alpha1
 kind: DevSecOps
 metadata:
   name: devsecops
+  # annotations:
+    # ansible.sdk.operatorframework.io/verbosity: '4'
 spec: {}
