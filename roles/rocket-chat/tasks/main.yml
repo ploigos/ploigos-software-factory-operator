@@ -11,7 +11,7 @@
 
 - name: Fetch mongodb secret from cluster
   set_fact:
-    secret_data: "{{ lookup('k8s', kind='Secret', kubeconfig=kubeconfig, namespace=rocketchat_project_name, resource_name='mongodb-secret') }}"
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=rocketchat_project_name, resource_name='mongodb-secret') }}"
 
 - name: Set mongodb credential facts from secret
   set_fact:
