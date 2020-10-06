@@ -54,7 +54,6 @@
 # Intent is to eventually clean up the operator and add more levers to the CRD.
 - name: Create users in Gitea
   shell: |
-    export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ oc_cli }}'
     admin_user='{{ workshop_admin.username }}'
     admin_password='{{ workshop_admin.password }}'

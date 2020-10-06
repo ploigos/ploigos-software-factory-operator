@@ -78,7 +78,6 @@
 # For now, using oc
 - name: Wait for SonarQube to report up
   shell: |
-    export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ oc_cli }}'
     admin_user='{{ workshop_admin.username }}'
     admin_password='{{ workshop_admin.password }}'

@@ -28,7 +28,7 @@
       include_vars: ../vars/devsecops.yml
       
     # Individual adjustment tasks have their own toggles
-    # - include_role:
-    #     name: cluster-adjuster
+    - include_role:
+        name: cluster-adjuster
   roles:
     - role: devsecops

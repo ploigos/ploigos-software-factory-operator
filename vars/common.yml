@@ -26,6 +26,8 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 #   understand them, but they aren't necessary to minimally deploy.
 ################################################################################
 
+oc_cli: /usr/local/bin/oc
+
 # A list of manually created users:
 manual_users:
   - username: opentlc-mgr

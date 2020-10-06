@@ -19,7 +19,6 @@
 - name: Create/update the htpasswd secret
   k8s:
     state: present
-    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-config
     definition:
       apiVersion: v1
@@ -35,7 +34,6 @@
 - name: Create/update OAuth CR
   k8s:
     state: present
-    kubeconfig: '{{ kubeconfig }}'
     apply: yes
     definition:
       apiVersion: v1
@@ -56,7 +54,6 @@
 - name: Enable admin on appropriate users
   k8s:
     state: present
-    kubeconfig: '{{ kubeconfig }}'
     apply: yes
     definition: |
       apiVersion: rbac.authorization.k8s.io/v1
@@ -79,7 +76,6 @@
 # This is easier than jumping through API hoops myself to get to the token.
 - name: Login with a new admin to cache that token
   shell: |
-    export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ oc_cli }}'
     admin_user='{{ workshop_admin.username }}'
     admin_password='{{ workshop_admin.password }}'
@@ -98,7 +94,6 @@
 - name: Delete the generated kubeadmin secrets
   k8s:
     state: absent
-    kubeconfig: '{{ kubeconfig }}'
     apply: yes
     namespace: kube-system
     definition:
@@ -111,6 +106,5 @@
 - name: Create User objects for each HTPasswd user
   k8s:
     state: present
-    kubeconfig: '{{ kubeconfig }}'
     apply: yes
     definition: '{{ lookup("template", "users.yml.j2")|from_yaml }}'
