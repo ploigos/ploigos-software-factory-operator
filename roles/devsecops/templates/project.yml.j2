@@ -4,13 +4,13 @@
   kind: Project
   metadata:
     name: '{{ username }}-{{ project.name }}'
-    labels:
-      name: '{{ username }}-{{ project.name }}'
-      environment: '{{ project.env|default(omit) }}'
-      for-user: '{{ username }}'
-    annotations:
-      openshift.io/display-name: '{{ username|capitalize }} {{ project.disp }}'
-      demo: openshift-cd-{{ username }}
+#    labels:
+#      name: '{{ username }}-{{ project.name }}'
+#      environment: '{{ project.env|default(omit) }}'
+#      for-user: '{{ username }}'
+#    annotations:
+#      openshift.io/display-name: '{{ username|capitalize }} {{ project.disp }}'
+#      demo: openshift-cd-{{ username }}
 
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
