@@ -29,3 +29,5 @@ spec:
             - "--leader-election-id=devsecops-operator"
           image: controller:latest
       terminationGracePeriodSeconds: 10
+      serviceAccountName: devsecops-operator-sa
+
