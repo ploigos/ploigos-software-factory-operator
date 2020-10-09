@@ -1,0 +1,5 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: DevSecOpsWorkshop
+metadata:
+  name: devsecopsworkshop-sample
+spec: {}

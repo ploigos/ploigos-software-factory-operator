@@ -3,3 +3,7 @@
   group: redhatgov.io
   kind: TsscPlatform
   playbook: playbooks/tssc-platform.yml
+- version: v1alpha1
+  group: redhatgov.io
+  kind: DevSecOpsWorkshop
+  playbook: playbooks/devsecops-workshop.yml

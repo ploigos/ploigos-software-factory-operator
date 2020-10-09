@@ -1,0 +1,39 @@
+- name: Ensure Mattermost Operator Namespace Exists
+  community.kubernetes.k8s:
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: "{{ mattermost_namespace }}"
+
+# TODO: Change the check to not include redhatgov-operators hard coded
+- name: Wait for Ability to Subscribe to Mattermost Operator
+  community.kubernetes.k8s_info:
+    api_version: packages.operators.coreos.com/v1
+    kind: PackageManifest
+    namespace: openshift-marketplace
+    name: mattermost-operator
+  register: mattermost_package_manifest
+  until: mattermost_package_manifest.resources|length > 0 and (mattermost_package_manifest.resources|first).status.catalogSource == "redhatgov-operators"
+  retries: 5
+  delay: 10
+
+- name: Subscribe to Mattermost Operator
+  community.kubernetes.k8s:
+    state: present
+    definition: |-
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: mattermost-operator
+        namespace: "{{ mattermost_namespace }}"
+      spec:
+        channel: "{{ mattermost_operator_channel }}"
+        installPlanApproval: Automatic
+        name: mattermost-operator
+        source: redhatgov-operators
+        sourceNamespace: openshift-marketplace
+
+- name: Create Mattermost 
+  community.kubernetes.k8s:
+    state: present
+    resource_definition: "{{ lookup('template', 'mattermost-resource.yml.j2') }}"

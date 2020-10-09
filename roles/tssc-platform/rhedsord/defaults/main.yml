@@ -1,0 +1,11 @@
+---
+deploy_rhsso: true
+deploy_quay: true
+deploy_gitea: true
+deploy_argocd: true
+deploy_sonarqube: true
+deploy_nexus: true
+deploy_crw: true
+deploy_selenium_grid: true
+deploy_legacy_jenkins: true
+deploy_mattermost_operator: true

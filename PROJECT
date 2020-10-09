@@ -1,8 +1,11 @@
 domain: io
 layout: ansible.sdk.operatorframework.io/v1
-projectName: gitea-operator
+projectName: tssc-operator
 resources:
 - group: redhatgov
-  kind: Gitea
+  kind: TsscPlatform
+  version: v1alpha1
+- group: redhatgov
+  kind: DevSecOpsWorkshop
   version: v1alpha1
 version: 3-alpha

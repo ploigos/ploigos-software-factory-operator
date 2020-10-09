@@ -1,0 +1,12 @@
+---
+crw_project_name: devsecops
+crw_project_display: DevSecOps Common Resources
+crw_operator_version: crwoperator.v2.3.0
+
+rhsso_project_name: rhsso
+rhsso_realm_name: openshift
+rhsso_app_name: rhsso
+
+crw_admin_user:
+  username: codeready-admin
+  password: demo123

@@ -1,10 +1,4 @@
 ---
-# TsscPlatform deployment playbook.
-
-# The following variables come from the ansible-operator
-# - ansible_operator_meta.namespace
-# - ansible_operator_meta.name (from the name of the CR)
-
 - hosts: localhost
   pre_tasks:
     - name: Get cluster dns
@@ -20,26 +14,24 @@
 
     - set_fact:
         openshift_base_domain: "{{ (cluster_dns.resources|first).spec.baseDomain.replace(cluster_name + '.','') }}"
-
-    - name: Get registry pull secret
-      k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ devsecops.pull_secret.name | default('pull-secret') }}"
-        namespace: "{{ devsecops.pull_secret.namespace | default('openshift-config') }}"
-      register: pull_secret
-
-    - set_fact:
-        reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] }}"
+        rhedsord_registry_username: TODO
+        rhedsord_registry_password: TODO
 
     - name: Look for default defined common variables
-      include_vars: ../vars/common.yml
-      
-    - name: Look for default defined devsecops variables
-      include_vars: ../vars/devsecops.yml
-      
-    # Individual adjustment tasks have their own toggles
-    - include_role:
-        name: cluster-adjuster
+      include_vars: ../vars/tssc-platform/common.yml
+      when: common_included is not defined or not common_included
+
+    - fail:
+        msg: Unable to continue without common variables set
+      when: common_included is not defined or not common_included
+
+    - name: Look for default defined rhedsord variables
+      include_vars: ../vars/tssc-platform/rhedsord.yml
+      when: rhedsord_included is not defined or not rhedsord_included
+
+    - fail:
+        msg: Unable to continue without rhedsord variables set
+      when: rhedsord_included is not defined or not rhedsord_included
+
   roles:
-    - role: devsecops
+    - role: tssc-platform/rhedsord

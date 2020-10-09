@@ -12,6 +12,7 @@ RUN ansible-galaxy collection install -r ${HOME}/requirements.yml \
  && chmod -R ug+rwx ${HOME}/.ansible
 
 COPY watches.yaml ${HOME}/watches.yaml
+COPY library/ /usr/share/ansible/openshift/
 COPY roles/ ${HOME}/roles/
 COPY playbooks/ ${HOME}/playbooks/
 COPY vars/ ${HOME}/vars/

@@ -1,0 +1,64 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ gitea_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ gitea_project_display }}'
+      spec: {}
+
+- name: Wait for gitea-operator package manifest to be available
+  k8s_info:
+    api_version: packages.operators.coreos.com/v1
+    kind: PackageManifest
+    namespace: openshift-marketplace
+    name: gitea-operator
+  register: gitea_package_manifest
+  until: gitea_package_manifest.resources|length > 0 and (gitea_package_manifest.resources|first).status.catalogSource == "redhatgov-operators"
+  retries: 5
+  delay: 10
+
+- name: Subscribe to Gitea
+  k8s:
+    definition: '{{ lookup("template", "gitea-subscription.yml.j2")|from_yaml }}'
+
+- name: Create Gitea from a CR
+  k8s:
+    namespace: '{{ gitea_project_name }}'
+    definition:
+      apiVersion: redhatgov.io/v1alpha1
+      kind: Gitea
+      metadata:
+        name: gitea
+      spec:
+        gitea:
+          expose:
+            kind: Route
+            ssl: true
+            uri: gitea-{{ gitea_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+          volumeSize: 4Gi
+        persistent: true
+        postgresql:
+          volumeSize: 4Gi
+  register: gitea_deployment
+  until: not gitea_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Wait for Gitea to finish being created
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ gitea_project_name }}'
+    label_selectors:
+      - "{{ gitea_pod_label }}"
+  register: gitea_pod
+  until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
+  retries: 10
+  delay: 30
+
+- name: Configure Gitea and RHSSO to work together
+  include: gitea_rhsso.yml

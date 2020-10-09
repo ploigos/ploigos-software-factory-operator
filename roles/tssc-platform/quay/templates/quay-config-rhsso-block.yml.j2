@@ -1,0 +1,7 @@
+RHSSO_LOGIN_CONFIG:
+  CLIENT_ID: {{ rhsso_quay_client_id }}
+  CLIENT_SECRET: {{ rhsso_quay_secret }}
+  LOGIN_SCOPES:
+  - openid
+  OIDC_SERVER: https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}/auth/realms/openshift/
+  SERVICE_NAME: Red Hat SSO

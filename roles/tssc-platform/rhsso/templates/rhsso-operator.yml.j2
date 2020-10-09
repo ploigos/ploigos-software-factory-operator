@@ -1,0 +1,23 @@
+# Operator Group for RH-SSO
+- apiVersion: v1
+  kind: OperatorGroup
+  metadata:
+    name: {{ rhsso_project_name }}-operatorgroup
+    namespace: {{ rhsso_project_name }}
+  spec:
+    targetNamespaces:
+    - {{ rhsso_project_name }}
+
+# Operator Subscription
+- apiVersion: v1alpha1
+  kind: Subscription
+  metadata:
+    name: rhsso-operator
+    namespace: {{ rhsso_project_name }}
+  spec:
+    channel: alpha
+    installPlanApproval: Automatic
+    name: rhsso-operator
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+    startingCSV: {{ rhsso_operator_version }}

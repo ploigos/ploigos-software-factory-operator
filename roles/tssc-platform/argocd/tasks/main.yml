@@ -1,0 +1,80 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ argocd_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ argocd_project_display }}'
+      spec: {}
+
+- name: Subscribe to Argo CD
+  k8s:
+    definition: '{{ lookup("template", "argocd-operator.yml.j2")|from_yaml }}'
+
+- name: Deploy Argo CD via CR
+  k8s:
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ArgoCD
+      metadata:
+        name: argocd
+        namespace: '{{ argocd_project_name }}'
+      spec:
+        grafana:
+          enabled: true
+          route:
+            enabled: true
+          image: grafana/grafana
+          version: sha256:bdef6f27255a09deb2f89741b3800a9a394a7e9eefa032570760e5688dd00a2f
+        prometheus:
+          enabled: true
+          route:
+            enabled: true
+        server:
+          route:
+            enabled: true
+          insecure: true
+        rbac:
+          defaultPolicy: 'role:readonly'
+          policy: |
+            g, argocd-admins, role:admin
+          scopes: '[groups]'
+        dex:
+          image: quay.io/redhat-cop/dex
+          openShiftOAuth: true
+          version: v2.22.0-openshift
+        redis:
+          image: redis
+          version: sha256:b33e5a3c00e5794324fad2fab650eadba0f65e625cc915e4e57995590502c269
+  register: argocd_deployment
+  until: not argocd_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Wait for Argo CD route to be created by the Operator
+  k8s_info:
+    api_version: route.openshift.io/v1
+    kind: Route
+    namespace: '{{ argocd_project_name }}'
+    name: argocd-server
+  register: argocd_route
+  until: argocd_route.resources|length > 0
+  retries: 10
+  delay: 30
+
+- set_fact:
+    argocd_route: '{{ argocd_route|json_query("resources[0].spec.host") }}'
+
+- name: Wait for Argo CD to respond to requests
+  uri:
+    url: 'https://{{ argocd_route }}/'
+    return_content: yes
+    validate_certs: no
+  register: argocd_endpoint
+  until: argocd_endpoint.status == 200
+  retries: 20
+  delay: 30
+

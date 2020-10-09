@@ -5,4 +5,7 @@ resources:
 - redhatgov_v1alpha1_tsscplatform.yaml
 - redhatgov_v1alpha1_tsscplatform_molecule.yaml
 - redhatgov_v1alpha1_tsscplatform_openshift.yaml
+- redhatgov_v1alpha1_devsecopsworkshop.yaml
+- redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml
+- redhatgov_v1alpha1_devsecopsworkshop_openshift.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

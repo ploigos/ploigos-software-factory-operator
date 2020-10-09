@@ -1,0 +1,6 @@
+---
+- include_tasks: deploy_mattermost_operator.yml
+  when: deploy_mattermost_operator | bool
+
+- include_tasks: setup_keycloak_for_mattermost.yml
+  when: authentication.keycloak.realmUrl is defined

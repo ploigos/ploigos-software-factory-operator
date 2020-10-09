@@ -1,0 +1,31 @@
+---
+- include_role:
+    name: tssc-platform/rhsso
+  when: deploy_rhsso
+- include_role:
+    name: tssc-platform/gitea
+  when: deploy_gitea
+- include_role:
+    name: tssc-platform/argocd
+  when: deploy_argocd
+- include_role:
+    name: tssc-platform/sonarqube
+  when: deploy_sonarqube
+- include_role:
+    name: tssc-platform/nexus
+  when: deploy_nexus
+- include_role:
+    name: tssc-platform/legacy-jenkins
+  when: deploy_legacy_jenkins
+- include_role:
+    name: tssc-platform/quay
+  when: deploy_quay
+- include_role:
+    name: tssc-platform/mattermost
+  when: deploy_mattermost_operator
+- include_role:
+    name: tssc-platform/codeready-workspaces
+  when: deploy_crw
+- include_role:
+    name: tssc-platform/selenium-grid
+  when: deploy_selenium_grid
