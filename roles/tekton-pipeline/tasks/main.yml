@@ -26,7 +26,6 @@
 # k8s_json_patch nor normal k8s modules are working here... oc CLI is
 - name: Attach new secrets to pipeline service accounts
   shell: |
-    export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ oc_cli }}'
     admin_user='{{ workshop_admin.username }}'
     admin_password='{{ workshop_admin.password }}'
