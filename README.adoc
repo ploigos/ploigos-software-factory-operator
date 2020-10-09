@@ -45,7 +45,7 @@ hack/operate.sh --overlay=namespaced --namespace=mynamespace
 == Custom Resources
 
 * `TsscPlatform` - deploys platform components which support the Trusted Software Supply Chain. For a list of these components, see the link:roles/tssc-platform/[tssc-platform roles directory].
-* `DevSecOpsWorkshop` - deploys tooling, pipelines, and user resources to support the OpenShift DevSecOps workshop. For a list of related roles, see the link:roles/devsecops-workshop/[devsecops-platform roles directory].
+* `DevSecOpsWorkshop` - deploys tooling, pipelines, and user resources to support the OpenShift DevSecOps workshop. For a list of related roles, see the link:roles/devsecops-workshop/[devsecops-workshop roles directory].
 
 == Deploying a custom TsscPlatform instance using the Operator
 
