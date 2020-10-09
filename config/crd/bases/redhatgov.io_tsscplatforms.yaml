@@ -2,20 +2,20 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: devsecops.redhatgov.io
+  name: tsscplatforms.redhatgov.io
 spec:
   group: redhatgov.io
   names:
-    kind: DevSecOps
-    listKind: DevSecOpsList
-    plural: devsecops
-    singular: devsecops
+    kind: TsscPlatform
+    listKind: TsscPlatformList
+    plural: tsscplatforms
+    singular: tsscplatform
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: DevSecOps is the Schema for the devsecops API
+        description: TsscPlatform is the Schema for the tsscplatform API
         properties:
           apiVersion:
             description: |
@@ -34,19 +34,19 @@ spec:
           metadata:
             type: object
           spec:
-            description: Spec defines the desired state of DevSecOps
+            description: Spec defines the desired state of TsscPlatform
             type: object
             properties:
-              devsecops:
-                description: Defines the desired state of the DevSecOps Deployment
+              tsscPlatform:
+                description: Defines the desired state of the TsscPlatform Deployment
                 type: object
                 properties:
                   image:
-                    description: Defines the ways in which the DevSecOps image should be sourced and managed
+                    description: Defines the ways in which the TsscPlatform image should be sourced and managed
                     type: object
                     properties: {}
           status:
-            description: Status defines the observed state of DevSecOps
+            description: Status defines the observed state of TsscPlatform
             type: object
             properties:
               conditions:

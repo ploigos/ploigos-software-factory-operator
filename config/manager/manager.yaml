@@ -26,8 +26,8 @@ spec:
         - name: manager
           args:
             - "--enable-leader-election"
-            - "--leader-election-id=devsecops-operator"
+            - "--leader-election-id=tssc-operator"
           image: controller:latest
       terminationGracePeriodSeconds: 10
-      serviceAccountName: devsecops-operator-sa
+      serviceAccountName: tssc-operator-sa
 

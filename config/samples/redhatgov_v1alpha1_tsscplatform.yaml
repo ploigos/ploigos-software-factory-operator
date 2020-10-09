@@ -1,5 +1,5 @@
 apiVersion: redhatgov.io/v1alpha1
-kind: DevSecOps
+kind: TsscPlatform
 metadata:
-  name: devsecops-testing
+  name: tsscplatform-sample
 spec: {}

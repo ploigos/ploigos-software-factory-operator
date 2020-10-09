@@ -1,13 +1,13 @@
-# permissions for end users to edit devsecops.
+# permissions for end users to edit tsscplatforms.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: devsecops-editor-role
+  name: tsscplatform-editor-role
 rules:
 - apiGroups:
   - redhatgov.io
   resources:
-  - devsecops
+  - tsscplatforms
   verbs:
   - create
   - delete
@@ -19,6 +19,6 @@ rules:
 - apiGroups:
   - redhatgov.io
   resources:
-  - devsecops/status
+  - tsscplatforms/status
   verbs:
   - get
