@@ -1,0 +1,22 @@
+# Add keycloak client for CodeReady
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakClient
+  metadata:
+    name: codeready-workspaces-client
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_name }}
+  spec:
+    realmSelector:
+      matchLabels:
+        app: {{ rhsso_app_name }}
+    client:
+      clientId: codeready-public
+      name: codeready-public
+      enabled: true
+      publicClient: true
+      redirectUris:
+        - 'http://codeready-{{ crw_project_name }}.apps.{{ full_cluster_name }}/*'
+      rootUrl: 'http://codeready-{{ crw_project_name }}.apps.{{ full_cluster_name }}/'
+      protocol: openid-connect
+

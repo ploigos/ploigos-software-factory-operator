@@ -1,0 +1,21 @@
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakUser
+  metadata:
+    name: codeready-admin
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_name }}
+  spec:
+    realmSelector:
+      matchLabels:
+        app: {{ rhsso_app_name }}
+    user:
+      username: {{ crw_admin_user.username }}
+      credentials:
+        - type: password
+          value: {{ crw_admin_user.password }}
+      firstName: CodeReady
+      lastName: Admin
+      email: codeready-admin@example.com
+      enabled: True
+      emailVerified: True

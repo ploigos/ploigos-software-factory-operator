@@ -1,0 +1,17 @@
+#
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakRealm
+  metadata:
+    name: {{ rhsso_realm_name }}
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_label }}
+  spec:
+    realm:
+      id: {{ rhsso_realm_name }}
+      realm: {{ rhsso_realm_name }}
+      enabled: True
+      displayName: {{ rhsso_realm_display }}
+    instanceSelector:
+      matchLabels:
+        app: {{ rhsso_app_label }}

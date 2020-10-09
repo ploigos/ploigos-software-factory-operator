@@ -1,0 +1,127 @@
+# Create the PostgreSQL DB secret
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: {{ database_secret_name }}
+    namespace: {{ rhsso_project_name }}
+  stringData:
+    POSTGRES_DATABASE: "{{ postgresql_database }}"
+    POSTGRES_PASSWORD: "{{ postgresql_password }}"
+    POSTGRES_USERNAME: "{{ postgresql_user }}"
+    POSTGRES_SUPERUSER: "true"
+    POSTGRES_EXTERNAL_ADDRESS: "{{ database_service_name }}.{{ rhsso_project_name }}.svc.cluster.local"
+    POSTGRES_EXTERNAL_PORT: "5432"
+
+# Create the PostgreSQL DB Service
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: {{ database_service_name }}
+    namespace: {{ rhsso_project_name }}
+  spec:
+    ports:
+    - name: postgresql
+      nodePort: 0
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    selector:
+      name: {{ database_service_name }}
+    sessionAffinity: None
+    type: ClusterIP
+
+# Create the PostgreSQL DB PVC
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: {{ database_service_name }}
+    namespace: {{ rhsso_project_name }}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ postgresql_volume_capacity }}
+
+# Create the PostgreSQL DB Deployment
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: {{ database_service_name }}
+    namespace: {{ rhsso_project_name }}
+  spec:
+    replicas: 1
+    selector:
+      name: {{ database_service_name }}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: {{ database_service_name }}
+      spec:
+        containers:
+        - capabilities: {}
+          env:
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_USERNAME
+                name: {{ database_secret_name }}
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_PASSWORD
+                name: {{ database_secret_name }}
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_DATABASE
+                name: {{ database_secret_name }}
+          image: 'registry.redhat.io/rhel8/postgresql-10:1'
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - /usr/libexec/check-container
+              - --live
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          name: postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /usr/libexec/check-container
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: {{ postgresql_memory_limit }}
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: {{ database_service_name }}-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        volumes:
+        - name: {{ database_service_name }}-data
+          persistentVolumeClaim:
+            claimName: {{ database_service_name }}
+#    triggers:
+#    - imageChangeParams:
+#        automatic: true
+#        containerNames:
+#        - postgresql
+#        from:
+#          kind: ImageStreamTag
+#          name: postgresql:{{ postgresql_version }}
+#          namespace: {{ rhsso_project_name }}
+#        lastTriggeredImage: ""
+#      type: ImageChange
+#    - type: ConfigChange

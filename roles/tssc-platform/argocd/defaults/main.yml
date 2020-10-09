@@ -1,0 +1,7 @@
+---
+argocd_project_name: devsecops
+argocd_project_display: DevSecOps Common Resources
+
+argocd_operator_version: argocd-operator.v0.0.12
+
+# keycloak_url: "https://keycloak-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}"

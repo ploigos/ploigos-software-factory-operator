@@ -1,0 +1,24 @@
+# Add keycloak client for OpenShift
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakClient
+  metadata:
+    name: quay-client
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_label }}
+  spec:
+    realmSelector:
+      matchLabels:
+        app: {{ rhsso_app_label }}
+    client:
+      clientId: {{ rhsso_quay_client_id }}
+      secret: {{ rhsso_quay_secret }}
+      name: {{ rhsso_quay_client_id }}
+      enabled: true
+      clientAuthenticatorType: client-secret
+      publicClient: false
+      redirectUris:
+        - 'https://quay.apps.{{ subdomain }}/oauth2/rhsso/callback'
+      rootUrl: 'https://quay.apps.{{ subdomain }}/'
+      protocol: openid-connect
+

@@ -2,6 +2,14 @@
 # This tells the playbooks to not try to include default-named vars files
 common_included: yes
 
+# This toggle indicates whether or not the cluster is connected to the internet
+#   and can pull content sources from their normal places
+connected_cluster: yes
+
+# This toggle indicates whether the cluster router certificates are trusted by
+#   the default bundles on most operating system images (and therefore would be
+#   trusted by most hosts and container images validating them)
+trusted_router_certificates: yes
 
 ################################################################################
 # The following variables are especially important to pay attention to if you're
@@ -11,47 +19,20 @@ common_included: yes
 # NOTE: IF A VARIABLE IS COMMENTED, IT LIKELY DEFAULTS TO THE OPPOSITE
 ################################################################################
 
-# The name of the cluster.
-# IF PROVISIONING:
-#   This value will be in your DNS entries and should conform to valid DNS characters.
-# IF RHPDS:
-#   This should be the first part of your cluster's base address
-#   e.g. for cluster-nisky-c592.nisky-c592.example.opentlc.com, this would be
-#         cluster-nisky-c592
-cluster_name: openshift
-
-# The base subdomain to use for your cluster.
-# IF PROVISIONING:
-#   Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created
-# IF RHPDS:
-#   This should be the rest of your cluster's base address
-openshift_base_domain: example.com
-
 ################################################################################
 # DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily
 #   throughout all the various roles
 _tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
 full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
-cluster_router: '{{ ".".join([ "apps", full_cluster_name ]) }}'
 tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
-################################################################################
 
-# The path to the kubeconfig file for the cluster you're using for the workshop.
-#   The default value is what's configured if you're provisioning the workshop
-#   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
-#   credentials with oc.
-#   NOTE: Do not use ~ or other shell-expandable variables
-# kubeconfig: '{{ ansible_env["HOME"] }}/.kube/config'
-#   NOTE: IF YOU ARE USING run-container.sh:
-# *** DO NOT CHANGE THIS - IT WILL BE PUT HERE BY THE RUN SCRIPT ***
-kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
 
 # The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
 #   for RHPDS clusters, or those being used with the container workflow, you
 #   should specify the absolute path of the oc client. The value commented out
 #   below is the location inside the container for that workflow.
 # oc_cli: '/usr/local/bin/oc'
-oc_cli: '{{ tmp_dir }}/oc'
+oc_cli: /usr/local/bin/oc
 
 
 ################################################################################
@@ -60,27 +41,80 @@ oc_cli: '{{ tmp_dir }}/oc'
 #   understand them, but they aren't necessary to minimally deploy.
 ################################################################################
 
+
+generated_password: "{{ lookup('password', '../tmp/rhssopasswd.txt length=15 chars=ascii_letters') }}"
+
+redhat_gov_catalog_tag: "1.3.0"
+
+################################################################################
+#
+# User attributes
+# - username:
+#   firstName:
+#   lastName:
+#   password:
+#   email:
+#   admin: # boolean, yes or true if this user is a cluster admin
+#   jenkinsRole: # Set to 'admin', 'edit', 'view', or leave undefined if no access to jenkins is needed
+#   nexusRole: # Set to valid role for nexus, or leave undefined if no access to nexus is needed
+#   realmRoles: # list of Realm defined roles assigned to user
+#   clientRoles: # RH-SSO Clients may have custom roles, for each client provide a list of client specific roles to assign
+#     rh-sso-client-name:
+#      - "clientrole"
+#
+################################################################################
+
 # A list of manually created users:
 manual_users:
   - username: openshift-admin
+    firstName: OpenShift
+    lastName: Administrator
     password: RedHatAdmin1
+    email: realmadmin@example.com
     admin: yes
+    realmRoles:
+      - "offline_access"
+    clientRoles:
+      account:
+        - "manage-account"
+      realm-management:
+        - "manage-users"
+  - username: realmadmin
+    firstName: Realm
+    lastName: Administrator
+    password: "{{ generated_password }}"
+    email: realmadmin@example.com
+    realmRoles:
+      - "offline_access"
+    clientRoles:
+      account:
+        - "manage-account"
+      realm-management:
+        - "manage-users"
 
 # A specially designated user for administering workshop content
 workshop_admin:
   username: workshop-admin
+  firstName: workshop-admin
+  lastName: Workshop Admin
   password: RedHatAdmin1
+  email: workshop@example.com
+  jenkinsRole: admin
   admin: yes
 
 # The number of users created, as a string
 number_of_users: "30"
-user_password: openshift
 
 # Generate a sequence of users
 sequence_users: |
   {%- for username in lookup("sequence", "1-" + number_of_users + ":user%0i", wantlist=True) %}
     - username: {{ username }}
-      password: {{ user_password }}
+      firstName: {{ username }}
+      lastName: Workshop user
+      password: "{{ generated_password }}"
+      email: {{ username }}@example.com
+      jenkinsRole: edit
+      nexusRole: nx-admin
   {% endfor -%}
 
 # The users to create in OpenShift
@@ -88,23 +122,8 @@ openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml 
 # The users to create workshop projects/integrations for
 workshop_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'
 
-# The type of worker to provision (including MachineSet adjustments)
-cluster_worker_machine_type: m4.2xlarge
-# The MachineSet replicas to enable on the MachineAutoscaler
-machineset_min_replicas: 0
-machineset_max_replicas: 5
-# The number of nodes to limit the overall cluster to across all MachineSets
-cluster_max_nodes_total: 15
-# Uncomment the following to adjust the overall minimum/maximum resources for the entire cluster
-# cluster_min_cores: 8
-# cluster_max_cores: 100
-# cluster_min_ram_gb: 32
-# cluster_max_ram_gb: 256
-
-# If not using letsencrypt in provision, uncomment the following and provide a
-#   path to a locally-generated fullchain certificate and key that your computer
-#   trusts in PEM format if you want to bring your own certificates to the
-#   cluster. They should have a CN or Alias that matches both your cluster API
-#   and wildcard router URLs.
-# byo_cert_fullchain_path: ../tmp/fullchain.pem
-# byo_cert_key_path: ../tmp/key.pem
+# Set common variables for RH-SSO setup and client integration
+rhsso_users: '{{ openshift_users }}'
+rhsso_realm_name: openshift
+rhsso_project_name: rhsso
+rhsso_app_label: rhsso

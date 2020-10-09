@@ -6,4 +6,5 @@ kind: Kustomization
 # It should be run by config/default
 resources:
 - bases/redhatgov.io_tsscplatforms.yaml
+- bases/redhatgov.io_devsecopsworkshops.yaml
 # +kubebuilder:scaffold:crdkustomizeresource

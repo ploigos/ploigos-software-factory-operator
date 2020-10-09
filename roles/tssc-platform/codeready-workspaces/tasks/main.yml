@@ -1,0 +1,80 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ crw_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ crw_project_display }}'
+      spec: {}
+
+- name: Subscribe to CodeReady Workspaces
+  k8s:
+    definition: '{{ lookup("template", "codeready-workspaces.yml.j2")|from_yaml }}'
+
+- name: Deploy CodeReady Workspaces via CR
+  k8s:
+    definition:
+      apiVersion: org.eclipse.che/v1
+      kind: CheCluster
+      metadata:
+        name: codeready-workspaces
+        namespace: '{{ crw_project_name }}'
+      spec:
+        auth:
+          identityProviderURL: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ full_cluster_name }}'
+          identityProviderRealm: '{{ rhsso_realm_name }}'
+          identityProviderClientId: codeready-public
+          identityProviderAdminUserName: '{{ crw_admin_user.username }}'
+          externalIdentityProvider: true
+          openShiftoAuth: false
+        database:
+          externalDb: false
+          postgresImage: registry.redhat.io/rhel8/postgresql-96:1
+        k8s: {}
+        server:
+          cheFlavor: codeready
+          selfSignedCert: false
+          tlsSupport: false
+          cheImage: registry.redhat.io/codeready-workspaces/server-rhel8
+          cheImageTag: '2.3'
+          pluginRegistryImage: quay.io/redhatgov/crw-plugin-registry-rhel8:2.3
+          devfileRegistryImage: quay.io/redhatgov/crw-devfile-registry-rhel8:2.3
+          customCheProperties:
+            CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: "0"
+            CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE: registry.redhat.io/ubi8-minimal:8.2
+            CHE_WORKSPACE_PLUGIN__BROKER_ARTIFACTS_IMAGE: registry.redhat.io/codeready-workspaces/pluginbroker-artifacts-rhel8:2.3
+            CHE_WORKSPACE_PLUGIN__BROKER_METADATA_IMAGE: registry.redhat.io/codeready-workspaces/pluginbroker-metadata-rhel8:2.3
+            CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE: registry.redhat.io/codeready-workspaces/jwtproxy-rhel8:2.3
+        storage:
+          preCreateSubPaths: true
+          pvcClaimSize: 1Gi
+          pvcStrategy: per-workspace
+  register: codeready_workspaces_deployment
+  until: not codeready_workspaces_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Create RHSSO Client definition for CRW
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-crw-client.yml.j2")|from_yaml }}'
+
+- name: Create CRW Admin User
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-user.yml.j2")|from_yaml }}'
+
+
+- name: Wait for CRW to come up
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ crw_project_name }}'
+    label_selectors:
+      - "app=codeready"
+      - "component=codeready"
+  register: crw_pod
+  until: crw_pod.resources|length > 0 and (crw_pod.resources|first).status.phase == "Running"
+  retries: 10
+  delay: 30

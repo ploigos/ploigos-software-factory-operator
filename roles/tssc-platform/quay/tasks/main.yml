@@ -1,0 +1,25 @@
+---
+- name: Subscribe to Quay Enterprise
+  k8s:
+    definition: '{{ lookup("template", "quay.yml.j2")|from_yaml }}'
+
+- name: Deploy Quay Enterprise via CR
+  k8s:
+    definition: '{{ lookup("template", "quay_cr.yml.j2")|from_yaml }}'
+  register: quay_deployment
+  until: not quay_deployment.failed
+  retries: 5
+  delay: 20
+
+- name: Wait for Quay route to begin answering requests
+  uri:
+    url: 'https://{{ quay_route }}/'
+    return_content: yes
+    validate_certs: no
+  register: quay_index
+  until: '"DOCTYPE html" in quay_index.content'
+  retries: 10
+  delay: 30
+
+- name: Configure Quay and RHSSO to work together
+  include: quay_rhsso.yml

@@ -1,0 +1,62 @@
+# Add keycloak client for OpenShift
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakClient
+  metadata:
+    name: sonarqube-client
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_label }}
+  spec:
+    realmSelector:
+      matchLabels:
+        app: {{ rhsso_app_label }}
+    client:
+      clientId: sonarqube
+      secret: sonarqube
+      name: sonarqube
+      enabled: true
+      clientAuthenticatorType: client-secret
+      publicClient: false
+      redirectUris:
+        - 'https://sonarqube-{{ sonarqube_project_name }}.apps.{{ subdomain }}/oauth2/callback/saml'
+      rootUrl: 'https://sonarqube-{{ sonarqube_project_name }}.apps.{{ subdomain }}/'
+      protocol: saml
+      attributes:
+        saml.authnstatement: 'true'
+        saml.assertion.signature: 'false'
+        saml.multivalued.roles: 'false'
+        saml.server.signature: 'true'
+        saml.client.signature: 'false'
+        saml.signature.algorithm: RSA_SHA256
+        saml_name_id_format: username
+
+      protocolMappers:
+      - config:
+          attribute.name: email
+          user.attribute: Email
+        id: email-1
+        name: Email
+        protocol: saml
+        protocolMapper: saml-user-property-mapper
+      - config:
+          attribute.name: groups
+          single: 'true'
+        id: groups-1
+        name: Groups
+        protocol: saml
+        protocolMapper: saml-role-list-mapper
+      - config:
+          attribute.name: name
+          user.attribute: username
+        id: name-1
+        name: name
+        protocol: saml
+        protocolMapper: saml-user-property-mapper
+      - config:
+          attribute.name: login
+          user.attribute: Username
+        id: login-1
+        name: Login
+        protocol: saml
+        protocolMapper: saml-user-property-mapper
+

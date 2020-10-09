@@ -1,0 +1,29 @@
+# Template to create Users
+- apiVersion: keycloak.org/v1alpha1
+  kind: KeycloakUser
+  metadata:
+    name: {{ item.username }}
+    namespace: {{ rhsso_project_name }}
+    labels:
+      app: {{ rhsso_app_label }}
+  spec:
+    realmSelector:
+      matchLabels:
+        app: {{ rhsso_app_label }}
+    user:
+      username: {{ item.username }}
+      credentials:
+        - type: password
+          value: {{ item.password }}
+      firstName: {{ item.firstName }}
+      lastName: {{ item.lastName }}
+      email: {{ item.email }}
+      enabled: True
+      emailVerified: False
+{% if item.realmRoles is defined %}
+      realmRoles: {{ item.realmRoles }}
+{% endif %}
+{% if item.clientRoles is defined %}
+      clientRoles: {{ item.clientRoles }}
+{% endif %}
+

@@ -1,0 +1,23 @@
+---
+rhsso_project_name: rhsso
+rhsso_project_display: Red Hat Single Sign-On Service
+rhsso_operator_version: rhsso-operator.7.4.1
+rhsso_app_name: rhsso
+rhsso_app_label: rhsso
+rhsso_realm_name: openshift
+rhsso_realm_display: RH-SSO OpenShift Realm
+subdomain: '{{ full_cluster_name }}'
+
+# PostgreSQL vars
+database_service_name: rhsso-postgresql
+database_secret_name: keycloak-db-secret
+postgresql_version: 10
+postgresql_database: root
+postgresql_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+postgresql_user: keycloak
+postgresql_volume_capacity: 1Gi
+postgresql_memory_limit: 512Mi
+
+
+
+

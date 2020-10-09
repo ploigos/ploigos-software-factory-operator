@@ -1,0 +1,79 @@
+---
+
+- name: Generate a Gitea secret for RHSSO
+  set_fact:
+    rhsso_gitea_secret: "{{ lookup('password', tmp_dir + '/rhsso_gitea.secret length=15 chars=ascii_letters') }}"
+
+- name: Create RHSSO Client definition for Gitea
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-gitea-client.yml.j2")|from_yaml }}'
+  register: rhsso_client
+
+- name: Check if Gitea OAuth provider exists
+  shell: |
+    oc='{{ oc_cli }}'
+
+    pod=$($oc get pods -n {{ gitea_project_name }} -l {{ gitea_pod_label }} -o jsonpath='{.items[0].metadata.name}')
+    $oc exec $pod -n {{ gitea_project_name }} -- /home/gitea/gitea --config=/home/gitea/conf/app.ini admin auth list |& grep -F rhsso
+  changed_when: false
+  failed_when: false
+  register: gitea_oauth_config
+
+- name: Configure RHSSO as an OAuth2 provider for Gitea
+  shell: |
+    oc='{{ oc_cli }}'
+    pod=$($oc get pods -n {{ gitea_project_name }} -l {{ gitea_pod_label }} -o jsonpath='{.items[0].metadata.name}')
+
+    {% if "rhsso" not in gitea_oauth_config.stdout %}
+      echo "Gitea needs to be configured with the RHSSO client"
+      output=$($oc exec $pod -n {{ gitea_project_name }} -- /home/gitea/gitea --config=/home/gitea/conf/app.ini admin auth add-oauth --name=rhsso --provider openidConnect --key {{ rhsso_gitea_client_id }} --secret {{ rhsso_gitea_client_id }} --auto-discover-url  https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}/auth/realms/{{ rhsso_realm_name }}/.well-known/openid-configuration 2>&1)
+      if echo "$output" | grep -qF 'login source already exists'; then
+          echo ok
+      elif echo "$output" | grep -qF 'Failed to run app'; then
+          echo failed
+      elif echo "$output" | grep -qE 'INSERT INTO "login_source"'; then
+          echo changed
+      else
+          echo failed
+      fi
+    {% elif rhsso_client.changed %}
+      echo "Gitea RHSSO client needs new secret updated"
+      output=$($oc exec $pod -n {{ gitea_project_name }} -- /home/gitea/gitea --config=/home/gitea/conf/app.ini admin auth update-oauth --id {{ gitea_oauth_config.stdout[0] }} --secret {{ rhsso_gitea_secret }} 2>&1)
+      if echo "$output" | grep -qF 'UPDATE'; then
+          echo changed
+      elif echo "$output" | grep -qF 'Failed to run app'; then
+          echo failed
+      else
+          echo ok
+      fi
+    {% else %}
+      echo "Gitea RHSSO client doesn't need updated"
+      echo ok
+    {% endif %}
+    echo "$output" >&2
+  register: gitea_rhsso_oauth
+  changed_when: '"changed" in gitea_rhsso_oauth.stdout_lines'
+  failed_when: '"failed" in gitea_rhsso_oauth.stdout_lines'
+
+- name : Restart gitea if the RHSSO changes were applied
+  block:
+  - name: Kill gitea pod for auth changes to take into effect
+    k8s:
+      api_version: v1
+      kind: Pod
+      namespace: '{{ gitea_project_name }}'
+      name: "{{ (gitea_pod.resources|first).metadata.name }}"
+      state: absent
+
+  - name: Wait **again** for Gitea to finish being created with RHSSO settings
+    k8s_info:
+      api_version: v1
+      kind: Pod
+      namespace: '{{ gitea_project_name }}'
+      label_selectors:
+        - "{{ gitea_pod_label }}"
+    register: gitea_pod
+    until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
+    retries: 10
+    delay: 30
+  when: gitea_rhsso_oauth.changed

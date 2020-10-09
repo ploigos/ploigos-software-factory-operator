@@ -1,0 +1,135 @@
+---
+- name: Configure RH SSO options for sonarqube
+  block:
+  - name: Create SonarQube SSO Client
+    k8s:
+      definition: '{{ lookup("template", "../templates/rhsso-sonar4-client.yml.j2")|from_yaml }}'
+
+  - name: Get RHSSO login
+    k8s_info:
+      api_version: v1
+      kind: Secret
+      name: credential-rhsso
+      namespace: "{{ rhsso_project_name }}"
+    register: rhsso_login_secret
+
+  - set_fact:
+      sso_admin_password: "{{ rhsso_login_secret | json_query('resources[0].data.ADMIN_PASSWORD') | b64decode }}"
+      sso_admin_user: "{{ rhsso_login_secret | json_query('resources[0].data.ADMIN_USERNAME') | b64decode }}"
+      keycloak_url: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}'
+      sonarqube_url: 'https://sonarqube-{{ sonarqube_project_name }}.apps.{{ subdomain }}'
+
+  - name: Get RH SSO admin token
+    uri:
+      url: '{{ keycloak_url }}/auth/realms/master/protocol/openid-connect/token'
+      validate_certs: false
+      method: POST
+      body:
+        username: "{{ sso_admin_user }}"
+        password: "{{ sso_admin_password }}"
+        grant_type: "password"
+        client_id: "admin-cli"
+      body_format: form-urlencoded
+      status_code: 200,201,204
+    register: rh_sso_admin_token
+
+  # The following is needed to compensate for not being able to set the defaultClientScopes in the KeyCloakClient configuration
+  # https://issues.redhat.com/browse/KEYCLOAK-15014
+  # ------------------------ begin role_list removal -------------------------------------
+  - name: Remove 'role_list' from client scopes
+    block:
+    - name: Get all clients
+      uri:
+        url: '{{ keycloak_url }}/auth/admin/realms/openshift/clients?first=0&max=20'
+        validate_certs: false
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "Bearer {{ rh_sso_admin_token.json.access_token }}"
+        return_content: yes
+        status_code: 200
+      register: all_clients
+
+    - name: Get all client scopes
+      uri:
+        url: '{{ keycloak_url }}/auth/admin/realms/openshift/client-scopes'
+        validate_certs: false
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "Bearer {{ rh_sso_admin_token.json.access_token }}"
+        return_content: yes
+        status_code: 200
+      register: all_client_scopes
+
+    - set_fact:
+        sonarqube_client: "{{ all_clients.json | json_query(sonarqube_client_query) | first }}"
+      vars:
+        sonarqube_client_query: "[?clientId == 'sonarqube']"
+
+    - set_fact:
+         sonarqube_client_id: "{{ sonarqube_client.id }}"
+         sonarqube_client_has_role_list: "{{ 'role_list' in sonarqube_client.defaultClientScopes }}"
+         role_list_client_scope_id: "{{ all_client_scopes.json | json_query(role_list_scope_query) | first }}"
+      vars:
+        role_list_scope_query: "[?name == 'role_list'].id"
+
+    - name: Remove 'role_list' from default client scope
+      uri:
+        url: '{{ keycloak_url }}/auth/admin/realms/openshift/clients/{{sonarqube_client_id}}/default-client-scopes/{{role_list_client_scope_id}}'
+        validate_certs: false
+        method: DELETE
+        headers:
+          Content-Type: application/json
+          Authorization: "Bearer {{ rh_sso_admin_token.json.access_token }}"
+        return_content: yes
+        status_code: 204
+      when: sonarqube_client_has_role_list
+    # ------------------------ end of role_list removal -------------------------------------
+
+
+- name: Configure SonarQube SAML Settings
+  block:
+  - name: Get realm cert for sonarqube from RHSSO
+    uri:
+      url: '{{ keycloak_url }}/auth/admin/realms/openshift/keys'
+      validate_certs: false
+      method: GET
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{ rh_sso_admin_token.json.access_token }}"
+      return_content: yes
+      status_code: 200
+    register: realm_keys
+
+  - set_fact:
+      rhsso_saml_cert_value: "{{ realm_keys.json | json_query(cert_query) | first }}"
+    vars:
+      cert_query: "keys[?type == 'RSA'].certificate"
+
+  - name: Update sonarqube settings
+    shell: >-
+      devsecops-api sonarqube update-setting
+      {{ sonarqube_url }}
+      --login-username admin --login-password admin
+      --new-login-password '{{ sonarqube_password }}'
+      --setting-name '{{ item.name }}'
+      --setting-value '{{ item.value }}'
+    # FIXME : not really sure how to deal with the changed_when deal
+    register: sonarqube_settings
+    # changed_when: sonarqube_settings.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+    failed_when: sonarqube_settings.rc != 0
+    until: not sonarqube_settings.failed
+    retries: 3
+    delay: 10
+    loop:
+      - { name: 'sonar.core.serverBaseURL', value: '{{ sonarqube_url }}' }
+      - { name: 'sonar.auth.saml.enabled', value: 'true' }
+      - { name: 'sonar.auth.saml.applicationId', value: 'sonarqube' }
+      - { name: 'sonar.auth.saml.providerName', value: 'RH SSO' }
+      - { name: 'sonar.auth.saml.providerId', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}' }
+      - { name: 'sonar.auth.saml.loginUrl', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}/protocol/saml' }
+      - { name: 'sonar.auth.saml.certificate.secured', value: '{{ rhsso_saml_cert_value }}' }
+      - { name: 'sonar.auth.saml.user.login', value: 'login' }
+      - { name: 'sonar.auth.saml.user.name', value: 'name' }
+      - { name: 'sonar.auth.saml.group.name', value: 'groups' }

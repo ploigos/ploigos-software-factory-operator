@@ -1,0 +1,10 @@
+---
+quay_route: quay.apps.{{ full_cluster_name }}
+quay_project_name: quay-enterprise
+enable_quay_repo_mirroring: false
+
+rhsso_realm_name: openshift
+rhsso_project_name: rhsso
+rhsso_app_label: rhsso
+rhsso_quay_client_id: quay-enterprise
+subdomain: '{{ full_cluster_name }}'
