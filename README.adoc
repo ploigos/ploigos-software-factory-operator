@@ -1,16 +1,14 @@
-= Gitea Operator
+= Tssc Operator
 
 == Overview
 
-This repository contains the code to build a Gitea Operator for Kubernetes, including Red Hat OpenShift Container Platform.
-
-The Operator will create a *PostgreSQL* database and a *Gitea* instance connected to the PostgreSQL database.
+This repository contains the code to build a Tssc Operator for Kubernetes, including Red Hat OpenShift Container Platform.
 
 It is implemented on top of the Red Hat https://sdk.operatorframework.io/[Operator SDK] - in particular the https://sdk.operatorframework.io/docs/building-operators/ansible/[Ansible Operator].
 
 == Building the Operator
 
-There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: Gitea` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy Gitea to a cluster directly from this repo you could run `hack/operate.sh -d`.
+There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: TsscPlatform` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy a Tssc Platform to a cluster directly from this repo you could run `hack/operate.sh -d`.
 
 Before running the script make sure to update the location of the container image to a repository you have access to. If you decide to build your own container image for the operator, make sure to update `hack/operate.conf` with an updated container image location and add the `-p` flag to `operate.sh`.
 
@@ -18,7 +16,7 @@ Before running the script make sure to update the location of the container imag
 
 === Operator Installation Steps
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Gitea Operator in their projects and deploy instances of Gitea using the gitea.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Gitea operator can be installed from the OperatorHub interface of the console.
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Tssc Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
 
 Perform the following tasks as *cluster-admin*:
 
@@ -29,8 +27,8 @@ Perform the following tasks as *cluster-admin*:
 hack/operate.sh
 ----
 
-. Once the Operator pod is running the Operator is ready to start creating Gitea Servers.
-. To deploy the above, and also one of the `config/samples/redhatgov_v1alpha1_gitea*.yaml` example CustomResources:
+. Once the Operator pod is running the Operator is ready to start creating Tssc Platforms.
+. To deploy the above, and also one of the `config/samples/redhatgov_v1alpha1_tsscplatform*.yaml` example CustomResources:
 +
 [source,sh]
 ----
@@ -44,49 +42,32 @@ hack/operate.sh --deploy-cr
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
 
-== Deploying a custom Gitea instance using the Operator
+== Deploying a custom TsscPlatform instance using the Operator
 
-A Gitea instance is deployed by creating a `kind: Gitea` Custom Resource based on the Gitea Custom Resource Definition. You can see some samples in the link:config/samples/[samples directory]. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, Custom Resource creation can be done through the console UI with embedded documentation or a form view.
+A TsscPlatform instance is deployed by creating a `kind: TsscPlatform` Custom Resource based on the TsscPlatform Custom Resource Definition. You can see some samples in the link:config/samples/[samples directory]. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, Custom Resource creation can be done through the console UI with embedded documentation or a form view.
 
-. Write the definition to a file (e.g. gitea.yaml) and then create the Gitea instance:
+. Write the definition to a file (e.g. tsscplatform.yaml) and then create the TsscPlatform instance:
 +
 [source,sh]
 ----
-oc create -f ./gitea.yaml
+oc create -f ./tsscplatform.yaml
 ----
 
-. The operator will first create the PostgreSQL database, wait until it is up and running and then create the Gitea pod.
-. Validate that both pods (postgresql and gitea) are running before proceeding.
-. You can validate the existence of your Gitea instance by querying for gitea objects:
+. The operator will deplot a Tssc Platform.
+. You can validate the existence of your Tssc Platform instance by querying for tsscplatform objects:
 +
 [source,sh]
 ----
-oc get gitea
+oc get tsscplatforms
 ----
 
-. Get the Route for Gitea (the PostgreSQL database is not accessible outside of the project):
-+
-[source,sh]
-----
-oc get route
-----
+== Deleting a TsscPlatform instance
 
-. Use the hostname returned in your Web Browser to open the Gitea UI (the first user created will be an administrator).
+Deleting a `TsscPlatform` object will not undeploy dependent objects. This functionality is still under construction.
 
-== Deleting a Gitea instance
+== Uninstalling the Tssc Operator
 
-Deleting a Gitea instance and its associated resources is as simple as deleting the gitea object. If you created a Gitea Custom Resource with `metadata.name` of `gitea-example` it suffices to run the delete command on that resource:
-
-[source,sh]
-----
-oc delete gitea gitea-example
-----
-
-The Operator adds ownerReference fields to all created objects - which means that deleting the Gitea object also deletes all objects that have been created by the Operator.
-
-== Uninstalling the Gitea Operator
-
-In case you wish to uninstall the Gitea Operator make sure that there are no more Gitea instances running. Once all Gitea instances have been deleted simply delete the operator and its resources with:
+In case you wish to uninstall the Tssc Operator, simply delete the operator and its resources with:
 
 [source,sh]
 ----
@@ -103,15 +84,8 @@ If you are using a `registries.conf` change and/or ImageContentSourcePolicy mirr
 
 To change the image sources for all necessary images to deploy the operator without such a policy, you need to have the following images hosted in a container repository on your disconnected network:
 
-. quay.io/redhatgov/gitea-operator:latest
-. quay.io/redhatgov/gitea:latest
-. Some PostgreSQL 10 image that either behaves like the Red Hat PostgreSQL 10 RHEL 8 image or the docker.io/library/postgres:10 image.
-
-The places where you must update those sources are then, respectively:
-
-. The `kind: Gitea` custom resource manifest: `spec.gitea.image.src` and `spec.gitea.image.tag` should be updated
-. The `kind: Gitea` custom resource manifest: `spec.postgresql.image.src` and `spec.postgresql.image.tag` should be updated
+. quay.io/redhatgov/tssc-operator:latest
 
 If you intend on using `hack/operate.sh` it expects you to be in a development environment. Operator installation from this script therefore expects access to the internet. This comes with one extra concern: If `kustomize` isn't in your path, it tries to download it from the internet and save it locally into a `.gitignore`d folder. If you intend on using `hack/operate.sh` to install the operator, you should also bring `kustomize` and place it in the `$PATH` of the user who will be running the script. Additionally, in order to install the operator with `hack/operate.sh` you'll need to make the following change:
 
-. `hack/operate.conf`: IMG should point to the gitea-operator image in your environment
+. `hack/operate.conf`: IMG should point to the tssc-operator image in your environment

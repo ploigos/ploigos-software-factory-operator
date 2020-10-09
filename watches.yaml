@@ -1,5 +1,5 @@
 ---
 - version: v1alpha1
   group: redhatgov.io
-  kind: DevSecOps
-  playbook: playbooks/devsecops-operator.yml
+  kind: TsscPlatform
+  playbook: playbooks/tssc-platform.yml

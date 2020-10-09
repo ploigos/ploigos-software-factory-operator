@@ -6,5 +6,5 @@ resources:
 - role_binding.yaml
 - ../leader_election_role.yaml
 - ../leader_election_role_binding.yaml
-- ../devsecops_editor_role.yaml
-- ../devsecops_viewer_role.yaml
+- ../tsscplatform_editor_role.yaml
+- ../tsscplatform_viewer_role.yaml

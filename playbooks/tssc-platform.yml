@@ -1,5 +1,5 @@
 ---
-# DevSecOps deployment playbook.
+# TsscPlatform deployment playbook.
 
 # The following variables come from the ansible-operator
 # - ansible_operator_meta.namespace
