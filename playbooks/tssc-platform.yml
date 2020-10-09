@@ -21,6 +21,17 @@
     - set_fact:
         openshift_base_domain: "{{ (cluster_dns.resources|first).spec.baseDomain.replace(cluster_name + '.','') }}"
 
+    - name: Get registry pull secret
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ devsecops.pull_secret.name | default('pull-secret') }}"
+        namespace: "{{ devsecops.pull_secret.namespace | default('openshift-config') }}"
+      register: pull_secret
+
+    - set_fact:
+        reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] }}"
+
     - name: Look for default defined common variables
       include_vars: ../vars/common.yml
       

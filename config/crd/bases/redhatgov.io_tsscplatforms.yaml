@@ -45,6 +45,16 @@ spec:
                     description: Defines the ways in which the TsscPlatform image should be sourced and managed
                     type: object
                     properties: {}
+                  pullSecret:
+                    description: Pull secret used by Tekton to pull images from registry.redhat.io
+                    type: object
+                    properties:
+                      name:
+                        description: The pull secret name
+                        type: string
+                      namespace:
+                        description: The pull secret namespace
+                        type: string
           status:
             description: Status defines the observed state of TsscPlatform
             type: object
