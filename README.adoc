@@ -89,8 +89,42 @@ If you are using a `registries.conf` change and/or ImageContentSourcePolicy mirr
 
 To change the image sources for all necessary images to deploy the operator without such a policy, you need to have the following images hosted in a container repository on your disconnected network:
 
-. quay.io/redhatgov/tssc-operator:latest
+* quay.io/redhatgov/tssc-operator:latest
 
 If you intend on using `hack/operate.sh` it expects you to be in a development environment. Operator installation from this script therefore expects access to the internet. This comes with one extra concern: If `kustomize` isn't in your path, it tries to download it from the internet and save it locally into a `.gitignore`d folder. If you intend on using `hack/operate.sh` to install the operator, you should also bring `kustomize` and place it in the `$PATH` of the user who will be running the script. Additionally, in order to install the operator with `hack/operate.sh` you'll need to make the following change:
 
-. `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
+* `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
+
+== TSSC Overview
+
+todo...
+
+== Intended Design vs Current Layout
+
+Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform. We want to support several use cases:
+
+* devsecops workshops
+* tssc workshop onboard an app
+* tssc demo example app
+* production deploy of tssc platform and/or pipeline
+
+We envision the following CRDs to support the above use cases:
+
+* TsscPlatform
+* TsscWorkshop
+* TsscPipeline
+
+Clearly each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
+
+----
+  tasks:
+    - import_role:
+        name: gitea
+        tasks_from: tssc-platform
+    
+    - import_role:
+        name: fuzzy-bunny
+        tasks_from: tssc-platform
+----
+
+Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
