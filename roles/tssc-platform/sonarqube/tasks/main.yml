@@ -109,6 +109,5 @@
     pod_delay: 10
     pod_timeout: 600
 
-
 - name: Configure SonarQube and RHSSO to work together
   include: sonarqube_rhsso.yml
