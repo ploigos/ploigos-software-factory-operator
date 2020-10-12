@@ -97,11 +97,15 @@ If you intend on using `hack/operate.sh` it expects you to be in a development e
 
 == TSSC Overview
 
-todo...
+The Trusted Software Supply Chain(TSSC) has 2 high level pieces the platform and the pipeline. More information on the pipeline can be found here: https://rhtconsulting.github.io/tsc-docs/. Please note that at this time(Oct 2020) the documentation at that link is still using old nomenclature: a simplistic translation would be TSSC == TSSC Pipeline and TISC == TSSC Platform.
+
+https://github.com/rhtconsulting/tssc-python-package[The TSSC Pipeline is implemented as a Python command line tool] that can run in any CI service; Jenkins, Tekton, GitLab, etc... It ships with a set of step implementations and can be extended with other step implementations. The Pipeline depends on a variety of services and tools to operate; source control repository, dependency repository, image repository, security scanner, etc... One could set these up and maintain them by hand...or you could just use the TSSC Platform.
+
+The TSSC Platform is a set of services and tools deployed on K8s/OCP using operators wherever possible. We aim to keep it compliant with the https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)] in both connected and disconnected clusters. A quick look at the roles folder in this repo will show you what services and tools are available in the TSSC Platform.
 
 == Intended Design vs Current Layout
 
-Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform. We want to support several use cases:
+Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform. We want to support the following use cases:
 
 * devsecops workshops
 * tssc workshop onboard an app
