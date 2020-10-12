@@ -20,20 +20,13 @@
 - name: Subscribe to Mattermost Operator
   community.kubernetes.k8s:
     state: present
-    definition: |-
-      apiVersion: operators.coreos.com/v1alpha1
-      kind: Subscription
-      metadata:
-        name: mattermost-operator
-        namespace: "{{ mattermost_namespace }}"
-      spec:
-        channel: "{{ mattermost_operator_channel }}"
-        installPlanApproval: Automatic
-        name: mattermost-operator
-        source: redhatgov-operators
-        sourceNamespace: openshift-marketplace
+    resource_definition: "{{ lookup('template', 'mattermost-subscription.yml.j2')|from_yaml }}"
 
 - name: Create Mattermost 
   community.kubernetes.k8s:
     state: present
     resource_definition: "{{ lookup('template', 'mattermost-resource.yml.j2') }}"
+  register: mattermost_deployment
+  until: not mattermost_deployment.failed
+  retries: 5
+  delay: 10
