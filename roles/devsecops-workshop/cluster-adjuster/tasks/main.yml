@@ -4,18 +4,5 @@
     path: '{{ tmp_dir }}'
     state: directory
 
-- include_tasks: byo_cert.yml
-  when:
-    - byo_cert_fullchain_path is defined
-    - byo_cert_fullchain_path != ""
-    - byo_cert_key_path is defined
-    - byo_cert_key_path != ""
-
 - include_tasks: create_users.yml
   when: create_users
-
-- include_tasks: autoscale.yml
-  when: autoscale
-
-- include_tasks: console.yml
-  when: adjust_console

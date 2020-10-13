@@ -1,13 +1,5 @@
 ---
 create_users: true
-autoscale: true
-adjust_console: true
-
-# A list of manually created users:
-manual_users:
-  - username: openshift-admin
-    password: RedHat1
-    admin: yes
 
 workshop_admin:
   username: workshop-admin
@@ -25,17 +17,4 @@ sequence_users: |
   {% endfor -%}
 
 # The users to create in OpenShift
-openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
-
-# The type of worker to provision (including MachineSet adjustments)
-cluster_worker_machine_type: m4.2xlarge
-# The MachineSet replicas to enable on the MachineAutoscaler
-machineset_min_replicas: 0
-machineset_max_replicas: 5
-# The number of nodes to limit the overall cluster to across all MachineSets
-cluster_max_nodes_total: 15
-# Overall minimum/maximum resources for the entire cluster
-cluster_min_cores: 8
-cluster_max_cores: 100
-cluster_min_ram_gb: 32
-cluster_max_ram_gb: 256
+openshift_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'
