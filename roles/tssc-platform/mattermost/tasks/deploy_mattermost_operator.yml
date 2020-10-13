@@ -33,7 +33,7 @@
         source: redhatgov-operators
         sourceNamespace: openshift-marketplace
 
-- name: Create Mattermost 
+- name: Create Mattermost
   community.kubernetes.k8s:
     state: present
     resource_definition: "{{ lookup('template', 'mattermost-resource.yml.j2') }}"
