@@ -5,14 +5,13 @@ resources:
 - ../../rbac
 - ../../manager
 
-namespace: osdk-system
-namePrefix: osdk-
+namespace: tssc-operator-system
+namePrefix: tssc-operator-
 
 images:
 - name: testing
   newName: testing-operator
 
 patchesStrategicMerge:
-- ../service_account.yaml
 - ../manager_image.yaml
 - ../debug_logs_patch.yaml
