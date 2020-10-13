@@ -35,8 +35,8 @@ workshop_admin:
   admin: yes
 
 # The number of users created, as a string
-number_of_users: "{{ devsecopsworkshop.workshop_users.number_of_users | default(3) | string}}"
-user_password: openshift
+number_of_users: "{{ devsecopsworkshop.workshop_users.number_of_users | default(3) | string }}"
+user_password: "{{ devsecopsworkshop.workshop_users.workshop_password | default('openshift') }}"
 
 # Generate a sequence of users
 sequence_users: |
