@@ -23,4 +23,4 @@ github_project: RedHatGov
 # NOTE: Not really implemented yet....
 pipeline_style: tekton
 
-create_users: '{{ devsecopsworkshop.workshop_users.create }}'
+create_users: '{{ devsecopsworkshop.workshop_users.create | default(true) }}'
