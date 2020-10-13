@@ -5,4 +5,4 @@
   gather_facts: false
   tasks:
   - name: Login to OCP
-    command: oc login $OCP_SERVER -u $OCP_USERNAME -p $OCP_PASSWORD
+    command: oc login $OCP_SERVER -u $OCP_USERNAME -p $OCP_PASSWORD --insecure-skip-tls-verify
