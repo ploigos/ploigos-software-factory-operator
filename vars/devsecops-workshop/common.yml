@@ -28,21 +28,15 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 
 oc_cli: /usr/local/bin/oc
 
-# A list of manually created users:
-manual_users:
-  - username: opentlc-mgr
-    password: r3dh4t1!
-    admin: yes
-
 # A specially designated user for administering workshop content
 workshop_admin:
   username: workshop-admin
-  password: RedHatAdmin1
+  password: "{{ devsecopsworkshop.workshop_users.admin_password | default('RedHatAdmin1') }}"
   admin: yes
 
 # The number of users created, as a string
-number_of_users: "3"
-user_password: openshift
+number_of_users: "{{ devsecopsworkshop.workshop_users.number_of_users | default(3) | string }}"
+user_password: "{{ devsecopsworkshop.workshop_users.workshop_password | default('openshift') }}"
 
 # Generate a sequence of users
 sequence_users: |
@@ -52,6 +46,6 @@ sequence_users: |
   {% endfor -%}
 
 # The users to create in OpenShift
-openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
+openshift_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'
 # The users to create workshop projects/integrations for
 workshop_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'

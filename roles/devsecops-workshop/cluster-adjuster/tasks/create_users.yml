@@ -1,4 +1,33 @@
 ---
+- name: Get Cluster Oauth
+  k8s_info:
+    api_version: v1
+    kind: OAuth
+    name: cluster
+  register: cluster_oauth
+
+- set_fact:
+    htpasswd_provider: "{{ cluster_oauth.resources[0].spec | json_query(\"identityProviders[?type=='HTPasswd']\") | join }}"
+
+- set_fact:
+    htpasswd_secret_name: "{{ htpasswd_provider.htpasswd.fileData.name }}"
+    htpasswd_provider_name: "{{ htpasswd_provider.name }}"
+  when: htpasswd_provider is defined
+
+- name: Get htpasswd secret
+  k8s_info:
+    kind: Secret
+    name: '{{ htpasswd_secret_name }}'
+    namespace: openshift-config
+  register: htpasswd_secret
+  when: htpasswd_secret_name is defined
+
+- name: Copy HTPasswd file to tmp directory
+  copy:
+    content: "{{ htpasswd_secret.resources[0].data.htpasswd | b64decode }}"
+    dest: '{{ tmp_dir + "/users.htpasswd" }}'
+  when: htpasswd_secret_name is defined
+
 - name: Create/update htpasswd file for users
   shell: |
     cd {{ tmp_dir }}
@@ -26,7 +55,7 @@
       metadata:
         labels:
           type: htpasswd
-        name: htpass-secret
+        name: '{{ htpasswd_secret_name }}'
       type: Opaque
       stringData:
         htpasswd: '{{ lookup("file", tmp_dir + "/users.htpasswd") }}'
@@ -44,12 +73,18 @@
           type: htpasswd
       spec:
         identityProviders:
-        - name: htpasswd
+        - name: '{{ htpasswd_provider_name }}'
           mappingMethod: claim
           type: HTPasswd
           htpasswd:
             fileData:
-              name: htpass-secret
+              name: '{{ htpasswd_secret_name }}'
+
+- name: Create User objects for each HTPasswd user
+  k8s:
+    state: present
+    apply: yes
+    definition: '{{ lookup("template", "users.yml.j2")|from_yaml }}'
 
 - name: Enable admin on appropriate users
   k8s:
@@ -72,39 +107,3 @@
         name: {{ user.username }}
       {% endif %}
       {% endfor %}
-
-# This is easier than jumping through API hoops myself to get to the token.
-- name: Login with a new admin to cache that token
-  shell: |
-    oc='{{ oc_cli }}'
-    admin_user='{{ workshop_admin.username }}'
-    admin_password='{{ workshop_admin.password }}'
-    if [ $($oc --insecure-skip-tls-verify=true whoami) != "$admin_user" ]; then
-        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
-    else
-        echo ok
-    fi
-  register: oc_login
-  changed_when: oc_login.stdout_lines|last == "changed"
-  failed_when: oc_login.stdout_lines|last == "failed"
-  until: not oc_login.failed
-  retries: 5
-  delay: 30
-
-- name: Delete the generated kubeadmin secrets
-  k8s:
-    state: absent
-    apply: yes
-    namespace: kube-system
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: kubeadmin
-  when: full_cluster_name != "crc.testing"
-
-- name: Create User objects for each HTPasswd user
-  k8s:
-    state: present
-    apply: yes
-    definition: '{{ lookup("template", "users.yml.j2")|from_yaml }}'

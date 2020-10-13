@@ -37,14 +37,26 @@ spec:
             description: Spec defines the desired state of DevSecOpsWorkshop
             type: object
             properties:
-              tsscPlatform:
+              devsecopsworkshop:
                 description: Defines the desired state of the DevSecOpsWorkshop Deployment
                 type: object
                 properties:
-                  image:
-                    description: Defines the ways in which the DevSecOpsWorkshop image should be sourced and managed
+                  workshopUsers:
+                    description: Properties related to workshop users
                     type: object
-                    properties: {}
+                    properties:
+                      create:
+                        description: Whether the cluster oauth should be updated to create workshop users
+                        type: boolean
+                      numberOfUsers:
+                        description: The number of users to bootstrap in workshop tooling
+                        type: integer
+                      workshopPassword:
+                        description: The password for standard workshop user accounts
+                        type: string
+                      adminPassword:
+                        description: The password for the workshop-admin user
+                        type: string
                   pullSecret:
                     description: Pull secret used by Tekton to pull images from registry.redhat.io
                     type: object
