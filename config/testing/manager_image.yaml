@@ -10,3 +10,4 @@ spec:
       containers:
         - name: manager
           image: testing
+      serviceAccountName: osdk-sa
