@@ -16,9 +16,4 @@
         source: build
         force_source: yes
 
-    - name: Load image into kind cluster
-      command: kind load docker-image --name osdk-test '{{ operator_image }}'
-      register: result
-      changed_when: '"not yet present" in result.stdout'
-
 - import_playbook: ../default/converge.yml

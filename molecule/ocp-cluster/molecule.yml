@@ -13,11 +13,8 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    create: ../kind-cluster/create.yml
     prepare: ../default/prepare.yml
-    converge: ../kind-cluster/converge.yml
     verify: ../default/verify.yml
-    destroy: ../kind-cluster/destroy.yml
   lint: |
     set -e
     ansible-lint
@@ -31,11 +28,11 @@ provisioner:
         config_dir: ${MOLECULE_PROJECT_DIRECTORY}/config
         samples_dir: ${MOLECULE_PROJECT_DIRECTORY}/config/samples
         project_dir: ${MOLECULE_PROJECT_DIRECTORY}
-        operator_image: testing-operator
+        operator_image: quay.io/akrohg/tssc-operator
         operator_pull_policy: "Never"
         kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
         kustomize: ${KUSTOMIZE_PATH:-kustomize}
-        scope: namespace
+        scope: cluster
   env:
     K8S_AUTH_KUBECONFIG: ${MOLECULE_EPHEMERAL_DIRECTORY}/kubeconfig
     KUBECONFIG: ${MOLECULE_EPHEMERAL_DIRECTORY}/kubeconfig
