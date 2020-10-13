@@ -1,18 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
-namespace: osdk-test
-namePrefix: osdk-
-
 resources:
 - ../../crd
 - ../../rbac
 - ../../manager
+
+namespace: osdk-system
+namePrefix: osdk-
 
 images:
 - name: testing
   newName: testing-operator
 
 patchesStrategicMerge:
+- ../service_account.yaml
 - ../manager_image.yaml
 - ../debug_logs_patch.yaml
