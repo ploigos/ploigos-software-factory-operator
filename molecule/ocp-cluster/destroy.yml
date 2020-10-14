@@ -14,4 +14,6 @@
       k8s:
         state: absent
         namespace: '{{ namespace }}'
-        name: devsecopsworkshop-testing
+        definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
+      vars:
+        cr_file: 'redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml'
