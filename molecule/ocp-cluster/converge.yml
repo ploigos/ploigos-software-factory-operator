@@ -8,7 +8,7 @@
     - name: Login to quay
       docker_login:
         registry_url: quay.io
-        username: '{{ quay_user }}'
+        username: '{{ quay_username }}'
         password: '{{ quay_password }}'
 
     - name: Build operator image
