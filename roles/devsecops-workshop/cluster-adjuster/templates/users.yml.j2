@@ -2,7 +2,7 @@
 - apiVersion: user.openshift.io/v1
   kind: User
   identities:
-  - 'htpasswd:{{ user.username }}'
+  - '{{ htpasswd_provider_name }}:{{ user.username }}'
   metadata:
     name: '{{ user.username }}'
 {% endfor %}
