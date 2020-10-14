@@ -4,11 +4,17 @@
     state: present
     namespace: '{{ namespace }}'
     definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
-    wait: yes
-    wait_timeout: 1800
-    wait_condition:
-      type: Running
-      reason: Successful
-      status: "True"
   vars:
     cr_file: 'redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml'
+
+# Ensure regular Ansible output to avoid Travis build timeouts
+- name: Wait for the CR to be Reconciled
+  k8s_info:
+    api_version: v1alpha1
+    kind: DevSecOpsWorkshop
+    namespace: '{{ namespace }}'
+    name: devsecopsworkshop-testing
+  register: devsecopsworkshop
+  until: devsecopsworkshop.resources[0].status | json_query("conditions[?(@.reason=='Successful')]") is  defined
+  retries: 30
+  delay: 60
