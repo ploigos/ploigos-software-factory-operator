@@ -5,6 +5,12 @@
   gather_facts: no
 
   tasks:
+    - name: Login to quay
+      docker_login:
+        registry_url: quay.io
+        username: '{{ quay_user }}'
+        password: '{{ quay_password }}'
+
     - name: Build operator image
       docker_image:
         build:
@@ -12,7 +18,7 @@
           pull: no
         name: '{{ operator_image }}'
         tag: latest
-        push: no
+        push: yes
         source: build
         force_source: yes
 

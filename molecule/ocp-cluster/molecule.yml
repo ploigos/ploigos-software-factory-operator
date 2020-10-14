@@ -28,7 +28,9 @@ provisioner:
         config_dir: ${MOLECULE_PROJECT_DIRECTORY}/config
         samples_dir: ${MOLECULE_PROJECT_DIRECTORY}/config/samples
         project_dir: ${MOLECULE_PROJECT_DIRECTORY}
-        operator_image: quay.io/akrohg/tssc-operator
+        quay_username: "{{ lookup('env', 'QUAY_USERNAME') }}"
+        quay_password: "{{ lookup('env', 'QUAY_PASSWORD') }}"
+        operator_image: quay.io/redhatgov/tssc-operator:test
         operator_pull_policy: "Always"
         kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
         kustomize: ${KUSTOMIZE_PATH:-kustomize}
