@@ -5,8 +5,8 @@ resources:
 - ../../rbac
 - ../../manager
 
-namespace: osdk-test
-namePrefix: osdk-
+namespace: tssc-operator-system
+namePrefix: tssc-operator-
 
 images:
 - name: testing

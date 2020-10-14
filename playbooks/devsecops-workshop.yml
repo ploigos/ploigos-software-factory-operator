@@ -10,7 +10,7 @@
         namespace: openshift-config
         name: cluster
       register: cluster_dns
-    
+
     - set_fact:
         cluster_name: '{{ (cluster_dns.resources|first).spec.baseDomain.split(".")[0] }}'
 
@@ -30,10 +30,10 @@
 
     - name: Look for default defined common variables
       include_vars: ../vars/devsecops-workshop/common.yml
-      
+
     - name: Look for default defined devsecops variables
       include_vars: ../vars/devsecops-workshop/devsecops.yml
-      
+
     # Individual adjustment tasks have their own toggles
     - include_role:
         name: devsecops-workshop/cluster-adjuster
