@@ -17,7 +17,3 @@ postgresql_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_let
 postgresql_user: keycloak
 postgresql_volume_capacity: 1Gi
 postgresql_memory_limit: 512Mi
-
-
-
-

@@ -41,9 +41,9 @@
     namespace: "{{ _gitea_namespace }}"
   register: r_route
   until:
-    - (r_route.resources|length) > 0
-    - r_route.resources[0].spec.host is defined
-    - r_route.resources[0].spec.host|length > 0
+  - (r_route.resources|length) > 0
+  - r_route.resources[0].spec.host is defined
+  - r_route.resources[0].spec.host|length > 0
 
 - name: Store Gitea Route Hostname
   when:
@@ -64,8 +64,8 @@
 
 - name: Wait until application is available
   when:
-    - _gitea_state == "present"
-    - _gitea_wait_for_init|bool
+  - _gitea_state == "present"
+  - _gitea_wait_for_init|bool
   k8s_facts:
     api_version: apps/v1
     kind: Deployment
