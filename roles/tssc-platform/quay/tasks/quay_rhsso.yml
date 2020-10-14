@@ -46,8 +46,8 @@
     name: quay-enterprise-config-secret
     patch:
       - op: replace
-      path: /data/config.yaml
-      value: "{{ lookup('file', tmp_dir + '/quay-config.yml') | b64encode }}"
+        path: /data/config.yaml
+        value: "{{ lookup('file', tmp_dir + '/quay-config.yml') | b64encode }}"
   when: rhsso_config_added.changed
 
 - name: Restart quay if the RHSSO changes were applied
