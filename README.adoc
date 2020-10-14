@@ -132,3 +132,19 @@ Clearly each CRD maps to a playbook named the same. Each playbook will call spec
 ----
 
 Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
+
+=== Design Quarks
+
+Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
+
+The CRD, if it has defaults set, will cause validation of vars to have their spec fleshed out to include those defaults if they were left out. When the playbook is called, those defaults from the CRD are passed as vars because they now exist in the CR. If you have an optional section in the CRD with no defaults, but the spec is validated, the variables will be passed to the playbook as a literal null value (None in Python).
+
+None provided to a role will not inherit defaults.
+None filtered with Ansible's default filter will be override with the default.
+
+This set of conditions means you should apply defaults in the CRD and the playbook; or, rather, maybe an or would be appropriate.
+
+* a validated but undefaulted CRD variable should have a default in the playbook
+* a defaulted CRD variable should be expected to be passed into the playbook
+
+This is not well documented, and James discovered this "feature" while working on things.

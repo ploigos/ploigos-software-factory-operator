@@ -8,7 +8,7 @@
         namespace: openshift-config
         name: cluster
       register: cluster_dns
-    
+
     - set_fact:
         cluster_name: '{{ (cluster_dns.resources|first).spec.baseDomain.split(".")[0] }}'
 
