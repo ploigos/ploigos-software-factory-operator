@@ -73,14 +73,6 @@ items:
         terminationGracePeriodSeconds: 30
     test: false
     triggers:
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-        - username-distribution
-        from:
-          kind: ImageStreamTag
-          name: username-distribution:latest
-      type: ImageChange
     - type: ConfigChange
 - apiVersion: v1
   kind: Service
