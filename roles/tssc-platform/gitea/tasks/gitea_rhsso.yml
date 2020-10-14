@@ -55,7 +55,7 @@
   changed_when: '"changed" in gitea_rhsso_oauth.stdout_lines'
   failed_when: '"failed" in gitea_rhsso_oauth.stdout_lines'
 
-- name : Restart gitea if the RHSSO changes were applied
+- name: Restart gitea if the RHSSO changes were applied
   block:
   - name: Kill gitea pod for auth changes to take into effect
     k8s:
@@ -71,7 +71,7 @@
       kind: Pod
       namespace: '{{ gitea_project_name }}'
       label_selectors:
-        - "{{ gitea_pod_label }}"
+      - "{{ gitea_pod_label }}"
     register: gitea_pod
     until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
     retries: 10

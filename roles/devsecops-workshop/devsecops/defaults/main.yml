@@ -9,4 +9,7 @@ deploy_workshop: true
 deploy_rocketchat: true
 deploy_username_distribution: true
 
+devsecops_project_name: devsecops
+devsecops_project_display: DevSecOps Common Resources
+
 pipeline_style: tekton

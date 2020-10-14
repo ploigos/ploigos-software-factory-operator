@@ -30,4 +30,3 @@ spec:
           image: controller:latest
       terminationGracePeriodSeconds: 10
       serviceAccountName: tssc-operator-sa
-

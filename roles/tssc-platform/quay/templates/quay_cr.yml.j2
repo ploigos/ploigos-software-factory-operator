@@ -2,7 +2,7 @@ apiVersion: redhatcop.redhat.io/v1alpha1
 kind: QuayEcosystem
 metadata:
   name: quayecosystem
-  namespace: quay-enterprise
+  namespace: {{ quay_project_name }}
 spec:
   clair:
     enabled: false

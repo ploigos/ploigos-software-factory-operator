@@ -24,18 +24,18 @@
 
 - name: Create secret if missing
   block:
-  - name: generate mongodb credential facts
-    set_fact:
-      mongodb_user: user{{ lookup('password', '/dev/null length=3 chars=digits') }}
-      mongodb_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') }}"
-      mongodb_admin_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') + '' }}"
-      mongodb_keyfile_value: "{{ lookup('password', '/dev/null length=756') | b64encode }}"
-  - name: create secret
-    k8s:
-      namespace: '{{ rocketchat_project_name }}'
-      definition: "{{ lookup('template', 'mongodb-secret.yml.j2') }}"
+    - name: generate mongodb credential facts
+      set_fact:
+        mongodb_user: user{{ lookup('password', '/dev/null length=3 chars=digits') }}
+        mongodb_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') }}"
+        mongodb_admin_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') + '' }}"
+        mongodb_keyfile_value: "{{ lookup('password', '/dev/null length=756') | b64encode }}"
+    - name: create secret
+      k8s:
+        namespace: '{{ rocketchat_project_name }}'
+        definition: "{{ lookup('template', 'mongodb-secret.yml.j2') }}"
   when:
-  - secret_data == []
+    - secret_data == []
 
 - name: Create MongoDB Deployment
   k8s:

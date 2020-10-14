@@ -1,6 +1,6 @@
 ---
-rhsso_project_name: rhsso
-rhsso_project_display: Red Hat Single Sign-On Service
+rhsso_project_name: devsecops
+rhsso_project_display: DevSecOps Common Resources
 rhsso_operator_version: rhsso-operator.7.4.1
 rhsso_app_name: rhsso
 rhsso_app_label: rhsso
@@ -17,7 +17,3 @@ postgresql_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_let
 postgresql_user: keycloak
 postgresql_volume_capacity: 1Gi
 postgresql_memory_limit: 512Mi
-
-
-
-
