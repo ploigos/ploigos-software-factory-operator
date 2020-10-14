@@ -1,6 +1,6 @@
 ---
 mattermost_name: mattermost
-mattermost_namespace: mattermost-operator
+mattermost_namespace: devsecops
 mattermost_operator_channel: stable
 
 database:

@@ -68,9 +68,9 @@
         sonarqube_client_query: "[?clientId == 'sonarqube']"
 
     - set_fact:
-         sonarqube_client_id: "{{ sonarqube_client.id }}"
-         sonarqube_client_has_role_list: "{{ 'role_list' in sonarqube_client.defaultClientScopes }}"
-         role_list_client_scope_id: "{{ all_client_scopes.json | json_query(role_list_scope_query) | first }}"
+        sonarqube_client_id: "{{ sonarqube_client.id }}"
+        sonarqube_client_has_role_list: "{{ 'role_list' in sonarqube_client.defaultClientScopes }}"
+        role_list_client_scope_id: "{{ all_client_scopes.json | json_query(role_list_scope_query) | first }}"
       vars:
         role_list_scope_query: "[?name == 'role_list'].id"
 
@@ -115,7 +115,7 @@
     set_fact:
       sonarqube_password: "{{ sonarqube_secret_data.data.password | b64decode }}"
     when:
-      - sonarqube_secret_data != []
+    - sonarqube_secret_data != []
 
   - name: Create secret if missing
     block:
@@ -146,13 +146,13 @@
     retries: 3
     delay: 10
     loop:
-      - { name: 'sonar.core.serverBaseURL', value: '{{ sonarqube_url }}' }
-      - { name: 'sonar.auth.saml.enabled', value: 'true' }
-      - { name: 'sonar.auth.saml.applicationId', value: 'sonarqube' }
-      - { name: 'sonar.auth.saml.providerName', value: 'RH SSO' }
-      - { name: 'sonar.auth.saml.providerId', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}' }
-      - { name: 'sonar.auth.saml.loginUrl', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}/protocol/saml' }
-      - { name: 'sonar.auth.saml.certificate.secured', value: '{{ rhsso_saml_cert_value }}' }
-      - { name: 'sonar.auth.saml.user.login', value: 'login' }
-      - { name: 'sonar.auth.saml.user.name', value: 'name' }
-      - { name: 'sonar.auth.saml.group.name', value: 'groups' }
+    - { name: 'sonar.core.serverBaseURL', value: '{{ sonarqube_url }}' }
+    - { name: 'sonar.auth.saml.enabled', value: 'true' }
+    - { name: 'sonar.auth.saml.applicationId', value: 'sonarqube' }
+    - { name: 'sonar.auth.saml.providerName', value: 'RH SSO' }
+    - { name: 'sonar.auth.saml.providerId', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}' }
+    - { name: 'sonar.auth.saml.loginUrl', value: '{{ keycloak_url }}/auth/realms/{{ rhsso_realm_name }}/protocol/saml' }
+    - { name: 'sonar.auth.saml.certificate.secured', value: '{{ rhsso_saml_cert_value }}' }
+    - { name: 'sonar.auth.saml.user.login', value: 'login' }
+    - { name: 'sonar.auth.saml.user.name', value: 'name' }
+    - { name: 'sonar.auth.saml.group.name', value: 'groups' }

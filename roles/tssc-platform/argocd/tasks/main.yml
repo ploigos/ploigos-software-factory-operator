@@ -77,4 +77,3 @@
   until: argocd_endpoint.status == 200
   retries: 20
   delay: 30
-
