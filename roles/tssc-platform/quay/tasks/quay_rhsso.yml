@@ -71,4 +71,4 @@
       until: quay_pod.resources|length > 0 and (quay_pod.resources|first).status.phase == "Running"
       retries: 10
       delay: 30
-    when: rhsso_config_added.changed
+  when: rhsso_config_added.changed
