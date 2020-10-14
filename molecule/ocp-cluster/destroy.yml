@@ -9,7 +9,7 @@
   tasks:
     - name: Login to OCP
       command: oc login $OCP_SERVER -u $OCP_USERNAME -p $OCP_PASSWORD --insecure-skip-tls-verify
-      
+
     - name: Remove the redhatgov.io/v1alpha1.DevSecOpsWorkshop
       k8s:
         state: absent
