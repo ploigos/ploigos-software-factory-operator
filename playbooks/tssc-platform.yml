@@ -14,8 +14,22 @@
 
     - set_fact:
         openshift_base_domain: "{{ (cluster_dns.resources|first).spec.baseDomain.replace(cluster_name + '.','') }}"
+        workshop_namespace: "{{ ansible_operator_meta.namespace }}"
         rhedsord_registry_username: TODO
         rhedsord_registry_password: TODO
+
+    - name: Set project names
+      set_fact:
+        argocd_project_name: '{{ workshop_namespace }}'
+        crw_project_name: '{{ workshop_namespace }}'
+        gitea_project_name: '{{ workshop_namespace }}'
+        jenkins_project_name: '{{ workshop_namespace }}'
+        mattermost_namespace: '{{ workshop_namespace }}'
+        nexus_project_name: '{{ workshop_namespace }}'
+        quay_project_name: '{{ workshop_namespace }}'
+        rhsso_project_name: '{{ workshop_namespace }}'
+        selenium_grid_project_name: '{{ workshop_namespace }}'
+        sonarqube_project_name: '{{ workshop_namespace }}'
 
     - name: Look for default defined common variables
       include_vars: ../vars/tssc-platform/common.yml
