@@ -60,15 +60,15 @@
         name: "{{ (quay_pod.resources|first).metadata.name }}"
         state: absent
 
-  - name: Wait for Quay to finish being created with RHSSO settings
-    k8s_info:
-      api_version: v1
-      kind: Pod
-      namespace: '{{ quay_project_name }}'
-      label_selectors:
-        - "quay-enterprise-component=app"
-    register: quay_pod
-    until: quay_pod.resources|length > 0 and (quay_pod.resources|first).status.phase == "Running"
-    retries: 10
-    delay: 30
-  when: rhsso_config_added.changed
+    - name: Wait for Quay to finish being created with RHSSO settings
+      k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: '{{ quay_project_name }}'
+        label_selectors:
+          - "quay-enterprise-component=app"
+      register: quay_pod
+      until: quay_pod.resources|length > 0 and (quay_pod.resources|first).status.phase == "Running"
+      retries: 10
+      delay: 30
+    when: rhsso_config_added.changed
