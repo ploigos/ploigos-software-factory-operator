@@ -29,10 +29,6 @@
         reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] }}"
         workshop_namespace: "{{ ansible_operator_meta.namespace }}"
 
-    - name: NAMESPACE
-      debug:
-        msg: 'Workshop namespace: {{ workshop_namespace }}'
-
     - name: Set project names
       set_fact:
         crw_project_name: '{{ workshop_namespace }}'
