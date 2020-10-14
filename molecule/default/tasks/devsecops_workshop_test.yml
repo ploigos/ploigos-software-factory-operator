@@ -15,6 +15,6 @@
     namespace: '{{ namespace }}'
     name: devsecopsworkshop-testing
   register: devsecopsworkshop
-  until: devsecopsworkshop.resources[0].status | json_query("conditions[?(@.reason=='Successful')]") is  defined
+  until: devsecopsworkshop.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 30
   delay: 60
