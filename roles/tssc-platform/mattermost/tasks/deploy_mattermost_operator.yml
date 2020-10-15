@@ -17,6 +17,17 @@
   retries: 5
   delay: 10
 
+- name: Get a list of operator groups
+  k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: '{{ mattermost_namespace }}'
+  register: operator_groups
+
+- set_fact:
+    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
+  when: operator_groups.resources
+
 - name: Subscribe to Mattermost Operator
   community.kubernetes.k8s:
     state: present

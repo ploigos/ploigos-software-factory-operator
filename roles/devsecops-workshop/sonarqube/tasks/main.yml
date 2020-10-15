@@ -21,6 +21,17 @@
   retries: 5
   delay: 10
 
+- name: Get a list of operator groups
+  k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: '{{ sonarqube_project_name }}'
+  register: operator_groups
+
+- set_fact:
+    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
+  when: operator_groups.resources
+
 - name: Subscribe to sonarqube
   k8s:
     definition: '{{ lookup("template", "sonarqube-subscription.yml.j2")|from_yaml }}'
