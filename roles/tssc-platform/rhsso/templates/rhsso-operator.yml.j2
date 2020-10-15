@@ -2,7 +2,7 @@
 - apiVersion: v1
   kind: OperatorGroup
   metadata:
-    name: {{ rhsso_project_name }}-operatorgroup
+    name: {{ operator_group_name | default(rhsso_project_name + '-operatorgroup') }}
     namespace: {{ rhsso_project_name }}
   spec:
     targetNamespaces:
