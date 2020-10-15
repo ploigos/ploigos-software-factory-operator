@@ -1,2 +1,2 @@
 ---
-naps_operator_index_image: quay.io/redhatgov/operator-catalog:1.2.0
+naps_operator_index_image: quay.io/redhatgov/operator-catalog:latest
