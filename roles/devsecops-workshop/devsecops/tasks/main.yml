@@ -16,7 +16,7 @@
     name: devsecops-workshop/nexus
   when: deploy_nexus
 - include_role:
-    name: devsecops-workshop/codeready-workspaces
+    name: common/codeready-workspaces
   when: deploy_crw
 - include_role:
     name: devsecops-workshop/username-distribution
