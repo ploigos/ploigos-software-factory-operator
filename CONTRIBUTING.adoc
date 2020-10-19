@@ -1,12 +1,25 @@
 
 
-== Constructing your development sandbox
+== Constructing Your Development Sandbox
 
+what needs to be installed locally and remotely(do I need an RHPDS cluster...)
 
-== Basic development flow
+== Basic Development Flows
+=== Edit Ansible
 
+describe commands/action to change Ansible files(mostly roles)
 
-== PR testing
+=== Edit Kustomize
 
+describe commands/action to change files under the config directory
 
-== Process for publishing a release of the operator
+=== Testing
+
+describe Molecule testing
+
+== PR Testing
+
+describe current TravisCI integration
+
+== Process for Publishing a Release of the Operator
+
