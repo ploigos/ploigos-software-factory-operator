@@ -138,20 +138,9 @@ If you intend on using `hack/operate.sh` it expects you to be in a development e
 
 == Intended Design vs Current Layout
 
-Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform. We want to support the following use cases:
+Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform and the intended design is not yet obvious from the current layout. 
 
-* devsecops workshops
-* tssc workshop onboard an app
-* tssc demo example app
-* production deploy of tssc platform and/or pipeline
-
-We envision the following CRDs to support the above use cases:
-
-* TsscPlatform
-* TsscWorkshop
-* TsscPipeline
-
-Clearly each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
+Each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
 
 ----
   tasks:
