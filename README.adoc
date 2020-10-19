@@ -47,17 +47,19 @@ Wherever possible we delegate to another operator to create/manage the platform 
 
 ==== Note
 
-This CRD is used to support the use case: <<DevSecOps Workshop>>.
+This CRD is used to support all the use cases including: <<DevSecOps Workshop>>.
 
 == TsscWorkshop CRD
 
-This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR. This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevSecOps Workshop>>.
+This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
 
 After this operator has completed execution in response to this CR an SA should be able to conduct the workshop without additional deployments or configurations.
 
 ==== Note
 
 This CRD's responsibilities may include deploy or configuring addition services/tools beyond what the TsscPlatform CRD does(eg. username-distribution).
+
+This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevSecOps Workshop>>.
 
 == TsscPipeline CRD
 
