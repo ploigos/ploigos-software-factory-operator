@@ -49,6 +49,41 @@ Wherever possible we delegate to another operator to create/manage the platform 
 == TsscPipeline CRD
 
 
+== Intended Design vs Current Layout
+
+Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform and the intended design is not yet obvious from the current layout. 
+
+Each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
+
+----
+  tasks:
+    - import_role:
+        name: gitea
+        tasks_from: tssc-platform
+    
+    - import_role:
+        name: fuzzy-bunny
+        tasks_from: tssc-platform
+----
+
+Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
+
+=== Design Quarks
+
+Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
+
+The CRD, if it has defaults set, will cause validation of vars to have their spec fleshed out to include those defaults if they were left out. When the playbook is called, those defaults from the CRD are passed as vars because they now exist in the CR. If you have an optional section in the CRD with no defaults, but the spec is validated, the variables will be passed to the playbook as a literal null value (None in Python).
+
+None provided to a role will not inherit defaults.
+None filtered with Ansible's default filter will be override with the default.
+
+This set of conditions means you should apply defaults in the CRD and the playbook; or, rather, maybe an or would be appropriate.
+
+* a validated but undefaulted CRD variable should have a default in the playbook
+* a defaulted CRD variable should be expected to be passed into the playbook
+
+This is not well documented, and James discovered this "feature" while working on things.
+
 == Building the Operator
 
 There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: TsscPlatform` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy a Tssc Platform to a cluster directly from this repo you could run `hack/operate.sh -d`.
@@ -136,37 +171,3 @@ If you intend on using `hack/operate.sh` it expects you to be in a development e
 
 * `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
 
-== Intended Design vs Current Layout
-
-Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform and the intended design is not yet obvious from the current layout. 
-
-Each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
-
-----
-  tasks:
-    - import_role:
-        name: gitea
-        tasks_from: tssc-platform
-    
-    - import_role:
-        name: fuzzy-bunny
-        tasks_from: tssc-platform
-----
-
-Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
-
-=== Design Quarks
-
-Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
-
-The CRD, if it has defaults set, will cause validation of vars to have their spec fleshed out to include those defaults if they were left out. When the playbook is called, those defaults from the CRD are passed as vars because they now exist in the CR. If you have an optional section in the CRD with no defaults, but the spec is validated, the variables will be passed to the playbook as a literal null value (None in Python).
-
-None provided to a role will not inherit defaults.
-None filtered with Ansible's default filter will be override with the default.
-
-This set of conditions means you should apply defaults in the CRD and the playbook; or, rather, maybe an or would be appropriate.
-
-* a validated but undefaulted CRD variable should have a default in the playbook
-* a defaulted CRD variable should be expected to be passed into the playbook
-
-This is not well documented, and James discovered this "feature" while working on things.
