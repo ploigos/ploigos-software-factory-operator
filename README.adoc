@@ -15,13 +15,13 @@ This repository contains the code to build a Tssc Operator for Kubernetes, inclu
 
 It is implemented on top of the Red Hat https://sdk.operatorframework.io/[Operator SDK] - in particular the https://sdk.operatorframework.io/docs/building-operators/ansible/[Ansible Operator].
 
-This operator services the following CRDs:
+This operator services the following https://docs.openshift.com/container-platform/4.5/operators/understanding/crds/crd-managing-resources-from-crds.html[CRDs]:
 
 * <<TsscPlatform CRD>>
 * <<TsscWorkshop CRD>>
 * <<TsscPipeline CRD>>
 
-The above CRDs enable the following use cases:
+The above https://docs.openshift.com/container-platform/4.5/operators/understanding/crds/crd-managing-resources-from-crds.html[CRDs] enable the following use cases:
 
 * <<DevSecOps Workshop>>
 * <<TSSC Workshop to Onboard an App>>
@@ -31,13 +31,33 @@ The above CRDs enable the following use cases:
 
 == DevSecOps Workshop
 
+Deploy and configure the resources required by the https://github.com/RedHatGov/devsecops-workshop-dashboard/blob/develop/tekton/workshop/content/index.md[DevSecOps workshop]. The workshop should be ready for an SA to conduct after this operator has completed execution.
+
 == TSSC Workshop to Onboard an App
+
+Deploy and configure the resources required by the ...doesn't exist yet:
+https://github.com/RedHatGov/tssc-operator/issues/57
+
 
 == TSSC Demo with a Reference App
 
+Deploy and configure a TSSC pipeline for the http://gitea.apps.tssc.rht-set.com/tssc-references/reference-quarkus-mvn-jenkins[TSSC Quark reference app]; this includes importing and updating the config of the git repos.
+
+==== Note
+
+This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
+
 == Production Deployment of TSSC Platform
 
+This use case is simply deploying and integrating the services/tooling that is required by the TSSC Pipeline. This platform could be used by a TSSC Pipeline, a workshop, a custom pipeline, or anything the user desires.
+
 == Production Deployment of TSSC Pipeline
+
+This use case does not included the steps required to alter a target git repository(s) to integrate it with TSSC. This use case includes configuration of a TSSC Platform to support a correctly configured pair of git repositories: source code and deploy config.
+
+==== Note
+
+This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
 
 == TsscPlatform CRD
 
@@ -66,6 +86,10 @@ This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevS
 This CRD is responsible for configuring the service/tooling deployed by a TsscPlatform CR. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
 
 This operator will not attempt to alter a target git repository(s) to integrate it with TSSC. After this operator has completed execution in response to this CR the only actions that should remain would be to edit contents of the target git repositories.
+
+==== Note
+
+This CRD supports both use cases: <<TSSC Demo with a Reference App>> and <<Production Deployment of TSSC Pipeline>>.
 
 == Intended Design vs Current Layout
 
