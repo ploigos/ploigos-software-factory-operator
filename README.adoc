@@ -29,17 +29,18 @@ The above https://docs.openshift.com/container-platform/4.5/operators/understand
 * <<Production Deployment of TSSC Platform>>
 * <<Production Deployment of TSSC Pipeline>>
 
-== DevSecOps Workshop
+== Use Cases
+=== DevSecOps Workshop
 
 Deploy and configure the resources required by the https://github.com/RedHatGov/devsecops-workshop-dashboard/blob/develop/tekton/workshop/content/index.md[DevSecOps workshop]. The workshop should be ready for an SA to conduct after this operator has completed execution.
 
-== TSSC Workshop to Onboard an App
+=== TSSC Workshop to Onboard an App
 
 Deploy and configure the resources required by the ...doesn't exist yet:
 https://github.com/RedHatGov/tssc-operator/issues/57
 
 
-== TSSC Demo with a Reference App
+=== TSSC Demo with a Reference App
 
 Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc.rht-set.com/tssc-references/reference-quarkus-mvn-jenkins[TSSC Quark reference app]; this includes importing and updating the config of the git repos.
 
@@ -47,11 +48,11 @@ Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc
 
 This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
 
-== Production Deployment of TSSC Platform
+=== Production Deployment of TSSC Platform
 
 This use case is simply deploying and integrating the services/tooling that is required by the TSSC Pipeline. This platform could be used by a TSSC Pipeline, a workshop, a custom pipeline, or anything the user desires.
 
-== Production Deployment of TSSC Pipeline
+=== Production Deployment of TSSC Pipeline
 
 This use case does not included the steps required to alter a target git repository(s) to integrate it with TSSC. This use case includes configuration of a TSSC Platform to support a correctly configured pair of git repositories: source code and deploy config.
 
@@ -59,7 +60,8 @@ This use case does not included the steps required to alter a target git reposit
 
 This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
 
-== TsscPlatform CRD
+== CRDs
+=== TsscPlatform CRD
 
 This CRD is responsible for the service tooling, or platform, required to support a TSSC Pipeline: a TSSC Platform. Each service/tool the CDR supports exposes options at a minimum a boolean to install or not to install it. 
 
@@ -69,7 +71,7 @@ Wherever possible we delegate to another operator to create/manage the platform 
 
 This CRD is used to support all the use cases including: <<DevSecOps Workshop>>.
 
-== TsscWorkshop CRD
+=== TsscWorkshop CRD
 
 This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
 
@@ -81,7 +83,7 @@ This CRD's responsibilities may include deploy or configuring addition services/
 
 This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevSecOps Workshop>>.
 
-== TsscPipeline CRD
+=== TsscPipeline CRD
 
 This CRD is responsible for configuring the service/tooling deployed by a TsscPlatform CR. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
 
