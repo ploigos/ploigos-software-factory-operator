@@ -22,6 +22,7 @@
       set_fact:
         argocd_project_name: '{{ workshop_namespace }}'
         crw_project_name: '{{ workshop_namespace }}'
+        crw_deployment_type: tssc
         gitea_project_name: '{{ workshop_namespace }}'
         jenkins_project_name: '{{ workshop_namespace }}'
         mattermost_namespace: '{{ workshop_namespace }}'
