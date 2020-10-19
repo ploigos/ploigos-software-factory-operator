@@ -41,7 +41,7 @@ https://github.com/RedHatGov/tssc-operator/issues/57
 
 == TSSC Demo with a Reference App
 
-Deploy and configure a TSSC pipeline for the http://gitea.apps.tssc.rht-set.com/tssc-references/reference-quarkus-mvn-jenkins[TSSC Quark reference app]; this includes importing and updating the config of the git repos.
+Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc.rht-set.com/tssc-references/reference-quarkus-mvn-jenkins[TSSC Quark reference app]; this includes importing and updating the config of the git repos.
 
 ==== Note
 
