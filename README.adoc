@@ -1,3 +1,12 @@
+= TSSC Overview
+
+The Trusted Software Supply Chain(TSSC) has 2 high level pieces the platform and the pipeline. More information on the pipeline can be found here: https://rhtconsulting.github.io/tsc-docs/. Please note that at this time(Oct 2020) the documentation at that link is still using old nomenclature: a simplistic translation would be TSSC == TSSC Pipeline and TISC == TSSC Platform.
+
+https://github.com/rhtconsulting/tssc-python-package[The TSSC Pipeline is implemented as a Python command line tool] that can run in any CI service; Jenkins, Tekton, GitLab, etc... It ships with a set of step implementations and can be extended with other step implementations. The Pipeline depends on a variety of services and tools to operate; source control repository, dependency repository, image repository, security scanner, etc... One could set these up and maintain them by hand...or you could just use the TSSC Platform.
+
+The TSSC Platform is a set of services and tools deployed on K8s/OCP using operators wherever possible. We aim to keep it compliant with the https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)] in both connected and disconnected clusters. A quick look at the roles folder in this repo will show you what services and tools are available in the TSSC Platform.
+
+
 = Tssc Operator
 
 == Overview
@@ -6,15 +15,47 @@ This repository contains the code to build a Tssc Operator for Kubernetes, inclu
 
 It is implemented on top of the Red Hat https://sdk.operatorframework.io/[Operator SDK] - in particular the https://sdk.operatorframework.io/docs/building-operators/ansible/[Ansible Operator].
 
+This operator services the following CRDs:
+
+* <<TsscPlatform CRD>>
+* <<TsscWorkshop CRD>>
+* <<TsscPipeline CRD>>
+
+The above CRDs enable the following use cases:
+
+* <<DevSecOps Workshop>>
+* <<TSSC Workshop to Onboard an App>>
+* <<TSSC Demo with a Reference App>>
+* <<Production Deployment of TSSC Platform>>
+* <<Production Deployment of TSSC Pipeline>>
+
+== DevSecOps Workshop
+
+== TSSC Workshop to Onboard an App
+
+== TSSC Demo with a Reference App
+
+== Production Deployment of TSSC Platform
+
+== Production Deployment of TSSC Pipeline
+
+== TsscPlatform CRD
+
+Wherever possible we delegate to another operator to create/manage the platform services. For example the https://github.com/RedHatGov/gitea-operator[gitea-operator] happens to also be part of this GitHub org. That allows us to make changes to that operator to fulfill the needs of TSSC. Another example is the rhsso-operator; which is not an operator the TSSC group controls. If you compare the gitea and rhsso roles in this repo you will notice that the gitea role simply subscribes to the operator and applies one or more CRs. The rhsso role includes more tasks as there are gaps between what TSSC needs and what the rhsso-operator fulfills with it's CRs.
+
+== TsscWorkshop CRD
+
+
+== TsscPipeline CRD
+
+
 == Building the Operator
 
 There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: TsscPlatform` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy a Tssc Platform to a cluster directly from this repo you could run `hack/operate.sh -d`.
 
 Before running the script make sure to update the location of the container image to a repository you have access to. If you decide to build your own container image for the operator, make sure to update `hack/operate.conf` with an updated container image location and add the `-p` flag to `operate.sh`.
 
-== Installation
-
-=== Operator Installation Steps
+== Developer Installation Steps
 
 The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Tssc Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
 
@@ -70,7 +111,7 @@ oc get tsscplatforms
 
 Deleting a `TsscPlatform` object will not undeploy dependent objects. This functionality is still under construction.
 
-== Uninstalling the Tssc Operator
+== Developer Uninstalling the Tssc Operator
 
 In case you wish to uninstall the Tssc Operator, simply delete the operator and its resources with:
 
@@ -94,14 +135,6 @@ To change the image sources for all necessary images to deploy the operator with
 If you intend on using `hack/operate.sh` it expects you to be in a development environment. Operator installation from this script therefore expects access to the internet. This comes with one extra concern: If `kustomize` isn't in your path, it tries to download it from the internet and save it locally into a `.gitignore`d folder. If you intend on using `hack/operate.sh` to install the operator, you should also bring `kustomize` and place it in the `$PATH` of the user who will be running the script. Additionally, in order to install the operator with `hack/operate.sh` you'll need to make the following change:
 
 * `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
-
-== TSSC Overview
-
-The Trusted Software Supply Chain(TSSC) has 2 high level pieces the platform and the pipeline. More information on the pipeline can be found here: https://rhtconsulting.github.io/tsc-docs/. Please note that at this time(Oct 2020) the documentation at that link is still using old nomenclature: a simplistic translation would be TSSC == TSSC Pipeline and TISC == TSSC Platform.
-
-https://github.com/rhtconsulting/tssc-python-package[The TSSC Pipeline is implemented as a Python command line tool] that can run in any CI service; Jenkins, Tekton, GitLab, etc... It ships with a set of step implementations and can be extended with other step implementations. The Pipeline depends on a variety of services and tools to operate; source control repository, dependency repository, image repository, security scanner, etc... One could set these up and maintain them by hand...or you could just use the TSSC Platform.
-
-The TSSC Platform is a set of services and tools deployed on K8s/OCP using operators wherever possible. We aim to keep it compliant with the https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)] in both connected and disconnected clusters. A quick look at the roles folder in this repo will show you what services and tools are available in the TSSC Platform.
 
 == Intended Design vs Current Layout
 
