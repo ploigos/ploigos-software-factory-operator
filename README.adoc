@@ -41,13 +41,29 @@ The above CRDs enable the following use cases:
 
 == TsscPlatform CRD
 
+This CRD is responsible for the service tooling, or platform, required to support a TSSC Pipeline: a TSSC Platform. Each service/tool the CDR supports exposes options at a minimum a boolean to install or not to install it. 
+
 Wherever possible we delegate to another operator to create/manage the platform services. For example the https://github.com/RedHatGov/gitea-operator[gitea-operator] happens to also be part of this GitHub org. That allows us to make changes to that operator to fulfill the needs of TSSC. Another example is the rhsso-operator; which is not an operator the TSSC group controls. If you compare the gitea and rhsso roles in this repo you will notice that the gitea role simply subscribes to the operator and applies one or more CRs. The rhsso role includes more tasks as there are gaps between what TSSC needs and what the rhsso-operator fulfills with it's CRs.
+
+==== Note
+
+This CRD is used to support the use case: <<DevSecOps Workshop>>.
 
 == TsscWorkshop CRD
 
+This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR. This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevSecOps Workshop>>.
+
+After this operator has completed execution in response to this CR an SA should be able to conduct the workshop without additional deployments or configurations.
+
+==== Note
+
+This CRD's responsibilities may include deploy or configuring addition services/tools beyond what the TsscPlatform CRD does(eg. username-distribution).
 
 == TsscPipeline CRD
 
+This CRD is responsible for configuring the service/tooling deployed by a TsscPlatform CR. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
+
+This operator will not attempt to alter a target git repository(s) to integrate it with TSSC. After this operator has completed execution in response to this CR the only actions that should remain would be to edit contents of the target git repositories.
 
 == Intended Design vs Current Layout
 
