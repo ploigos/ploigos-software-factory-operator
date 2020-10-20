@@ -18,7 +18,7 @@ before_script:
 - sudo sysctl -w vm.max_map_count=262144
 script:
 - make kustomize
-- '[ -f ./bin/kustomize ] && KUSTOMIZE="$(realpath ./bin/kustomize)" || KUSTOMIZE="$(which kustomize)"'
+- '[ -f ./bin/kustomize ] && export KUSTOMIZE="$(realpath ./bin/kustomize)" || export KUSTOMIZE="$(which kustomize)"'
 - molecule test -s ocp-cluster
 deploy:
 - provider: script
