@@ -32,6 +32,7 @@
     - name: Set project names
       set_fact:
         crw_project_name: '{{ workshop_namespace }}'
+        crw_deployment_type: devsecops
         devsecops_project_name: '{{ workshop_namespace }}'
         gitea_project_name: '{{ workshop_namespace }}'
         nexus_project_name: '{{ workshop_namespace }}'
