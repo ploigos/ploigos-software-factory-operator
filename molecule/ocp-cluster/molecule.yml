@@ -30,10 +30,10 @@ provisioner:
         project_dir: ${MOLECULE_PROJECT_DIRECTORY}
         quay_username: "{{ lookup('env', 'QUAY_USERNAME') }}"
         quay_password: "{{ lookup('env', 'QUAY_PASSWORD') }}"
-        operator_image: quay.io/redhatgov/tssc-operator:test
+        operator_image: "{{ lookup('env', 'OPERATOR_IMAGE') | default('quay.io/redhatgov/tssc-operator:test') }}"
         operator_pull_policy: "Always"
         kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
-        kustomize: ${KUSTOMIZE_PATH:-kustomize}
+        kustomize: ${KUSTOMIZE:-kustomize}
         scope: cluster
   env:
     K8S_AUTH_KUBECONFIG: ${MOLECULE_EPHEMERAL_DIRECTORY}/kubeconfig

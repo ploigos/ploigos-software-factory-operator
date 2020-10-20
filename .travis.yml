@@ -17,10 +17,9 @@ sudo: true
 before_script:
 - sudo sysctl -w vm.max_map_count=262144
 script:
-- OPERATORDIR="$(pwd)"
 - make kustomize
 - '[ -f ./bin/kustomize ] && KUSTOMIZE="$(realpath ./bin/kustomize)" || KUSTOMIZE="$(which kustomize)"'
-- KUSTOMIZE_PATH=${KUSTOMIZE} TEST_OPERATOR_NAMESPACE=tssc-operator-system molecule test -s ocp-cluster
+- molecule test -s ocp-cluster
 deploy:
 - provider: script
   script: hack/operate.sh --push-images --bundle --develop --verbose --formatter
