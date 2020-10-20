@@ -3,12 +3,25 @@
 
 * https://learn.openshift.com/operatorframework/
 
+== Development Environment
+
+. `$ git clone https://github.com/RedHatGov/tssc-operator.git`
+. install docker, podman will not work with the molecule tests right now
+. install make
+. install python3
+. `pip3 install docker==4.2.2 molecule ansible-lint yamllint flake8 openshift jmespath`
+. `ansible-galaxy collection install -r requirements.yml`
+
+==== Fedora 32
+
+. `sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"``
+. `sudo dnf remove podman-docker` <- if this is installed on your machine
+. `sudo dnf install moby-engine`
+. `sudo systemctl enable docker.service --now`
+
 
 == Development Workflow
 
-. Install docker or podman, and make
-. `$ git clone https://github.com/RedHatGov/tssc-operator.git`
-. `cd tssc-operator`
 . `$ oc login` <- as cluster admin
 . `$ hack/operate.sh -o namespaced` <- install the operator. It will be deployed into the tssc-operator-system namespace by default.
 . Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`. This will provision a TsscPlatform in the tssc-operator-system namespace.
@@ -21,7 +34,22 @@
 
 === Testing
 
-describe Molecule testing
+In the example below are all the env vars that you need to set in your terminal. Note that you need to replace all the 'replace's, one in each env var.
+
+```
+export OCP_SERVER=replace
+export OCP_USERNAME=replace
+export OCP_PASSWORD='replace'
+export QUAY_USERNAME=replace
+export QUAY_PASSWORD='replace'
+export OPERATOR_IMAGE=quay.io/replace/tssc-operator:test
+```
+
+Make sure the repo provided is public for the env var OPERATOR_IMAGE
+
+Now you can execute the molecule tests repeatedly as much as you like with this command:
+
+`molecule test -s ocp-cluster`
 
 == PR Testing
 
