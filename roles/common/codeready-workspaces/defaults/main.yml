@@ -1,8 +1,16 @@
 ---
+# Common properties
 crw_project_name: devsecops
 crw_project_display: DevSecOps Common Resources
 crw_operator_version: crwoperator.v2.3.0
 
+crw_deployment_type: devsecops
+
+# DevSecOps Workshop properties
+hotload_crw_users: yes
+keycloak_url: "https://keycloak-{{ crw_project_name }}.{{ cluster_router }}"
+
+# TSSC Properties
 rhsso_project_name: rhsso
 rhsso_realm_name: openshift
 rhsso_app_name: rhsso
