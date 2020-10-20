@@ -18,6 +18,7 @@
 . `sudo dnf remove podman-docker` <- if this is installed on your machine
 . `sudo dnf install moby-engine`
 . `sudo systemctl enable docker.service --now`
+. sorry now you need to reboot
 
 
 == Development Workflow
