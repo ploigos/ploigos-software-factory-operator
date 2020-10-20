@@ -8,5 +8,5 @@ patchesStrategicMerge:
 - namespace_scope_patch.yaml
 resources:
 - ../crd
-- ../rbac/namespaced
+- ../rbac
 - ../manager

@@ -24,7 +24,7 @@
     name: tssc-platform/mattermost
   when: deploy_mattermost_operator
 - include_role:
-    name: tssc-platform/codeready-workspaces
+    name: common/codeready-workspaces
   when: deploy_crw
 - include_role:
     name: tssc-platform/selenium-grid
