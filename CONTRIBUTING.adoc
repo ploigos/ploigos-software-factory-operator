@@ -28,9 +28,9 @@
 . Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`. This will provision a TsscPlatform in the tssc-operator-system namespace.
 . If you make some Ansible changes and need to test them, you need to rebuild the operator image. 
 .. Carefully cleanup the tssc-operator-system project (so as not to orphan resources and leave the project stuck in Terminating) by deleting the CustomResources that have been created (e.g. `oc delete -n tssc-operator-system ArgoCD,CheCluster,Gitea,Mattermost,Nexus,QuayEcosystem,Keycloak,SeleniumGrid,Sonarqube --all`), and then removing the operator installation by running `hack/operate.sh -r`
-.. Override the default operator image in a shell variable: `IMAGE=quay.io/<your quay username>/tssc-operator`
-.. Build and push the image (requires a container runtime on your local): `hack/operate.sh --image $IMAGE --version latest --push-only`. If this is the first time you're doing this, you'll need to login to quay.io and change your repo from Private to Public so OCP can pull it
-.. Deploy the operator from your new image: `hack/operate.sh -o namespaced --image $IMAGE --version latest`
+.. Override the default operator image in a shell variable: `OPERATOR_IMAGE=quay.io/<your quay username>/tssc-operator`
+.. Build and push the image (requires a container runtime on your local): `hack/operate.sh --image $OPERATOR_IMAGE --version latest --push-only`. If this is the first time you're doing this, you'll need to login to quay.io and change your repo from Private to Public so OCP can pull it
+.. Deploy the operator from your new image: `hack/operate.sh -o namespaced --image $OPERATOR_IMAGE --version latest`
 .. Recreate the CR: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`
 
 === Testing
