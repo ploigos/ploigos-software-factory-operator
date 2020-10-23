@@ -2,16 +2,13 @@ apiVersion: redhatcop.redhat.io/v1alpha1
 kind: QuayEcosystem
 metadata:
   name: quayecosystem
-  namespace: {{ quay_project_name }}
+  namespace: {{ tssc_namespace }}
 spec:
   clair:
     enabled: false
   quay:
-{% if enable_quay_repo_mirroring|bool %}
-    enableRepoMirroring: true
-{% endif %}
     externalAccess:
-      hostname: {{ quay_route }}
+      hostname: quay.apps.{{ full_cluster_name }}
       tls:
         termination: edge
     imagePullSecretName: dummy-pull-secret

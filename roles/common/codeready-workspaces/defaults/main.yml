@@ -2,7 +2,6 @@
 # Common properties
 crw_project_name: devsecops
 crw_project_display: DevSecOps Common Resources
-crw_operator_version: crwoperator.v2.3.0
 
 crw_deployment_type: devsecops
 

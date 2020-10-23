@@ -1,26 +1,4 @@
 ---
-- name: Ensure namespace exists
-  k8s:
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: '{{ rhsso_project_name }}'
-        annotations:
-          openshift.io/display-name: '{{ rhsso_project_display }}'
-      spec: {}
-
-- name: Get a list of operator groups
-  k8s_info:
-    api_version: operators.coreos.com/v1
-    kind: OperatorGroup
-    namespace: '{{ rhsso_project_name }}'
-  register: operator_groups
-
-- set_fact:
-    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
-  when: operator_groups.resources
-
 - name: Subscribe to RH-SSO Operator
   k8s:
     definition: '{{ lookup("template", "rhsso-operator.yml.j2")|from_yaml }}'
