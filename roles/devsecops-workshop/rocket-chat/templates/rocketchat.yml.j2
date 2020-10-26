@@ -35,6 +35,8 @@
             value: "{{ rocketchat_url }}"
           - name: Accounts_Default_User_Preferences_notificationsSoundVolume
             value: "0"
+          - name: API_Enable_Rate_Limiter
+            value: "false"
           - name: Show_Setup_Wizard
             value: completed
           - name: ADMIN_USERNAME
@@ -121,7 +123,7 @@
     sessionAffinity: None
 
 - kind: Route
-  apiVersion: v1
+  apiVersion: route.openshift.io/v1
   metadata:
     name: rocketchat
     labels:

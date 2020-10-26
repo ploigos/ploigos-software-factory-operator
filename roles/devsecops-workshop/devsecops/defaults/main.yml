@@ -13,3 +13,10 @@ devsecops_project_name: devsecops
 devsecops_project_display: DevSecOps Common Resources
 
 pipeline_style: tekton
+
+operator_list:
+- quay
+- gitea
+- sonarqube
+- nexus
+- crw
