@@ -27,20 +27,20 @@
 
     - set_fact:
         reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] }}"
-        workshop_namespace: "{{ ansible_operator_meta.namespace }}"
+        tssc_namespace: "{{ ansible_operator_meta.namespace }}"
 
     - name: Set project names
       set_fact:
-        crw_project_name: '{{ workshop_namespace }}'
+        crw_project_name: '{{ tssc_namespace }}'
         crw_deployment_type: devsecops
-        devsecops_project_name: '{{ workshop_namespace }}'
-        gitea_project_name: '{{ workshop_namespace }}'
-        nexus_project_name: '{{ workshop_namespace }}'
-        quay_project_name: '{{ workshop_namespace }}'
-        rocketchat_project_name: '{{ workshop_namespace }}'
-        sonarqube_project_name: '{{ workshop_namespace }}'
-        username_distribution_project_name: '{{ workshop_namespace }}'
-        workshop_spawner_project_name: '{{ workshop_namespace }}'
+        devsecops_project_name: '{{ tssc_namespace }}'
+        gitea_project_name: '{{ tssc_namespace }}'
+        nexus_project_name: '{{ tssc_namespace }}'
+        quay_project_name: '{{ tssc_namespace }}'
+        rocketchat_project_name: '{{ tssc_namespace }}'
+        sonarqube_project_name: '{{ tssc_namespace }}'
+        username_distribution_project_name: '{{ tssc_namespace }}'
+        workshop_spawner_project_name: '{{ tssc_namespace }}'
 
     - name: Look for default defined common variables
       include_vars: ../vars/devsecops-workshop/common.yml

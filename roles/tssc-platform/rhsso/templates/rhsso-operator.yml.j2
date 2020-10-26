@@ -1,13 +1,3 @@
-# Operator Group for RH-SSO
-- apiVersion: v1
-  kind: OperatorGroup
-  metadata:
-    name: {{ operator_group_name | default(rhsso_project_name + '-operatorgroup') }}
-    namespace: {{ rhsso_project_name }}
-  spec:
-    targetNamespaces:
-    - {{ rhsso_project_name }}
-
 # Operator Subscription
 - apiVersion: v1alpha1
   kind: Subscription

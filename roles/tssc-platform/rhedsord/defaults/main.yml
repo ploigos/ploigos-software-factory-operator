@@ -9,3 +9,19 @@ deploy_crw: true
 deploy_selenium_grid: true
 deploy_legacy_jenkins: true
 deploy_mattermost_operator: true
+
+subdomain: '{{ full_cluster_name }}'
+
+crw_admin_user:
+  username: codeready-admin
+  password: demo123
+
+operator_list:
+- gitea
+- argocd
+- sonarqube
+- nexus
+- quay
+- mattermost
+- crw
+- selenium_grid

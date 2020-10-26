@@ -203,6 +203,21 @@ items:
       spawner: devsecops-workshop-dashboard
     name: devsecops-workshop-dashboard-session-envvars
     namespace: {{ workshop_spawner_project_name }}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: devsecops-workshop-dashboard
+      class: spawner
+      spawner: devsecops-workshop-dashboard
+    name: devsecops-workshop-dashboard-spawner-data
+    namespace: {{ workshop_spawner_project_name }}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
@@ -341,21 +356,6 @@ items:
           kind: ImageStreamTag
           name: devsecops-workshop-dashboard-spawner:latest
       type: ImageChange
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: devsecops-workshop-dashboard
-      class: spawner
-      spawner: devsecops-workshop-dashboard
-    name: devsecops-workshop-dashboard-spawner-data
-    namespace: {{ workshop_spawner_project_name }}
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: 1Gi
 - apiVersion: v1
   kind: Service
   metadata:

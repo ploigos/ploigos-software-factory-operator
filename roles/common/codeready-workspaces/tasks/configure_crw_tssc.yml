@@ -1,0 +1,20 @@
+- name: Create RHSSO Client definition for CRW
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-crw-client.yml.j2")|from_yaml }}'
+
+- name: Create CRW Admin User
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-user.yml.j2")|from_yaml }}'
+
+- name: Wait for CRW to come up
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ crw_project_name }}'
+    label_selectors:
+      - "app=codeready"
+      - "component=codeready"
+  register: crw_pod
+  until: crw_pod.resources|length > 0 and (crw_pod.resources|first).status.phase == "Running"
+  retries: 10
+  delay: 30
