@@ -1,14 +1,14 @@
 apiVersion: redhatgov.io/v1alpha1
 kind: Gitea
 metadata:
-  name: gitea
+  name: gitea-server
   namespace: {{ tssc_namespace }}
 spec:
   gitea:
     expose:
       kind: Route
       ssl: true
-      uri: gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
+      uri: gitea-server-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     volumeSize: 4Gi
   persistent: true
   postgresql:
