@@ -25,7 +25,7 @@
 - include_role:
     name: tssc-platform/rhsso
   when: deploy_rhsso
-    
+
 - name: 'Create CustomResource for {{ item }}'
   k8s:
     definition: '{{ lookup("template", "custom-resources/" + item + ".yml.j2") }}'
