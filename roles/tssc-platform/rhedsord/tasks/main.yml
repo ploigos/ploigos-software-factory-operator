@@ -62,3 +62,7 @@
 - include_role:
     name: tssc-platform/selenium-grid
   when: deploy_selenium_grid
+
+- name: Create tssc-platform-config ConfigMap
+  k8s:
+    definition: '{{ lookup("template", "config-map.yml.j2") }}'
