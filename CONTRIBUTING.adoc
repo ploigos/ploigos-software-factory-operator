@@ -1,0 +1,60 @@
+
+== Resources and References
+
+* https://learn.openshift.com/operatorframework/
+
+== Development Environment
+
+. `$ git clone https://github.com/RedHatGov/tssc-operator.git`
+. install docker, podman will not work with the molecule tests right now
+. install make
+. install python3
+. `pip3 install docker==4.2.2 molecule ansible-lint yamllint flake8 openshift jmespath`
+. `ansible-galaxy collection install -r requirements.yml`
+
+==== Fedora 32
+
+. `sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"``
+. `sudo dnf remove podman-docker` <- if this is installed on your machine
+. `sudo dnf install moby-engine`
+. `sudo systemctl enable docker.service --now`
+. sorry now you need to reboot
+
+
+== Development Workflow
+
+. `$ oc login` <- as cluster admin
+. `$ hack/operate.sh -o namespaced` <- install the operator. It will be deployed into the tssc-operator-system namespace by default.
+. Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`. This will provision a TsscPlatform in the tssc-operator-system namespace.
+. If you make some Ansible changes and need to test them, you need to rebuild the operator image. 
+.. Carefully cleanup the tssc-operator-system project (so as not to orphan resources and leave the project stuck in Terminating) by deleting the CustomResources that have been created (e.g. `oc delete -n tssc-operator-system ArgoCD,CheCluster,Gitea,Mattermost,Nexus,QuayEcosystem,Keycloak,SeleniumGrid,Sonarqube --all`), and then removing the operator installation by running `hack/operate.sh -r`
+.. Override the default operator image in a shell variable: `OPERATOR_IMAGE=quay.io/<your quay username>/tssc-operator`
+.. Build and push the image (requires a container runtime on your local): `hack/operate.sh --image $OPERATOR_IMAGE --version latest --push-only`. If this is the first time you're doing this, you'll need to login to quay.io and change your repo from Private to Public so OCP can pull it
+.. Deploy the operator from your new image: `hack/operate.sh -o namespaced --image $OPERATOR_IMAGE --version latest`
+.. Recreate the CR: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`
+
+=== Testing
+
+In the example below are all the env vars that you need to set in your terminal. Note that you need to replace all the 'replace's, one in each env var.
+
+```
+export OCP_SERVER=replace
+export OCP_USERNAME=replace
+export OCP_PASSWORD='replace'
+export QUAY_USERNAME=replace
+export QUAY_PASSWORD='replace'
+export OPERATOR_IMAGE=quay.io/replace/tssc-operator:test
+```
+
+Make sure the repo provided is public for the env var OPERATOR_IMAGE
+
+Now you can execute the molecule tests repeatedly as much as you like with this command:
+
+`molecule test -s ocp-cluster`
+
+== PR Testing
+
+describe current TravisCI integration
+
+== Process for Publishing a Release of the Operator
+
