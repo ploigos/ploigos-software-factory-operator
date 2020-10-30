@@ -3,7 +3,19 @@
   group: redhatgov.io
   kind: TsscPlatform
   playbook: playbooks/tssc-platform.yml
+  vars:
+    cr_state: present
+  finalizer:
+    name: finalizer.tsscplatform.redhatgov.io
+    vars:
+      cr_state: absent
 - version: v1alpha1
   group: redhatgov.io
   kind: DevSecOpsWorkshop
   playbook: playbooks/devsecops-workshop.yml
+  vars:
+    cr_state: present
+  finalizer:
+    name: finalizer.devsecopsworkshop.redhatgov.io
+    vars:
+      cr_state: absent

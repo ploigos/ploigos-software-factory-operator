@@ -9,6 +9,19 @@ items:
       spawner: devsecops-workshop-dashboard
     name: devsecops-workshop-dashboard-spawner
     namespace: {{ workshop_spawner_project_name }}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: devsecops-workshop-dashboard-spawner-viewer
+    namespace: {{ workshop_spawner_project_name }}
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: devsecops-workshop-dashboard-spawner
+    namespace: {{ workshop_spawner_project_name }}
 - apiVersion: authorization.openshift.io/v1
   kind: ClusterRoleBinding
   metadata:

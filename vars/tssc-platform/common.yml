@@ -103,7 +103,7 @@ workshop_admin:
   admin: yes
 
 # The number of users created, as a string
-number_of_users: "30"
+number_of_users: "3"
 
 # Generate a sequence of users
 sequence_users: |

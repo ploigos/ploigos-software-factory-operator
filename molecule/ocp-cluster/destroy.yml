@@ -18,14 +18,3 @@
       vars:
         cr_file: 'redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml'
       ignore_errors: true
-
-    - name: Remove the operator deployment
-      k8s:
-        state: absent
-        namespace: '{{ namespace }}'
-        definition: |
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: tssc-operator-controller-manager
-          spec: {}

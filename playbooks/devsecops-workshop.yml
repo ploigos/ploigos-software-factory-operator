@@ -2,7 +2,7 @@
 # DevSecOpsWorkshop deployment playbook.
 
 - hosts: localhost
-  pre_tasks:
+  tasks:
     - name: Get cluster dns
       k8s_info:
         api_version: config.openshift.io/v1
@@ -48,8 +48,12 @@
     - name: Look for default defined devsecops variables
       include_vars: ../vars/devsecops-workshop/devsecops.yml
 
-    # Individual adjustment tasks have their own toggles
     - include_role:
         name: devsecops-workshop/cluster-adjuster
-  roles:
-    - role: devsecops-workshop/devsecops
+      when: cr_state == 'present'
+
+    - include_role:
+        name: devsecops-workshop/devsecops
+
+    - include_tasks: cleanup-devsecops.yml
+      when: cr_state == 'absent'

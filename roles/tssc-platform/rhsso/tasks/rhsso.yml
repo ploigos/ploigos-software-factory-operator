@@ -1,11 +1,17 @@
 ---
-- name: Create PostgreSQL Deployment
+- name: Set PostgreSQL Deployment to {{ cr_state }}
   k8s:
     definition: '{{ lookup("template", "rhsso-postgresql.yml.j2")|from_yaml }}'
+    state: '{{ cr_state }}'
 
-- name: Create RH-SSO Deployment
+- name: Set RH-SSO Deployment to {{ cr_state }}
   k8s:
     definition: '{{ lookup("template", "rhsso-deployment.yml.j2")|from_yaml }}'
+    state: '{{ cr_state }}'
+  register: deployment
+  until: not deployment.failed
+  retries: 5
+  delay: 10
 
 - name: Wait for RH-SSO to finish being created
   k8s_info:
@@ -18,3 +24,4 @@
   until: rhsso_pod.resources|length > 0 and (rhsso_pod.resources|first).status.phase == "Running"
   retries: 20
   delay: 30
+  when: cr_state == 'present'

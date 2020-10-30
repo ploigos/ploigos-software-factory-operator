@@ -1,0 +1,5 @@
+---
+- name: Clean up remaining resources
+  shell: |
+    oc delete -n {{ tssc_namespace }} KeycloakUser,KeycloakClient --all
+    oc delete -n {{ tssc_namespace }} all -l app=jenkins-persistent
