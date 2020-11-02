@@ -11,13 +11,11 @@
       k8s:
         api_version: v1
         kind: Namespace
-        name: '{{ namespace }}'
-
-    - name: Create alternate namespace
-      k8s:
-        api_version: v1
-        kind: Namespace
-        name: '{{ namespace }}-alt'
+        name: '{{ item }}'
+      loop:
+      - '{{ namespace }}'
+      - travis-devsecopsworkshop
+      - travis-tsscplatform
 
     - import_tasks: kustomize.yml
       vars:

@@ -10,11 +10,49 @@
     - name: Login to OCP
       command: oc login $OCP_SERVER -u $OCP_USERNAME -p $OCP_PASSWORD --insecure-skip-tls-verify
 
-    - name: Remove the redhatgov.io/v1alpha1.DevSecOpsWorkshop
+    - set_fact:
+        custom_resources:
+        - DevSecOpsWorkshop
+        - TsscPlatform
+
+    - name: Remove CRs
       k8s:
+        api_version: v1alpha1
+        kind: '{{ item }}'
         state: absent
-        namespace: '{{ namespace }}'
-        definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
-      vars:
-        cr_file: 'redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml'
+        name: '{{ item | lower }}-testing'
+        namespace: 'travis-{{ item | lower }}'
       ignore_errors: true
+      loop: '{{ custom_resources }}'
+
+    - name: Wait for CRs to be deleted
+      k8s_info:
+        api_version: v1alpha1
+        kind: '{{ item }}'
+        name: '{{ item | lower }}-testing'
+        namespace: 'travis-{{ item | lower }}'
+      register: result
+      until: result.resources | length == 0
+      ignore_errors: true
+      retries: 30
+      delay: 10
+      loop: '{{ custom_resources }}'
+
+    - name: Remove Namespaces
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: 'travis-{{ item | lower}}'
+        state: absent
+      loop: '{{ custom_resources }}'
+
+    - name: Wait for Namespaces to be deleted
+      k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: 'travis-{{ item | lower}}'
+      register: result
+      until: result.resources | length == 0
+      retries: 30
+      delay: 10
+      loop: '{{ custom_resources }}'
