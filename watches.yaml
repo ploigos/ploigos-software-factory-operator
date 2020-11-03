@@ -3,6 +3,7 @@
   group: redhatgov.io
   kind: TsscPlatform
   playbook: playbooks/tssc-platform.yml
+  watchDependentResources: false
   vars:
     cr_state: present
   finalizer:
@@ -13,6 +14,7 @@
   group: redhatgov.io
   kind: DevSecOpsWorkshop
   playbook: playbooks/devsecops-workshop.yml
+  watchDependentResources: false
   vars:
     cr_state: present
   finalizer:
