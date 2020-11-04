@@ -1,5 +1,6 @@
 ---
-- name: 'Destroy Resources for non-Operator Workloads'
+# TODO: cleanup CRW
+- name: 'Destroy Resources for non-Operator'
   shell: |
     oc delete -n {{ tssc_namespace }} all -l app=rocketchat
     oc delete -n {{ tssc_namespace }} all -l app=username-distribution

@@ -55,5 +55,6 @@
     - include_role:
         name: devsecops-workshop/devsecops
 
-    - include_tasks: cleanup-devsecops.yml
-      when: cr_state == 'absent'
+    # TODO: Run this when CRW cleanup is implemented
+    # - include_tasks: cleanup-devsecops.yml
+    #   when: cr_state == 'absent'
