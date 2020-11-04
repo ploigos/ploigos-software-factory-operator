@@ -44,14 +44,6 @@
 {% endfor %}
 {% endfor %}
 
-- apiVersion: v1
-  kind: Namespace
-  metadata:
-    name: {{ devsecops_project_name }}
-    annotations:
-      openshift.io/display-name: {{ devsecops_project_display }}
-  spec: {}
-
 - kind: Group
   apiVersion: user.openshift.io/v1
   metadata:

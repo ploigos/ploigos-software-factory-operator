@@ -2,6 +2,7 @@
 - name: Generate projects per-user
   k8s:
     definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
+    state: '{{ cr_state }}'
 
 - include_role:
     name: common/redhatgov-catalog
@@ -26,53 +27,57 @@
     definition: '{{ lookup("template", "subscriptions/" + item + ".yml.j2") }}'
   loop: '{{ operator_list }}'
 
-- name: 'Create CustomResource for {{ item }}'
+- name: 'Set CustomResource for {{ item }} to {{ cr_state }}'
   k8s:
     definition: '{{ lookup("template", "custom-resources/" + item + ".yml.j2") }}'
+    state: '{{ cr_state }}'
   register: deployment
   until: not deployment.failed
   retries: 5
   delay: 10
   loop: '{{ operator_list }}'
 
-- include_role:
-    name: devsecops-workshop/quay
-  when: deploy_quay
-- include_role:
-    name: devsecops-workshop/gitea
-  when: deploy_gitea
-- include_role:
-    name: devsecops-workshop/sonarqube
-  when: deploy_sonarqube
-- include_role:
-    name: devsecops-workshop/nexus
-  when: deploy_nexus
-- include_role:
-    name: common/codeready-workspaces
-  when: deploy_crw
-- include_role:
-    name: devsecops-workshop/username-distribution
-  when: deploy_username_distribution
-- include_role:
-    name: devsecops-workshop/rocket-chat
-  when: deploy_rocketchat
-- include_role:
-    name: devsecops-workshop/workshop-spawner
-  when: deploy_workshop
+- name: App level configuration
+  block:
+  - include_role:
+      name: devsecops-workshop/quay
+    when: deploy_quay
+  - include_role:
+      name: devsecops-workshop/gitea
+    when: deploy_gitea
+  - include_role:
+      name: devsecops-workshop/sonarqube
+    when: deploy_sonarqube
+  - include_role:
+      name: devsecops-workshop/nexus
+    when: deploy_nexus
+  - include_role:
+      name: common/codeready-workspaces
+    when: deploy_crw
+  - include_role:
+      name: devsecops-workshop/username-distribution
+    when: deploy_username_distribution
+  - include_role:
+      name: devsecops-workshop/rocket-chat
+    when: deploy_rocketchat
+  - include_role:
+      name: devsecops-workshop/workshop-spawner
+    when: deploy_workshop
 
-- include_role:
-    name: devsecops-workshop/tekton
-  when:
-    - deploy_pipeline
-    - pipeline_style == 'tekton'
-- include_role:
-    name: devsecops-workshop/tekton-pipeline
-  when:
-    - deploy_pipeline
-    - pipeline_style == 'tekton'
+  - include_role:
+      name: devsecops-workshop/tekton
+    when:
+      - deploy_pipeline
+      - pipeline_style == 'tekton'
+  - include_role:
+      name: devsecops-workshop/tekton-pipeline
+    when:
+      - deploy_pipeline
+      - pipeline_style == 'tekton'
 
-- include_role:
-    name: devsecops-workshop/jenkins
-  when:
-    - deploy_pipeline
-    - pipeline_style == 'jenkins'
+  - include_role:
+      name: devsecops-workshop/jenkins
+    when:
+      - deploy_pipeline
+      - pipeline_style == 'jenkins'
+  when: cr_state == 'present'
