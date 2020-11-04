@@ -19,6 +19,16 @@
       keycloak_url: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}'
       sonarqube_url: 'https://sonarqube-{{ sonarqube_project_name }}.apps.{{ subdomain }}'
 
+  - name: Wait for KeyCloak to respond to requests
+    uri:
+      url: '{{ keycloak_url }}'
+      return_content: yes
+      validate_certs: no
+    register: keycloak_endpoint
+    until: keycloak_endpoint.status == 200
+    retries: 10
+    delay: 30
+
   - name: Get RH SSO admin token
     uri:
       url: '{{ keycloak_url }}/auth/realms/master/protocol/openid-connect/token'

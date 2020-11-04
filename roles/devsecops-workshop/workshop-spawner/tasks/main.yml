@@ -1,15 +1,4 @@
 ---
-- name: Ensure namespace exists
-  k8s:
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: '{{ workshop_spawner_project_name }}'
-        annotations:
-          openshift.io/display-name: '{{ workshop_spawner_project_display }}'
-      spec: {}
-
 - name: Wait for KeyCloak to respond to requests
   uri:
     url: '{{ keycloak_url }}'
