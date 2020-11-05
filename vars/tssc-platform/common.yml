@@ -44,8 +44,6 @@ oc_cli: /usr/local/bin/oc
 
 generated_password: "{{ lookup('password', '../tmp/rhssopasswd.txt length=15 chars=ascii_letters') }}"
 
-redhat_gov_catalog_tag: "1.3.0"
-
 ################################################################################
 #
 # User attributes
