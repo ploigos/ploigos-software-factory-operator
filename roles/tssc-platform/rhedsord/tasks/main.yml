@@ -26,43 +26,47 @@
     name: tssc-platform/rhsso
   when: deploy_rhsso
 
-- name: 'Create CustomResource for {{ item }}'
+- name: 'Set CustomResource for {{ item }} to {{ cr_state }}'
   k8s:
     definition: '{{ lookup("template", "custom-resources/" + item + ".yml.j2") }}'
+    state: '{{ cr_state }}'
   register: deployment
   until: not deployment.failed
   retries: 5
   delay: 10
   loop: '{{ operator_list }}'
 
-- include_role:
-    name: tssc-platform/gitea
-  when: deploy_gitea
-- include_role:
-    name: tssc-platform/argocd
-  when: deploy_argocd
-- include_role:
-    name: tssc-platform/sonarqube
-  when: deploy_sonarqube
-- include_role:
-    name: tssc-platform/nexus
-  when: deploy_nexus
-- include_role:
-    name: tssc-platform/legacy-jenkins
-  when: deploy_legacy_jenkins
-- include_role:
-    name: tssc-platform/quay
-  when: deploy_quay
-- include_role:
-    name: tssc-platform/mattermost
-  when: deploy_mattermost_operator
-- include_role:
-    name: common/codeready-workspaces
-  when: deploy_crw
-- include_role:
-    name: tssc-platform/selenium-grid
-  when: deploy_selenium_grid
+- name: App level configuration
+  block:
+  - include_role:
+      name: tssc-platform/gitea
+    when: deploy_gitea
+  - include_role:
+      name: tssc-platform/argocd
+    when: deploy_argocd
+  - include_role:
+      name: tssc-platform/sonarqube
+    when: deploy_sonarqube
+  - include_role:
+      name: tssc-platform/nexus
+    when: deploy_nexus
+  - include_role:
+      name: tssc-platform/legacy-jenkins
+    when: deploy_legacy_jenkins
+  - include_role:
+      name: tssc-platform/quay
+    when: deploy_quay
+  - include_role:
+      name: tssc-platform/mattermost
+    when: deploy_mattermost_operator
+  - include_role:
+      name: common/codeready-workspaces
+    when: deploy_crw
+  - include_role:
+      name: tssc-platform/selenium-grid
+    when: deploy_selenium_grid
 
-- name: Create tssc-platform-config ConfigMap
-  k8s:
-    definition: '{{ lookup("template", "config-map.yml.j2") }}'
+  - name: Create tssc-platform-config ConfigMap
+    k8s:
+      definition: '{{ lookup("template", "config-map.yml.j2") }}'
+  when: cr_state == 'present'

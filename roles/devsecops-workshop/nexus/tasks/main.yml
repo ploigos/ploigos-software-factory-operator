@@ -107,3 +107,15 @@
   # to_json|from_json| is a terrible hack but here we are
   changed_when: maven_public_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
   failed_when: maven_public_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or maven_public_repo.rc != 0
+
+- name: Add oscap-reports raw repository
+  shell: >-
+    devsecops-api nexus add-raw-repository
+    https://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_admin_password }}'
+    --repository-names 'oscap-reports'
+  register: oscap_reports_repo
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: oscap_reports_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: oscap_reports_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or oscap_reports_repo.rc != 0
