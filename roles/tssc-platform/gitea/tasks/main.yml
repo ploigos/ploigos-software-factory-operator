@@ -12,3 +12,68 @@
 
 - name: Configure Gitea and RHSSO to work together
   include: gitea_rhsso.yml
+
+- name: Get Gitea Admin Secret
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: '{{ gitea_project_name }}'
+    name: gitea-admin-credentials
+  register: gitea_admin_credentials
+
+- set_fact:
+    gitea_admin_username: "{{ gitea_admin_credentials | json_query('resources[0].data.username') | b64decode }}"
+    gitea_admin_password: "{{ gitea_admin_credentials | json_query('resources[0].data.password') | b64decode }}"
+
+- name: Create Service Account for Gitea
+  uri:
+    url: 'https://gitea-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/admin/users'
+    validate_certs: no
+    body_format: json
+    method: POST
+    headers:
+      Authorization: "Basic {{ gitea_admin_username + ':' + gitea_admin_password | b64encode }}"
+    body:
+      email: tssc@redhat.com
+      full_name: Tssc ServiceAccount
+      login_name: '{{ tssc_service_account_username }}'
+      must_change_password: false
+      password: '{{ tssc_service_account_password }}'
+      send_notify: false
+      source_id: 0
+      username: '{{ tssc_service_account_username }}'
+    status_code: 201,422
+  register: response
+  changed_when: response.status == 201
+
+- name: Check for gitea token secret
+  k8s_info:
+    namespace: "{{ gitea_project_name }}"
+    kind: Secret
+    name: gitea-access-token
+  register: gitea_access_token_secret
+
+- name: Create gitea access token if secret doesn't exist
+  block:
+  - name: Create Application Token for Gitea
+    uri:
+      url: 'https://gitea-{{ gitea_project_name }}.{{ cluster_router }}/api/v1/users/{{ tssc_service_account_username }}/tokens'
+      validate_certs: no
+      body_format: json
+      method: POST
+      headers:
+        Authorization: "Basic {{ tssc_service_account_username + ':' + tssc_service_account_password | b64encode }}"
+      body:
+        name: tssc-platform-token
+      status_code: 201,422
+    register: token_creation_response
+    changed_when: token_creation_response.status == 201
+
+  - name: Grab token sha1 from response
+    set_fact:
+      gitea_access_token: '{{ token_creation_response.json.sha1 }}'
+
+  - name: Create Gitea token secret
+    k8s:
+      definition: "{{ lookup('template', 'secret.yml.j2') | from_yaml }}"
+  when: not gitea_access_token_secret.resources

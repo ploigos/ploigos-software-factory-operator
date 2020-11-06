@@ -1,4 +1,0 @@
-{% for line in gitea_users.stdout_lines %}{% if line.startswith('token ') %}
-- username: {{ line.split(' ')[1] }}
-  token: {{ line.split(' ')[2] }}
-{% endif %}{% endfor %}

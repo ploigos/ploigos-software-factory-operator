@@ -32,6 +32,11 @@
         selenium_grid_project_name: '{{ tssc_namespace }}'
         sonarqube_project_name: '{{ tssc_namespace }}'
 
+    - name: Set tssc service account credentials
+      set_fact:
+        tssc_service_account_username: tssc
+        tssc_service_account_password: test123
+
     - name: Look for default defined common variables
       include_vars: ../vars/tssc-platform/common.yml
       when: common_included is not defined or not common_included
