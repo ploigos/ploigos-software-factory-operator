@@ -22,3 +22,7 @@
   until: argocd_endpoint.status == 200
   retries: 20
   delay: 30
+
+- name: Grant argocd-application-controller serviceaccount self-provisioner
+  k8s:
+    definition: "{{ lookup('template', 'cluster-role-binding.yml.j2') }}"
