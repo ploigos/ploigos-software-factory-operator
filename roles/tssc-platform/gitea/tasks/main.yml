@@ -42,7 +42,7 @@
     headers:
       Authorization: "Basic {{ (gitea_admin_username + ':' + gitea_admin_password) | b64encode }}"
     body:
-      email: tssc@redhat.com
+      email: '{{ tssc_service_account.email }}'
       full_name: "{{ tssc_service_account.first_name + ' ' + tssc_service_account.last_name }}"
       login_name: '{{ tssc_service_account.username }}'
       must_change_password: false
