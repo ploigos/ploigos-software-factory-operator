@@ -21,7 +21,7 @@ spec:
     defaultPolicy: 'role:readonly'
     policy: |
       g, argocd-admins, role:admin
-      p, tssc-serviceaccount, role:admin
+      p, {{ tssc_service_account.username }}, *, *, *, allow
     scopes: '[groups]'
   dex:
     image: quay.io/redhat-cop/dex

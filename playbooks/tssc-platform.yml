@@ -36,7 +36,7 @@
       set_fact:
         tssc_service_account:
           username: tssc
-          password: test123
+          password: test1234
           email: tssc-service-account@redhat.com
           first_name: Tssc
           last_name: service_account
