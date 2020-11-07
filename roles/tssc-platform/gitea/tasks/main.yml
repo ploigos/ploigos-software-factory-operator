@@ -65,7 +65,7 @@
   block:
   - name: Create Application Token for Gitea
     uri:
-      url: 'https://gitea-{{ gitea_project_name }}.{{ cluster_router }}/api/v1/users/{{ tssc_service_account.username }}/tokens'
+      url: 'https://gitea-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/users/{{ tssc_service_account.username }}/tokens'
       validate_certs: no
       body_format: json
       method: POST
