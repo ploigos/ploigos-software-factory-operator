@@ -21,3 +21,31 @@
   # https://github.com/ansible/ansible/issues/27299
   # to_json|from_json| is a terrible hack but here we are
   changed_when: quay_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+
+- name: Create Organization for pipeline
+  shell: >-
+    devsecops-api quay add-org https://{{ quay_route }}
+    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
+    --organizations tssc
+  register: quay_orgs
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: quay_orgs.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+
+- name: Create Robot account
+  shell: >-
+    devsecops-api quay add-robot https://{{ quay_route }}
+    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
+    --organization tssc --robot-name '{{ tssc_service_account.username }}' --robot-description 'TSSC Platform Robot Account'
+  register: quay_robot
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: quay_robot.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+
+- name: Get robot token
+  set_fact:
+    quay_robot_token: "{{ quay_robot.stdout | regex_search('[A-Z0-9]{64}') }}"
+
+- name: Create Quay robot token secret
+  k8s:
+    definition: "{{ lookup('template', 'quay-token-secret.yml.j2') }}"

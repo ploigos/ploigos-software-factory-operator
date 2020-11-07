@@ -16,7 +16,7 @@ data:
         maven-servers:
           internal-mirror:
             id: internal-server
-            username: tssc
+            username: {{ tssc_service_account.username }}
         maven-mirrors:
           internal-mirror:
             id: internal-mirror
@@ -24,7 +24,7 @@ data:
             mirror-of: '*'
         container-registries:
             quay.apps.{{ full_cluster_name }}:
-                username: tssc+jenkins_robot
+                username: {{ tssc_service_account.username }}
       global-environment-defaults:
         DEV:
           kube-app-domain: dev.apps.{{ full_cluster_name }}
@@ -39,7 +39,7 @@ data:
       tag-source:
       - implementer: Git
         config:
-          username: sa-tssc-reference-apps
+          username: {{ tssc_service_account.username }}
       unit-test:
       - implementer: Maven
         config: {
@@ -81,8 +81,8 @@ data:
           readiness-probe-path: /fruits
           liveness-probe-path: /fruits
           destination-url: docker://quay.apps.{{ full_cluster_name }}
-          argocd-username: admin
-          git-username: sa-tssc-reference-apps
+          argocd-username: {{ tssc_service_account.username }}
+          git-username: {{ tssc_service_account.username }}
       validate-environment-configuration:
       - implementer: ConfiglintFromArgocd
       - implementer: Configlint
