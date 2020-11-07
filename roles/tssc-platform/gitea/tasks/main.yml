@@ -40,7 +40,7 @@
     body_format: json
     method: POST
     headers:
-      Authorization: "Basic {{ gitea_admin_username + ':' + gitea_admin_password | b64encode }}"
+      Authorization: "Basic {{ (gitea_admin_username + ':' + gitea_admin_password) | b64encode }}"
     body:
       email: tssc@redhat.com
       full_name: "{{ tssc_service_account.first_name + ' ' + tssc_service_account.last_name }}"
@@ -70,7 +70,7 @@
       body_format: json
       method: POST
       headers:
-        Authorization: "Basic {{ tssc_service_account.username + ':' + tssc_service_account.password | b64encode }}"
+        Authorization: "Basic {{ (tssc_service_account.username + ':' + tssc_service_account.password) | b64encode }}"
       body:
         name: tssc-platform-token
       status_code: 201,422
