@@ -10,3 +10,14 @@
 
 - name: Configure Quay and RHSSO to work together
   include: quay_rhsso.yml
+
+- name: Add tssc service account to Quay instance
+  shell: >-
+    devsecops-api quay add-user https://{{ quay_route }}
+    --login-username quay --login-password password
+    --usernames '{{ tssc_service_account.username }}'
+    --passwords '{{ tssc_service_account.password }}'
+  register: quay_users
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: quay_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0

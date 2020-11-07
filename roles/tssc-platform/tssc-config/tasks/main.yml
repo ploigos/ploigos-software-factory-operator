@@ -1,8 +1,5 @@
 ---
 ### GITEA ###
-# Create local service account in Gitea
-
-# ALSO create token for this account
 
 # Create organization in Gitea
 
@@ -11,7 +8,6 @@
 # Create webhook
 
 ### QUAY ###
-# Create Service Account
 
 # Create Organization
 
@@ -22,19 +18,16 @@
 # Create Demo repo ahead of time and set it to public
 
 ### NEXUS ###
-# Create service account?
 
 # Allow overwrite in maven-releases (TBD)
 
 # (Optional) add stuff to nexus if disconnected
 
 ### SONARQUBE ###
-# Create local service account
 
 # Install sonar-java plugin
 
 ### ARGOCD ###
-# Grant argocd-application-controller service account "self-provisioner", should be in TsscPlatform
 
 ### JENKINS ###
 # Create Jenkins Credential for gitea sa token?

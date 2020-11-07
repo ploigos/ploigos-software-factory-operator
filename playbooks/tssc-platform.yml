@@ -34,8 +34,12 @@
 
     - name: Set tssc service account credentials
       set_fact:
-        tssc_service_account_username: tssc
-        tssc_service_account_password: test123
+        tssc_service_account:
+          username: tssc
+          password: test123
+          email: tssc@redhat.com
+          first_name: Tssc
+          last_name: service_account
 
     - name: Look for default defined common variables
       include_vars: ../vars/tssc-platform/common.yml

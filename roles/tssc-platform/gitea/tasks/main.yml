@@ -1,12 +1,11 @@
 - name: Wait for Gitea to finish being created
   k8s_info:
-    api_version: v1
-    kind: Pod
+    api_version: v1alpha1
+    kind: Gitea
     namespace: '{{ gitea_project_name }}'
-    label_selectors:
-      - "{{ gitea_pod_label }}"
-  register: gitea_pod
-  until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
+    name: gitea
+  register: result
+  until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 10
   delay: 30
 
@@ -35,13 +34,13 @@
       Authorization: "Basic {{ gitea_admin_username + ':' + gitea_admin_password | b64encode }}"
     body:
       email: tssc@redhat.com
-      full_name: Tssc ServiceAccount
-      login_name: '{{ tssc_service_account_username }}'
+      full_name: "{{ tssc_service_account.first_name + ' ' + tssc_service_account.last_name }}"
+      login_name: '{{ tssc_service_account.username }}'
       must_change_password: false
-      password: '{{ tssc_service_account_password }}'
+      password: '{{ tssc_service_account.password }}'
       send_notify: false
       source_id: 0
-      username: '{{ tssc_service_account_username }}'
+      username: '{{ tssc_service_account.username }}'
     status_code: 201,422
   register: response
   changed_when: response.status == 201
@@ -57,12 +56,12 @@
   block:
   - name: Create Application Token for Gitea
     uri:
-      url: 'https://gitea-{{ gitea_project_name }}.{{ cluster_router }}/api/v1/users/{{ tssc_service_account_username }}/tokens'
+      url: 'https://gitea-{{ gitea_project_name }}.{{ cluster_router }}/api/v1/users/{{ tssc_service_account.username }}/tokens'
       validate_certs: no
       body_format: json
       method: POST
       headers:
-        Authorization: "Basic {{ tssc_service_account_username + ':' + tssc_service_account_password | b64encode }}"
+        Authorization: "Basic {{ tssc_service_account.username + ':' + tssc_service_account.password | b64encode }}"
       body:
         name: tssc-platform-token
       status_code: 201,422
