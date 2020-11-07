@@ -83,5 +83,5 @@
 
   - name: Create Gitea token secret
     k8s:
-      definition: "{{ lookup('template', 'secret.yml.j2') | from_yaml }}"
+      definition: "{{ lookup('template', 'gitea-token-secret.yml.j2') }}"
   when: not gitea_access_token_secret.resources
