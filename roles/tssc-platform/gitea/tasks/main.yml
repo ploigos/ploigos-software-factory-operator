@@ -9,6 +9,15 @@
   retries: 10
   delay: 30
 
+- name: Get Gitea Pod
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ gitea_project_name }}'
+    label_selectors:
+    - app=gitea
+  register: gitea_pod
+
 - name: Configure Gitea and RHSSO to work together
   include: gitea_rhsso.yml
 

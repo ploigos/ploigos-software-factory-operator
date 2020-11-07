@@ -3,7 +3,7 @@
     api_version: v1alpha1
     kind: Gitea
     namespace: '{{ gitea_project_name }}'
-    name: gitea
+    name: gitea-server
   register: result
   until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 10
