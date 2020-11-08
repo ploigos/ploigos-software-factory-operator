@@ -38,7 +38,18 @@
     definition: '{{ lookup("template", "tssc-config.yml.j2") }}'
     state: '{{ cr_state }}'
 
+- name: Get secret template as base64
+  set_fact:
+    tss_config_secrets: "{{ lookup('template', 'tssc-config-secrets.yml.j2') | b64encode }}"
+
 - name: 'Set tssc-config-secrets Secret to {{ cr_state }}'
   k8s:
-    definition: '{{ lookup("template", "tssc-config-secrets.yml.j2") }}'
     state: '{{ cr_state }}'
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: tssc-config-secrets
+        namespace: '{{ tssc_namespace }}'
+      data:
+        tssc-config-secrets.yml: '{{ tssc_config_secrets }}'
