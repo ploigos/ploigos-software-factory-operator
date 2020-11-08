@@ -51,11 +51,11 @@
       name: tssc-platform/nexus
     when: deploy_nexus
   - include_role:
-      name: tssc-platform/legacy-jenkins
-    when: deploy_legacy_jenkins
-  - include_role:
       name: tssc-platform/quay
     when: deploy_quay
+  - include_role:
+      name: tssc-platform/legacy-jenkins
+    when: deploy_legacy_jenkins
   - include_role:
       name: tssc-platform/mattermost
     when: deploy_mattermost_operator
@@ -65,6 +65,25 @@
   - include_role:
       name: tssc-platform/selenium-grid
     when: deploy_selenium_grid
-  - include_role:
-      name: tssc-platform/tssc-config
   when: cr_state == 'present'
+
+- name: 'Set tssc-config ConfigMap to {{ cr_state }}'
+  k8s:
+    definition: '{{ lookup("template", "tssc-config.yml.j2") }}'
+    state: '{{ cr_state }}'
+
+- name: Get secret template as base64
+  set_fact:
+    tssc_config_secrets: "{{ lookup('template', 'tssc-config-secrets.yml.j2') | b64encode }}"
+
+- name: 'Set tssc-config-secrets Secret to {{ cr_state }}'
+  k8s:
+    state: '{{ cr_state }}'
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: tssc-config-secrets
+        namespace: '{{ tssc_namespace }}'
+      data:
+        tssc-config-secrets.yml: '{{ tssc_config_secrets }}'

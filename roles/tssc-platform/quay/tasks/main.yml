@@ -46,6 +46,17 @@
   set_fact:
     quay_robot_token: "{{ quay_robot.stdout | regex_search('[A-Z0-9]{64}') }}"
 
+- name: Construct docker auth object
+  set_fact:
+    quay_robot_docker_auth:
+      auths:
+        '{{ quay_route }}':
+          username: 'platform+{{ tssc_service_account.username }}'
+          password: '{{ quay_robot_token }}'
+          auth: '{{ auth_decoded | b64encode }}'
+  with_vars:
+    auth_decoded: 'platform+{{ tssc_service_account.username }}:{{ quay_robot_token }}'
+
 - name: Create Quay robot token secret
   k8s:
     definition: "{{ lookup('template', 'quay-token-secret.yml.j2') }}"
