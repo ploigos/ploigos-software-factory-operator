@@ -8,9 +8,6 @@
   retries: 10
   delay: 30
 
-- name: Configure Quay and RHSSO to work together
-  include: quay_rhsso.yml
-
 - name: Add tssc service account to Quay instance
   shell: >-
     devsecops-api quay add-user https://{{ quay_route }}
@@ -54,9 +51,12 @@
           username: 'platform+{{ tssc_service_account.username }}'
           password: '{{ quay_robot_token }}'
           auth: '{{ auth_decoded | b64encode }}'
-  with_vars:
+  vars:
     auth_decoded: 'platform+{{ tssc_service_account.username }}:{{ quay_robot_token }}'
 
 - name: Create Quay robot token secret
   k8s:
     definition: "{{ lookup('template', 'quay-token-secret.yml.j2') }}"
+
+- name: Configure Quay and RHSSO to work together
+  include: quay_rhsso.yml
