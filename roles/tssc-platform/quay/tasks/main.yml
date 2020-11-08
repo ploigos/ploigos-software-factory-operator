@@ -45,18 +45,19 @@
 
 - name: Construct docker auth object
   set_fact:
-    quay_robot_docker_auth:
-      auths:
-        '{{ quay_route }}':
-          username: 'platform+{{ tssc_service_account.username }}'
-          password: '{{ quay_robot_token }}'
-          auth: '{{ auth_decoded | b64encode }}'
-  vars:
-    auth_decoded: 'platform+{{ tssc_service_account.username }}:{{ quay_robot_token }}'
+    quay_robot_docker_config: "{{ lookup('template', 'quay-docker-config.yml.j2') | to_json }}"
 
 - name: Create Quay robot token secret
   k8s:
-    definition: "{{ lookup('template', 'quay-token-secret.yml.j2') }}"
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: quay-robot-token
+        namespace: '{{ quay_project_name }}'
+      data:
+        .dockerconfigjson: '{{ quay_robot_docker_config | b64encode }}'
+      type: kubernetes.io/dockerconfigjson
 
 - name: Configure Quay and RHSSO to work together
   include: quay_rhsso.yml
