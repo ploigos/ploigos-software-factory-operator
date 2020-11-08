@@ -23,7 +23,7 @@ data:
             url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
-            quay.apps.{{ full_cluster_name }}:
+            quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
                 username: {{ tssc_service_account.username }}
       global-environment-defaults:
         DEV:
@@ -66,7 +66,7 @@ data:
       - implementer: Skopeo
         config:
           source: docker-archive:backend.tar
-          destination-url: quay.apps.{{ full_cluster_name }}
+          destination-url: quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
       container-image-static-compliance-scan:
       - implementer: OpenSCAP
         config:
@@ -80,7 +80,7 @@ data:
           route-enabled: true
           readiness-probe-path: /fruits
           liveness-probe-path: /fruits
-          destination-url: docker://quay.apps.{{ full_cluster_name }}
+          destination-url: docker://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
           argocd-username: {{ tssc_service_account.username }}
           git-username: {{ tssc_service_account.username }}
       validate-environment-configuration:
