@@ -45,7 +45,7 @@
 
 - name: Construct docker auth object
   set_fact:
-    quay_robot_docker_config: "{{ lookup('template', 'quay-docker-config.yml.j2') | | from_yaml | to_json }}"
+    quay_robot_docker_config: "{{ lookup('template', 'quay-docker-config.yml.j2') | from_yaml | to_json }}"
 
 - name: Create Quay robot token secret
   k8s:
