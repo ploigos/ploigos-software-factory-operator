@@ -32,14 +32,9 @@
         selenium_grid_project_name: '{{ tssc_namespace }}'
         sonarqube_project_name: '{{ tssc_namespace }}'
 
-    - name: Set tssc service account credentials
+    - name: Set tssc service account secret
       set_fact:
-        tssc_service_account:
-          username: tssc
-          password: test1234
-          email: tssc-service-account@redhat.com
-          first_name: Tssc
-          last_name: service_account
+        tssc_service_account_secret: "{{ tssc_platform.service_account_secret.name | default('tssc-service-account-credentials') }}"
 
     - name: Look for default defined common variables
       include_vars: ../vars/tssc-platform/common.yml

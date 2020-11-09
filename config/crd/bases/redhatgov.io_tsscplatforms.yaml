@@ -41,18 +41,19 @@ spec:
               tsscPlatform:
                 description: Defines the desired state of the TsscPlatform Deployment
                 properties:
-                  image:
-                    description: Defines the ways in which the TsscPlatform image
-                      should be sourced and managed
-                    type: object
-                  pullSecret:
-                    description: Pull secret used by Tekton to pull images from registry.redhat.io
+                  serviceAccountSecret:
+                    description: |
+                      An OpenShift Secret holding the user attributes of the platform service account. 
+                      If the Secret does not exist when this TsscPlatform is created, it will be generated with the
+                      name provided. Within this secret, the following keys are utilized:
+                      * username - Required
+                      * password - Required
+                      * email
+                      * first_name 
+                      * last_name 
                     properties:
                       name:
-                        description: The pull secret name
-                        type: string
-                      namespace:
-                        description: The pull secret namespace
+                        description: The secret name
                         type: string
                     type: object
                 type: object

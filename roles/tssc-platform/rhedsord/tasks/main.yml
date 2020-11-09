@@ -1,4 +1,36 @@
 ---
+- name: Fetch tssc-service-account secret
+  set_fact:
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=tssc_namespace, resource_name=tssc_service_account_secret) }}"
+
+- name: Set tssc-service-account credential facts from secret
+  set_fact:
+    tssc_service_account:
+      username:  "{{ secret_data.data.username | b64decode }}"
+      password: "{{ secret_data.data.password | b64decode }}"
+      email: "{{ secret_data.data.email | b64decode }}"
+      first_name: "{{ secret_data.data.first_name | b64decode }}"
+      last_name: "{{ secret_data.data.last_name | b64decode }}"
+  when:
+    - secret_data != []
+
+- name: Create secret if missing
+  block:
+    - name: generate tssc-service-account credential facts
+      set_fact:
+        tssc_service_account:
+          username:  tssc
+          password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') }}"
+          email: tssc-service-account@redhat.com
+          first_name: Tssc
+          last_name: ServiceAccount
+    - name: create secret
+      k8s:
+        namespace: '{{ tssc_namespace }}'
+        definition: "{{ lookup('template', 'tssc-service-account-secret.yml.j2') }}"
+  when:
+    - secret_data == []
+
 - include_role:
     name: common/redhatgov-catalog
 

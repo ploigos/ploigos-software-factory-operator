@@ -17,6 +17,9 @@ spec:
   server:
     route:
       enabled: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: passthrough
   rbac:
     defaultPolicy: 'role:readonly'
     policy: |
