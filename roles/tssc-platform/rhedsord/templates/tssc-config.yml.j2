@@ -12,7 +12,7 @@ data:
         service-name: fruit
         application-name: reference-quarkus-mvn-jenkins
         organization: tssc-team
-        argocd-api: argocd-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
+        argocd-api: argocd.{{ tssc_namespace }}.cluster.svc.local
         maven-servers:
           internal-mirror:
             id: internal-server

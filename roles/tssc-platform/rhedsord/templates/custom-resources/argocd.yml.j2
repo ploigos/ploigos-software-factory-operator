@@ -19,7 +19,7 @@ spec:
       enabled: true
       tls:
         insecureEdgeTerminationPolicy: Redirect
-        termination: passthrough
+        termination: reencrypt
   rbac:
     defaultPolicy: 'role:readonly'
     policy: |
