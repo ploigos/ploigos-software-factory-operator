@@ -43,14 +43,14 @@ spec:
                 properties:
                   serviceAccountSecret:
                     description: |
-                      An OpenShift Secret holding the user attributes of the platform service account. 
+                      An OpenShift Secret holding the user attributes of the platform service account.
                       If the Secret does not exist when this TsscPlatform is created, it will be generated with the
                       name provided. Within this secret, the following keys are utilized:
                       * username - Required
                       * password - Required
                       * email
-                      * first_name 
-                      * last_name 
+                      * first_name
+                      * last_name
                     properties:
                       name:
                         description: The secret name
