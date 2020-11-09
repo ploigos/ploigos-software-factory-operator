@@ -17,11 +17,14 @@ spec:
   server:
     route:
       enabled: true
-    insecure: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
   rbac:
     defaultPolicy: 'role:readonly'
     policy: |
       g, argocd-admins, role:admin
+      p, {{ tssc_service_account.username }}, *, *, *, allow
     scopes: '[groups]'
   dex:
     image: quay.io/redhat-cop/dex

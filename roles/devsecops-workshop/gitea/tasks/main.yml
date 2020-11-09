@@ -1,12 +1,11 @@
 - name: Wait for Gitea to finish being created
   k8s_info:
-    api_version: v1
-    kind: Pod
+    api_version: v1alpha1
+    kind: Gitea
     namespace: '{{ gitea_project_name }}'
-    label_selectors:
-      - app=gitea-server
-  register: gitea_pod
-  until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
+    name: gitea-server
+  register: result
+  until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 10
   delay: 30
 
