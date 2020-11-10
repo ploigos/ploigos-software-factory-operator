@@ -310,7 +310,7 @@ function update_components() {
         else
             error_run "Updating the Operator SDK manager" pip install --user --upgrade operator-sdk-manager || return 1
         fi
-        error_run "Updating the Operator SDK" 'sdk_version=$(operator-sdk-manager update -vvvv | cut -d" " -f 3)' || return 1
+        error_run "Updating the Operator SDK" 'sdk_version=$(operator-sdk-manager update --version=1.1.0 -vvvv | cut -d" " -f 3)' || return 1
     fi
     components_updated=true
 }
