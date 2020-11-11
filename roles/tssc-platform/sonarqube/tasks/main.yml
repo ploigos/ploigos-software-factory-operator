@@ -61,3 +61,27 @@
 
 - name: Configure SonarQube and RHSSO to work together
   include: sonarqube_rhsso.yml
+
+- name: Fetch sonarqube secret from cluster
+  set_fact:
+    sonarqube_secret_data: "{{ lookup('k8s', kind='Secret', namespace=sonarqube_project_name, resource_name='sonarqube-admin-credentials') }}"
+
+- name: Set sonarqube password fact from secret
+  set_fact:
+    sonarqube_password: "{{ sonarqube_secret_data.data.password | b64decode }}"
+
+- name: Create tssc service account
+  shell: >-
+    devsecops-api sonarqube add-user
+    https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ sonarqube_password }}'
+    --usernames '{{ tssc_service_account.username }}'
+    --passwords '{{ workshop_users|json_query("[].password")|join(",") }}'
+  register: sonarqube_users
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or sonarqube_users.rc != 0
+  until: not sonarqube_users.failed
+  retries: 3
+  delay: 10

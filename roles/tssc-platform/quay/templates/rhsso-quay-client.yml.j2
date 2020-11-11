@@ -18,7 +18,7 @@
       clientAuthenticatorType: client-secret
       publicClient: false
       redirectUris:
-        - 'https://quay.apps.{{ subdomain }}/oauth2/rhsso/callback'
-      rootUrl: 'https://quay.apps.{{ subdomain }}/'
+        - 'https://{{ quay_route }}/oauth2/rhsso/callback'
+      rootUrl: 'https://{{ quay_route }}/'
       protocol: openid-connect
 

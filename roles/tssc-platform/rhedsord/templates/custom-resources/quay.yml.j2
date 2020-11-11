@@ -8,7 +8,7 @@ spec:
     enabled: false
   quay:
     externalAccess:
-      hostname: quay.apps.{{ full_cluster_name }}
+      hostname: quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
       tls:
         termination: edge
     imagePullSecretName: dummy-pull-secret

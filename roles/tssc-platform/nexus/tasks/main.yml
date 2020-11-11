@@ -14,3 +14,19 @@
   k8s:
     namespace: '{{ nexus_project_name }}'
     definition: '{{ lookup("template", "nexususer.yml.j2")|from_yaml }}'
+
+- name: Create tssc Service Account
+  k8s:
+    namespace: '{{ nexus_project_name }}'
+    definition: |
+      apiVersion: redhatgov.io/v1alpha1
+      kind: NexusUser
+      metadata:
+        name: {{ tssc_service_account.username }}
+      spec:
+        user:
+          username: {{ tssc_service_account.username }}
+          password: {{ tssc_service_account.password }}
+          firstName: {{ tssc_service_account.first_name }}
+          lastName: {{ tssc_service_account.last_name }}
+          email: {{ tssc_service_account.email }}

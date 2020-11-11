@@ -13,12 +13,36 @@
 - set_fact:
     argocd_route: '{{ argocd_route|json_query("resources[0].spec.host") }}'
 
-- name: Wait for Argo CD to respond to requests
-  uri:
-    url: 'https://{{ argocd_route }}/'
-    return_content: yes
-    validate_certs: no
-  register: argocd_endpoint
-  until: argocd_endpoint.status == 200
-  retries: 20
-  delay: 30
+- name: Get argocd-ca Secret
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: '{{ argocd_project_name }}'
+    name: argocd-ca
+  register: argocd_ca_secret
+  until: argocd_ca_secret.resources|length > 0
+  retries: 5
+  delay: 3
+
+- name: Get ca.crt for destinationCACertificate value
+  set_fact:
+    argocd_ca_cert: "{{ argocd_ca_secret.resources[0].data['ca.crt'] | b64decode }}"
+
+- name: Patch ArgoCD CR with destinationCACertificate value
+  k8s:
+    definition: "{{ lookup('template', 'argocd-tls-patch.yml.j2') }}"
+
+- name: Grant argocd-application-controller serviceaccount self-provisioner
+  k8s:
+    definition: "{{ lookup('template', 'cluster-role-binding.yml.j2') }}"
+
+- name: Create tssc service account
+  k8s:
+    namespace: '{{ argocd_project_name }}'
+    definition: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cm
+      data:
+        'accounts.{{ tssc_service_account.username }}': 'apiKey, login'
