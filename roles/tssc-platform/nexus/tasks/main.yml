@@ -30,3 +30,28 @@
           firstName: {{ tssc_service_account.first_name }}
           lastName: {{ tssc_service_account.last_name }}
           email: {{ tssc_service_account.email }}
+
+- name: Retrieve Nexus admin credentials
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: '{{ nexus_project_name }}'
+    name: nexus-admin-credentials
+  register: nexus_admin_secret
+  until: nexus_admin_secret.resources|length > 0
+
+- set_fact:
+      nexus_admin_password: "{{ nexus_admin_secret | json_query('resources[0].data.password') | b64decode }}"
+
+- name: Change the settings on the maven-releases repo to allow artifacts to be overwritten
+  shell: >-
+    devsecops-api nexus update-repository
+    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
+    --login-username admin --login-password '{{ nexus_admin_password }}'
+    --repository-names 'maven-releases'
+    --write-policy 'ALLOW'
+  register: updated_nexus_repos
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: updated_nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: updated_nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or updated_nexus_repos.rc != 0
