@@ -3,3 +3,4 @@
   shell: |
     oc delete -n {{ tssc_namespace }} KeycloakUser,KeycloakClient --all
     oc delete -n {{ tssc_namespace }} all,configmap,pvc,serviceaccount,rolebinding -l app=jenkins-persistent
+    oc delete -n {{ tssc_namespace }} secret gitea-access-token

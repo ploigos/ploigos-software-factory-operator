@@ -56,13 +56,6 @@
 
 - name: Create gitea access token if it doesn't exist
   block:
-  - name: Delete Gitea token secret first
-    k8s:
-      kind: Secret
-      namespace: "{{ gitea_project_name }}"
-      name: gitea-access-token
-      state: absent
-
   - name: Create Application Token for Gitea
     uri:
       url: 'https://gitea-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/users/{{ tssc_service_account.username }}/tokens'
