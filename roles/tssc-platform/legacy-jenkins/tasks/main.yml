@@ -1,15 +1,4 @@
 ---
-- name: Ensure namespace exists
-  k8s:
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: '{{ jenkins_project_name }}'
-        annotations:
-          openshift.io/display-name: '{{ jenkins_project_display }}'
-      spec: {}
-
 # https://docs.openshift.com/container-platform/4.5/openshift_images/using_images/images-other-jenkins.html#images-other-jenkins-env-var_images-other-jenkins
 # looks like the env var OVERRIDE_PV_PLUGINS_WITH_IMAGE_PLUGINS would mean that we don't have to worry as long as the default plugins are sufficient
 
@@ -53,3 +42,48 @@
   k8s:
     namespace: '{{ jenkins_project_name }}'
     definition: '{{ lookup("template", "jenkins_user_role_binding.yml.j2")|from_yaml }}'
+
+- name: Wait for Jenkins to respond to requests
+  uri:
+    url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/login'
+    validate_certs: no
+  register: jenkins_endpoint
+  until: jenkins_endpoint.status == 200
+  retries: 30
+  delay: 20
+
+- name: Get workshop_admin OpenShift token
+  community.kubernetes.k8s_auth:
+    username: "{{ workshop_admin.username }}"
+    password: "{{ workshop_admin.password }}"
+    host: 'https://api.{{ full_cluster_name }}:6443'
+    validate_certs: no
+  register: k8s_auth_result
+
+- set_fact:
+    ocp_token: '{{ k8s_auth_result.k8s_auth.api_key }}'
+
+- name: Ensure Gitea Server is configured in jenkins settings
+  uri:
+    url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/script'
+    method: POST
+    body_format: form-urlencoded
+    validate_certs: false
+    headers:
+      Authorization: 'Bearer {{ ocp_token }}'
+    body:
+      script: 'giteaServers = Jenkins.instance.getExtensionList(org.jenkinsci.plugin.gitea.servers.GiteaServers.class)[0];giteaServers.updateServer(new org.jenkinsci.plugin.gitea.servers.GiteaServer("platform", "http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000", true, null, "https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/"));giteaServers.save()'
+  register: org_response
+
+- name: Create platform Gitea Organization
+  uri:
+    url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/createItem?name=platform'
+    method: POST
+    validate_certs: false
+    headers:
+      Authorization: 'Bearer {{ ocp_token }}'
+      Content-Type: 'text/xml'
+    body: "{{ lookup('template', 'gitea-organization.xml.j2') }}"
+    status_code: 200,400
+  register: org_response
+  changed_when: org_response.status == 200
