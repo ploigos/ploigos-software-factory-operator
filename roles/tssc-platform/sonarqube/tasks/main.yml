@@ -85,3 +85,19 @@
   until: not sonarqube_users.failed
   retries: 3
   delay: 10
+
+- name: Update sonar-java plugin
+  community.kubernetes.k8s_exec:
+    namespace: "{{ sonarqube_project_name }}"
+    pod: '{{ sonarqube_pod.resources[0].metadata.name }}'
+    command: |
+      rm /opt/sonarqube/data/extensions/plugins/sonar-java-plugin-*.jar && \
+      curl -o /opt/sonarqube/data/extensions/plugins/sonar-java-plugin-6.3.2.22818.jar \
+      https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-6.3.2.228
+
+- name: Kill Sonarqube Pod to invoke server restart
+  k8s:
+    kind: Pod
+    namespace: '{{ sonarqube_project_name }}'
+    name: '{{ sonarqube_pod.resources[0].metadata.name }}'
+    state: absent
