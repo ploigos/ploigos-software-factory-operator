@@ -37,16 +37,9 @@
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
 
-- name: Get workshop_admin OpenShift token
-  community.kubernetes.k8s_auth:
-    username: "{{ workshop_admin.username }}"
-    password: "{{ workshop_admin.password }}"
-    host: 'https://api.{{ full_cluster_name }}:6443'
-    validate_certs: no
-  register: k8s_auth_result
-
-- set_fact:
-    ocp_token: '{{ k8s_auth_result.k8s_auth.api_key }}'
+- name: Get Service Account token
+  set_fact:
+    ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
 
 - name: Scan Gitea Org to create Jenkins job
   uri:
