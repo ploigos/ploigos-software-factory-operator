@@ -52,7 +52,7 @@ data:
       - implementer: SonarQube
         config:
           url: https://sonarqube-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/
-          user: reference-apps-sa
+          user: {{ tssc_service_account.username }}
       push-artifacts:
       - implementer: Maven
         config:
