@@ -76,7 +76,7 @@
     https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password '{{ sonarqube_password }}'
     --usernames '{{ tssc_service_account.username }}'
-    --passwords '{{ workshop_users|json_query("[].password")|join(",") }}'
+    --passwords '{{ tssc_service_account.password }}'
   register: sonarqube_users
   # https://github.com/ansible/ansible/issues/27299
   # to_json|from_json| is a terrible hack but here we are
