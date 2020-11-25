@@ -42,7 +42,7 @@ items:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 10Gi
+        storage: 20Gi
   status: {}
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
@@ -94,7 +94,7 @@ items:
           - name: JENKINS_UC_INSECURE
             value: "false"
           - name: INSTALL_PLUGINS
-            value: "handy-uri-templates-2-api:2.1.8-1.0,display-url-api:2.3.3,credentials:2.3.5,workflow-aggregator:2.6,workflow-multibranch:2.22,gitea:1.2.1,ansicolor:0.7.3,durable-task:1.33,jackson2-api:2.10.2,pipeline-model-extensions:1.6.0"
+            value: "handy-uri-templates-2-api:2.1.8-1.0,display-url-api:2.3.3,credentials:2.3.5,plain-credentials:1.6,workflow-aggregator:2.6,workflow-multibranch:2.22,gitea:1.2.1,ansicolor:0.7.3,durable-task:1.33,jackson2-api:2.10.2,pipeline-model-extensions:1.6.0,pipeline-model-definition:1.6.0"
           image: ' '
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -115,7 +115,7 @@ items:
           resources:
             limits:
               cpu: '2'
-              memory: 2Gi
+              memory: 4Gi
             requests:
               cpu: 100m
               memory: 512Mi

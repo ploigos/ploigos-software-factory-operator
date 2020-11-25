@@ -52,7 +52,7 @@
     <org.jenkinsci.plugin.gitea.GiteaSCMNavigator plugin="gitea@1.2.1">
       <serverUrl>http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000</serverUrl>
       <repoOwner>platform</repoOwner>
-      <credentialsId></credentialsId>
+      <credentialsId>platform-gitea-token</credentialsId>
       <traits>
         <org.jenkinsci.plugin.gitea.BranchDiscoveryTrait>
           <strategyId>1</strategyId>
