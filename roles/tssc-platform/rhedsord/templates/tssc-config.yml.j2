@@ -56,7 +56,7 @@ data:
       push-artifacts:
       - implementer: Maven
         config:
-          maven-push-artifact-repo-id: internal-server
+          maven-push-artifact-repo-id: maven-releases
           maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository
       create-container-image:
       - implementer: Buildah
