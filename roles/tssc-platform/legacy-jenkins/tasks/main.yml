@@ -72,6 +72,17 @@
       script: 'giteaServers = Jenkins.instance.getExtensionList(org.jenkinsci.plugin.gitea.servers.GiteaServers.class)[0];giteaServers.updateServer(new org.jenkinsci.plugin.gitea.servers.GiteaServer("platform", "http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000", true, null, "https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/"));giteaServers.save();["BranchSpec getName", "GitSCM getBranches", "GitSCM getUserRemoteConfigs", "UserRemoteConfig getUrl"].each{ method -> org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval.get().approveSignature("method hudson.plugins.git.${method}")}'
   register: org_response
 
+- name: Get gitea token secret
+  k8s_info:
+    kind: Secret
+    api_version: v1
+    namespace: '{{ tssc_namespace }}'
+    name: gitea-access-token
+  register: gitea_token_secret
+
+- set_fact:
+    gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
+
 - name: Create Gitea Credential
   uri:
     url: "https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/credentials/store/system/domain/_/createCredentials"
