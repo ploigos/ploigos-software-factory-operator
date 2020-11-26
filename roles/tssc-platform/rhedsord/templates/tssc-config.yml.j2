@@ -15,11 +15,20 @@ data:
         argocd-api: argocd.{{ tssc_namespace }}.cluster.svc.local
         maven-servers:
           internal-mirror:
-            id: internal-server
+            id: maven-public
             username: {{ tssc_service_account.username }}
+          maven-releases:
+            id: maven-releases
+            username: {{ tssc_service_account.username }}
+        maven-repositories:
+          maven-releases:
+            id: maven-releases
+            url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-releases/
+            snapshots: false
+            releases: true
         maven-mirrors:
           internal-mirror:
-            id: internal-mirror
+            id: maven-public
             url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
@@ -57,7 +66,7 @@ data:
       - implementer: Maven
         config:
           maven-push-artifact-repo-id: maven-releases
-          maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository
+          maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-releases
       create-container-image:
       - implementer: Buildah
         config:
