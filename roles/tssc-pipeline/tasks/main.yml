@@ -1,4 +1,10 @@
 ---
+- name: Create quay repository
+  shell: >-
+    devsecops-api quay add-repo https://{{ quay_route }}
+    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
+    --organization platform --repo-name reference-quarkus-mvn-jenkins-fruit
+
 - name: Get gitea token secret
   k8s_info:
     kind: Secret
