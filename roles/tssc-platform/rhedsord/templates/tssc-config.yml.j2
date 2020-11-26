@@ -32,8 +32,10 @@ data:
             url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
-            quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
-                username: {{ tssc_service_account.username }}
+          quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
+            username: {{ tssc_service_account.username }}
+          registry.redhat.io:
+            username: {{ rhio_username }}
       global-environment-defaults:
         DEV:
           kube-app-domain: dev.apps.{{ full_cluster_name }}

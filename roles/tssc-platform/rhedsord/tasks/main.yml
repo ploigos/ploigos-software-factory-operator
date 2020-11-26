@@ -99,6 +99,24 @@
     when: deploy_selenium_grid
   when: cr_state == 'present'
 
+- name: Get registry pull secret
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ tssc_platform.pull_secret.name | default('pull-secret') }}"
+    namespace: "{{ tssc_platform.pull_secret.namespace | default('openshift-config') }}"
+  register: pull_secret
+
+- set_fact:
+    reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] | b64decode | from_json }}"
+
+- set_fact:
+    rhio_auth: "{{ reg_rhio_pull_token.auths['registry.redhat.io'].auth | b64decode }}"
+
+- set_fact:
+    rhio_username: "{{ rhio_auth.split(':')[0] }}"
+    rhio_token: "{{ rhio_auth.split(':')[1] }}"
+
 - name: 'Set tssc-config ConfigMap to {{ cr_state }}'
   k8s:
     definition: '{{ lookup("template", "tssc-config.yml.j2") }}'
