@@ -78,6 +78,13 @@ data:
         config:
           source: docker-archive:backend.tar
           destination-url: quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
+      sign-container-image:
+      - implementer: PodmanSign
+        config: {}
+      - implementer: CurlPush
+        config:
+          container-image-signature-server-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}repository/container-image-signatures
+          container-image-signature-server-username: tssc
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
