@@ -32,7 +32,7 @@
   k8s:
     definition: "{{ lookup('template', 'argocd-tls-patch.yml.j2') }}"
 
-- name: Grant argocd-application-controller serviceaccount self-provisioner
+- name: Grant argocd-application-controller serviceaccount cluster-admin
   k8s:
     definition: "{{ lookup('template', 'cluster-role-binding.yml.j2') }}"
 
