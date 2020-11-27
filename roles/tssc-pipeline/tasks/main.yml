@@ -25,7 +25,7 @@
       Authorization: 'token {{ gitea_token }}'
   register: gitea_org_response
 
-- name: Migrate Repo From Upstream into Gitea, in platform org
+- name: Migrate {{ repo_name }} From Upstream into Gitea, in platform org
   uri:
     url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
     validate_certs: no
@@ -35,13 +35,19 @@
       Authorization: 'token {{ gitea_token }}'
     body: |
       {
-        "clone_addr": "https://github.com/RedHatGov/reference-quarkus-mvn-jenkins.git",
+        "clone_addr": "https://github.com/RedHatGov/{{ repo_name }}.git",
         "uid": {{ gitea_org_response.json.id }},
-        "repo_name": "reference-quarkus-mvn-jenkins"
+        "repo_name": "{{ repo_name }}"
       }
     status_code: 201,409
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
+  loop:
+  - reference-quarkus-mvn-jenkins
+  - reference-quarkus-mvn-jenkins-config
+  loop_control:
+    loop_var: repo_name
+    label: repo_name
 
 - name: Get Service Account token
   set_fact:

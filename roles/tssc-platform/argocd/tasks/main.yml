@@ -46,3 +46,29 @@
         name: argocd-cm
       data:
         'accounts.{{ tssc_service_account.username }}': 'apiKey, login'
+
+- name: Get ArgoCD admin password
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: '{{ argocd_project_name }}'
+    name: argocd-cluster
+  register: argocd_cluster_secret
+
+- set_fact:
+    argocd_admin_password: "{{ argocd_cluster_secret.resources[0].data['admin.password'] | b64decode }}"
+
+- name: Get ArgoCD server pod
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ argocd_project_name }}'
+    label_selectors:
+    - "app.kubernetes.io/name=argocd-server"
+  register: argocd_pod
+
+- name: Set tssc service account password
+  community.kubernetes.k8s_exec:
+    namespace: '{{ argocd_project_name }}'
+    pod: '{{ argocd_pod.resources[0].metadata.name }}'
+    command: sh -c "argocd login argocd-server.{{ argocd_project_name }}.svc.cluster.local --username=admin --password={{ argocd_admin_password }} --insecure --config config && argocd account update-password --account={{ tssc_service_account.username }} --new-password={{ tssc_service_account.password }} --current-password={{ argocd_admin_password }} --config config && rm -f config"
