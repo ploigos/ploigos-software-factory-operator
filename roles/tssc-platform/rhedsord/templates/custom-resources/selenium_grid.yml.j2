@@ -1,11 +1,8 @@
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
+apiVersion: redhatgov.io/v1alpha1
+kind: SeleniumGrid
 metadata:
-  name: selenium-grid-operator
+  name: selenium-grid
   namespace: {{ tssc_namespace }}
 spec:
-  channel: alpha
-  installPlanApproval: Automatic
-  name: selenium-grid-operator
-  source: redhatgov-operators
-  sourceNamespace: openshift-marketplace
+  expose:
+    kind: None
