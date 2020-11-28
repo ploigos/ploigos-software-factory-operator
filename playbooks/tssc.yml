@@ -34,7 +34,7 @@
 
     - name: Set tssc service account secret
       set_fact:
-        tssc_service_account_secret: "{{ tssc_platform.service_account_secret.name | default('tssc-service-account-credentials') }}"
+        tssc_service_account_secret: tssc-service-account-credentials
 
     - name: Look for default defined common variables
       include_vars: ../vars/tssc-platform/common.yml
