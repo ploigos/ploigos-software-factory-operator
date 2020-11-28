@@ -40,7 +40,6 @@ spec:
             properties:
               tsscPipeline:
                 description: Defines the desired state of the TsscPipeline Deployment
-                properties: {}
                 type: object
             type: object
           status:
