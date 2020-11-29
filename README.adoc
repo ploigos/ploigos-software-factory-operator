@@ -79,6 +79,7 @@ It is recommended to generate a new service account before a workshop and delete
   * Click on the name of the service account, go to the 'OpenShift Secret' tab, click 'view its contents' 
   * Copy value after `.dockerconfigjson`.
   * Create your secret with this value:
+  
   ----
     SECRET=<the value you copied in step 4>
 
