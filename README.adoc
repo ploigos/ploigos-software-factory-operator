@@ -60,6 +60,7 @@ spec:
   publisher: RedHatGov
 EOF
 ----
+
 3. Create a project named **devsecops** for your pipeline tooling to live.
 ----
 oc new-project devsecops
@@ -67,6 +68,7 @@ oc new-project devsecops
 # Delete limit range, if created by a project template
 oc delete limitrange --all -n devsecops
 ----
+
 4. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator" in the **devsecops** project. Select it and click **Install**
 5. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
 6. Leave other options as default and click **Install** once more.
@@ -91,16 +93,20 @@ It is recommended to generate a new service account before a workshop and delete
       type: kubernetes.io/dockerconfigjson
     EOF
   ----
+
 8. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
 9. If you modified the namespace or name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
 10. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
+
 ----
 PLAY RECAP *********************************************************************
 [0;33mlocalhost[0m                  : [0;32mok=32  [0m [0;33mchanged=10  [0m unreachable=0    failed=0    [0;36mskipped=17  [0m rescued=0    ignored=0   
-
 ----
+
 which indicates that the Reconciliation is complete. This should take 8-10 minutes.
+
 11. Then create a `TsscPipeline` instance, which should create and start your pipeline job in Jenkins:
+
 ----
 oc apply -n devsecops -f - << EOF
 apiVersion: redhatgov.io/v1alpha1
