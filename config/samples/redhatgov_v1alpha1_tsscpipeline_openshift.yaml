@@ -1,0 +1,5 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: TsscPipeline
+metadata:
+  name: tsscpipeline
+spec: {}

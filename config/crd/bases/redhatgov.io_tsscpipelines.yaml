@@ -2,22 +2,22 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: tsscplatforms.redhatgov.io
+  name: tsscpipelines.redhatgov.io
 spec:
   conversion:
     strategy: None
   group: redhatgov.io
   names:
-    kind: TsscPlatform
-    listKind: TsscPlatformList
-    plural: tsscplatforms
-    singular: tsscplatform
+    kind: TsscPipeline
+    listKind: TsscPipelineList
+    plural: tsscpipelines
+    singular: tsscpipeline
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: TsscPlatform is the Schema for the tsscplatform API
+        description: TsscPipeline is the Schema for the tsscpipeline API
         properties:
           apiVersion:
             description: |
@@ -36,25 +36,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: Spec defines the desired state of TsscPlatform
+            description: Spec defines the desired state of TsscPipeline
             properties:
-              tsscPlatform:
-                description: Defines the desired state of the TsscPlatform Deployment
-                properties:
-                  pullSecret:
-                    description: Pull secret used by the platform to pull images from registry.redhat.io
-                    type: object
-                    properties:
-                      name:
-                        description: The pull secret name
-                        type: string
-                      namespace:
-                        description: The pull secret namespace
-                        type: string
+              tsscPipeline:
+                description: Defines the desired state of the TsscPipeline Deployment
                 type: object
             type: object
           status:
-            description: Status defines the observed state of TsscPlatform
+            description: Status defines the observed state of TsscPipeline
             properties:
               conditions:
                 description: The conditions reported by the Ansible operator

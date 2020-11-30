@@ -2,14 +2,23 @@
 - version: v1alpha1
   group: redhatgov.io
   kind: TsscPlatform
-  playbook: playbooks/tssc-platform.yml
+  playbook: playbooks/tssc.yml
   watchDependentResources: false
   vars:
     cr_state: present
+    cr_type: platform
   finalizer:
     name: finalizer.tsscplatform.redhatgov.io
     vars:
       cr_state: absent
+      cr_type: platform
+- version: v1alpha1
+  group: redhatgov.io
+  kind: TsscPipeline
+  playbook: playbooks/tssc.yml
+  vars:
+    cr_state: present
+    cr_type: pipeline
 - version: v1alpha1
   group: redhatgov.io
   kind: DevSecOpsWorkshop
