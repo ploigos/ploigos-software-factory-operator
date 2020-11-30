@@ -11,20 +11,31 @@ data:
       global-defaults:
         service-name: fruit
         application-name: reference-quarkus-mvn-jenkins
-        organization: tssc-team
-        argocd-api: argocd.{{ tssc_namespace }}.cluster.svc.local
+        organization: platform
+        argocd-api: argocd-server.{{ tssc_namespace }}.svc.cluster.local
         maven-servers:
           internal-mirror:
-            id: internal-server
+            id: maven-public
             username: {{ tssc_service_account.username }}
+          maven-releases:
+            id: maven-releases
+            username: {{ tssc_service_account.username }}
+        maven-repositories:
+          maven-releases:
+            id: maven-releases
+            url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-releases/
+            snapshots: false
+            releases: true
         maven-mirrors:
           internal-mirror:
-            id: internal-mirror
+            id: maven-public
             url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
-            quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
-                username: {{ tssc_service_account.username }}
+          quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
+            username: {{ tssc_service_account.username }}
+          registry.redhat.io:
+            username: {{ rhio_username }}
       global-environment-defaults:
         DEV:
           kube-app-domain: dev.apps.{{ full_cluster_name }}
@@ -52,12 +63,12 @@ data:
       - implementer: SonarQube
         config:
           url: https://sonarqube-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/
-          user: reference-apps-sa
+          user: {{ tssc_service_account.username }}
       push-artifacts:
       - implementer: Maven
         config:
-          maven-push-artifact-repo-id: internal-server
-          maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository
+          maven-push-artifact-repo-id: maven-releases
+          maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-releases
       create-container-image:
       - implementer: Buildah
         config:
@@ -67,15 +78,32 @@ data:
         config:
           source: docker-archive:backend.tar
           destination-url: quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
-      container-image-static-compliance-scan:
-      - implementer: OpenSCAP
+      sign-container-image:
+      - implementer: PodmanSign
+        config: {}
+      - implementer: CurlPush
         config:
-          scap-input-file: /usr/share/xml/scap/ssg/content/ssg-jre-oval.xml
+          container-image-signature-server-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}repository/container-image-signatures
+          container-image-signature-server-username: tssc
+      container-image-static-compliance-scan:
+      # sample scans using DataStream file (preferred)
+      - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+          oscap-tailoring-uri: https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+      container-image-static-vulnerability-scan:
+      # sample vulnerability scan using XCCDF file (preferred)
+      - name: OpenSCAP - Vulnerability - DataStream
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
       deploy:
       - implementer: ArgoCD
         config:
           git-email: 'napsspo+tssc@redhat.com'
-          helm-config-repo: http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000/tssc-references/reference-quarkus-mvn-jenkins-config.git
+          helm-config-repo: http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000/platform/reference-quarkus-mvn-jenkins-config.git
           num-replicas: 1
           route-enabled: true
           readiness-probe-path: /fruits
