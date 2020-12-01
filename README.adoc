@@ -87,7 +87,7 @@ It is recommended to generate a new service account before a workshop and delete
   * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
 9. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
-10. If you modified the namespace or name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
+10. If you modified the name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
 11. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
 
   PLAY RECAP *********************************************************************
