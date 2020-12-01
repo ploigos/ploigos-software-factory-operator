@@ -175,7 +175,7 @@ Each CRD maps to a playbook named the same. Each playbook will call specific tas
 
 Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
 
-=== Design Quarks
+=== Design Quirks
 
 Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
 
