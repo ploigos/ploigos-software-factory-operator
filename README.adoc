@@ -83,9 +83,9 @@ It is recommended to generate a new service account before a workshop and delete
   
   ```
   oc create secret generic pull-secret --from-file=.dockerconfigjson=</path/to/.docker/config.json> --type=kubernetes.io/dockerconfigjson
-  
   ```
-  * Replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
+ 
+  * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
 8. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
 9. If you modified the namespace or name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
