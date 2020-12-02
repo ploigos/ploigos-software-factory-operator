@@ -55,3 +55,15 @@
   # to_json|from_json| is a terrible hack but here we are
   changed_when: updated_nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
   failed_when: updated_nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or updated_nexus_repos.rc != 0
+
+- name: Add container-image-signatures raw repository
+  shell: >-
+    devsecops-api nexus add-raw-repository
+    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
+    --login-username admin --login-password '{{ nexus_admin_password }}'
+    --repository-names 'container-image-signatures'
+  register: signatures_repo
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: signatures_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: signatures_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or signatures_repo.rc != 0

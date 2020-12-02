@@ -31,6 +31,10 @@
   when:
     - secret_data == []
 
+- name: Generate GPG Key
+  import_tasks: generate_gpg_key.yml
+  when: cr_state == 'present'
+
 - include_role:
     name: common/redhatgov-catalog
 

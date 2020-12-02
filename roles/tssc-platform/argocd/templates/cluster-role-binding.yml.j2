@@ -1,7 +1,7 @@
 apiVersion: authorization.openshift.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: argocd-project-provisioner
+  name: argocd-{{ argocd_project_name}}-cluster-admin
 roleRef:
   name: cluster-admin
 subjects:
