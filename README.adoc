@@ -76,27 +76,16 @@ oc delete limitrange --all -n devsecops
 It is recommended to generate a new service account before a workshop and delete it after, as this token is available in each of the users' projects (and can be used in the future if the service account isn't deleted). To get a service account:
   * Go to https://access.redhat.com/terms-based-registry/
   * Login with your Red Hat credentials, then go to Service Accounts (upper right corner) and create a new service account. 
-  * Click on the name of the service account, go to the 'OpenShift Secret' tab, click 'view its contents' 
-  * Copy value after `.dockerconfigjson`.
-  * Create your secret with this value:
+  * Click on the name of the service account, go to the 'Docker Configuration' tab, click 'view its contents' 
+  * Copy the contents and save it `~/.docker/config.json`
+  * Create the config.json file if not already existed `vi ~/.docker/config.json` and paste the contents there.
+  * Run the below command to create the pull-secret secret in the openshift-config namespace
   
-  ----
-    SECRET=<the value you copied in step 4>
-
-    oc apply -f - << EOF
-      kind: Secret
-      apiVersion: v1
-      metadata:
-        name: pull-secret
-        namespace: openshift-config
-      data:
-        .dockerconfigjson: $SECRET
-      type: kubernetes.io/dockerconfigjson
-    EOF
-  ----
-or 
-
-`oc create secret generic pull-secret --from-file=.dockerconfigjson=<path/to/.docker/config.json> --type=kubernetes.io/dockerconfigjson`
+  ```
+  oc create secret generic pull-secret --from-file=.dockerconfigjson=</path/to/.docker/config.json> --type=kubernetes.io/dockerconfigjson
+  
+  ```
+  * Replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
 8. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
 9. If you modified the namespace or name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
