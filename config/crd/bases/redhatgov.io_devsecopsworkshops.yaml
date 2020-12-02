@@ -45,9 +45,6 @@ spec:
                     description: Properties related to workshop users
                     type: object
                     properties:
-                      create:
-                        description: Whether the cluster oauth should be updated to create workshop users
-                        type: boolean
                       numberOfUsers:
                         description: The number of users to bootstrap in workshop tooling
                         type: integer

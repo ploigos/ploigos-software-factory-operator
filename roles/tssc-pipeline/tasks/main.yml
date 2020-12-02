@@ -1,0 +1,76 @@
+---
+- name: Fetch tssc-service-account secret
+  set_fact:
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=tssc_namespace, resource_name='tssc-service-account-credentials') }}"
+
+- name: Set tssc-service-account credential facts from secret
+  set_fact:
+    tssc_service_account:
+      username:  "{{ secret_data.data.username | b64decode }}"
+      password: "{{ secret_data.data.password | b64decode }}"
+      email: "{{ secret_data.data.email | b64decode }}"
+      first_name: "{{ secret_data.data.first_name | b64decode }}"
+      last_name: "{{ secret_data.data.last_name | b64decode }}"
+
+- name: Create quay repository
+  shell: >-
+    devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
+    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
+    --organization platform --repo-name reference-quarkus-mvn-jenkins-fruit
+
+- name: Get gitea token secret
+  k8s_info:
+    kind: Secret
+    api_version: v1
+    namespace: '{{ tssc_namespace }}'
+    name: gitea-access-token
+  register: gitea_token_secret
+
+- set_fact:
+    gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
+
+- name: Get platform org uid
+  uri:
+    url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/orgs/platform'
+    validate_certs: no
+    body_format: json
+    headers:
+      Authorization: 'token {{ gitea_token }}'
+  register: gitea_org_response
+
+- name: Migrate {{ repo_name }} From Upstream into Gitea, in platform org
+  uri:
+    url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
+    validate_certs: no
+    body_format: json
+    method: POST
+    headers:
+      Authorization: 'token {{ gitea_token }}'
+    body: |
+      {
+        "clone_addr": "https://github.com/RedHatGov/{{ repo_name }}.git",
+        "uid": {{ gitea_org_response.json.id }},
+        "repo_name": "{{ repo_name }}"
+      }
+    status_code: 201,409
+  register: gitea_repo_migration_task
+  changed_when: gitea_repo_migration_task.status == 201
+  loop:
+  - reference-quarkus-mvn-jenkins
+  - reference-quarkus-mvn-jenkins-config
+  loop_control:
+    loop_var: repo_name
+    label: repo_name
+
+- name: Get Service Account token
+  set_fact:
+    ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+
+- name: Scan Gitea Org to create Jenkins job
+  uri:
+    url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
+    method: POST
+    validate_certs: false
+    headers:
+      Authorization: 'Bearer {{ ocp_token }}'
+    status_code: "302"

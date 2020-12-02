@@ -42,14 +42,19 @@
   register: response
   changed_when: response.status == 201
 
-- name: Check for gitea token secret
-  k8s_info:
-    namespace: "{{ gitea_project_name }}"
-    kind: Secret
-    name: gitea-access-token
-  register: gitea_access_token_secret
+- name: Check Service Account token is present
+  uri:
+    url: 'https://gitea-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/users/{{ tssc_service_account.username }}/tokens'
+    validate_certs: no
+    method: GET
+    return_content: yes
+    body_format: json
+    headers:
+      Authorization: "Basic {{ (tssc_service_account.username + ':' + tssc_service_account.password) | b64encode }}"
+    status_code: 200
+  register: gitea_access_token_response
 
-- name: Create gitea access token if secret doesn't exist
+- name: Create gitea access token if it doesn't exist
   block:
   - name: Create Application Token for Gitea
     uri:
@@ -72,7 +77,27 @@
   - name: Create Gitea token secret
     k8s:
       definition: "{{ lookup('template', 'gitea-token-secret.yml.j2') }}"
-  when: not gitea_access_token_secret.resources
+
+  - name: Create Organization for Service Account
+    uri:
+      url: 'https://gitea-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/orgs'
+      validate_certs: no
+      body_format: json
+      method: POST
+      headers:
+        Authorization: "token {{ gitea_access_token }}"
+        Content-Type: "application/json"
+      body:
+        description: "TSSC Platform Organization"
+        full_name: "platform"
+        location: "Red Hat"
+        repo_admin_change_team_access: true
+        username: "platform"
+        visibility: "public"
+      status_code: 201,422
+    register: response
+    changed_when: response.status == 201
+  when: gitea_access_token_response.json == []
 
 - name: Get Gitea Pod
   k8s_info:

@@ -3,7 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: argocd-project-provisioner
 roleRef:
-  name: self-provisioner
+  name: cluster-admin
 subjects:
 - kind: ServiceAccount
   name: argocd-application-controller
