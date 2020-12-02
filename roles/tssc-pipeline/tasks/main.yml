@@ -1,4 +1,14 @@
 ---
+- name: Ensure that a TsscPlatform exists here
+  k8s_info:
+    api_version: redhatgov.io/v1alpha1
+    kind: TsscPlatform
+    namespace: '{{ tssc_namespace }}'
+  register: result
+  until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
+  retries: 20
+  delay: 60
+
 - name: Fetch tssc-service-account secret
   set_fact:
     secret_data: "{{ lookup('k8s', kind='Secret', namespace=tssc_namespace, resource_name='tssc-service-account-credentials') }}"
