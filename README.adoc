@@ -81,9 +81,9 @@ It is recommended to generate a new service account before a workshop and delete
   * Create the config.json file if not already existed `vi ~/.docker/config.json` and paste the contents there.
   * Run the below command to create the pull-secret secret in the openshift-config namespace
   
-  ----
+  
   oc create secret generic pull-secret --from-file=.dockerconfigjson=</path/to/.docker/config.json> --type=kubernetes.io/dockerconfigjson
-  ----
+  
  
   * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
