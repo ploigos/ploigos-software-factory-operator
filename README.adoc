@@ -68,7 +68,7 @@ Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc
 
   oc delete limitrange --all -n devsecops
 
-5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator" in the **devsecops** project. Select it and click **Install**
+5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator". Select it and click **Install**
 6. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
 7. Leave other options as default and click **Install** once more.
 8. *If you're using an RHPDS-provisioned cluster, you can skip this step, since this secret is created as part of the default provisioning template.* Create a `.dockerconfigjson` secret containing a pull token for registry.redhat.io.
