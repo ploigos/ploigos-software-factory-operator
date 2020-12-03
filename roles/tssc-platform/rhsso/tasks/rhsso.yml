@@ -1,4 +1,25 @@
 ---
+- name: Check for Postgres credential secret
+  k8s_info:
+    namespace: "{{ rhsso_project_name }}"
+    kind: Secret
+    name: "{{ database_service_name }}-credentials"
+  register: postgres_credentials
+
+- name: Generate Postgres password
+  block:
+    - set_fact:
+        pg_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+
+    - name: Create {{ database_service_name }}-credentials Secret
+      k8s:
+        definition: "{{ lookup('template', 'postgres-secret.yml.j2') | from_yaml }}"
+  when: not postgres_credentials.resources
+
+- name: Set Postgres password
+  set_fact:
+    postgresql_password: "{{ postgres_credentials | json_query('resources[0].data.password') | b64decode }}"
+
 - name: Set PostgreSQL Deployment to {{ cr_state }}
   k8s:
     definition: '{{ lookup("template", "rhsso-postgresql.yml.j2")|from_yaml }}'
