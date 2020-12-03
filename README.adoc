@@ -46,33 +46,32 @@ Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc
 
 1. Login to an OpenShift cluster (tested on 4.4 or above) as a `cluster-admin`
 2. Create a `CatalogSource` to import the RedHatGov operator catalog.
-----
-oc apply -f - << EOF
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: redhatgov-operators
-  namespace: openshift-marketplace
-spec:
-  sourceType: grpc
-  image: quay.io/redhatgov/operator-catalog:latest
-  displayName: Red Hat NAPS Community Operators
-  publisher: RedHatGov
-EOF
-----
+
+  oc apply -f - << EOF
+  apiVersion: operators.coreos.com/v1alpha1
+  kind: CatalogSource
+  metadata:
+    name: redhatgov-operators
+    namespace: openshift-marketplace
+  spec:
+    sourceType: grpc
+    image: quay.io/redhatgov/operator-catalog:latest
+    displayName: Red Hat NAPS Community Operators
+    publisher: RedHatGov
+  EOF
 
 3. Create a project named **devsecops** for your pipeline tooling to live.
-----
-oc new-project devsecops
 
-# Delete limit range, if created by a project template
-oc delete limitrange --all -n devsecops
-----
+  oc new-project devsecops
 
-4. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator" in the **devsecops** project. Select it and click **Install**
-5. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
-6. Leave other options as default and click **Install** once more.
-7. *If you're using an RHPDS-provisioned cluster, you can skip this step, since this secret is created as part of the default provisioning template.* Create a `.dockerconfigjson` secret containing a pull token for registry.redhat.io. 
+4. *If you are using an RHPDS-provisioned cluster:*  delete the limit range for the new project. RHPDS sometimes sets default CPU / memory limits that are too restrictive for certain Pods that the operator will create.
+
+  oc delete limitrange --all -n devsecops
+
+5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator". Select it and click **Install**
+6. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
+7. Leave other options as default and click **Install** once more.
+8. *If you're using an RHPDS-provisioned cluster, you can skip this step, since this secret is created as part of the default provisioning template.* Create a `.dockerconfigjson` secret containing a pull token for registry.redhat.io.
 It is recommended to generate a new service account before a workshop and delete it after, as this token is available in each of the users' projects (and can be used in the future if the service account isn't deleted). To get a service account:
   * Go to https://access.redhat.com/terms-based-registry/
   * Login with your Red Hat credentials, then go to Service Accounts (upper right corner) and create a new service account. 
@@ -87,18 +86,16 @@ It is recommended to generate a new service account before a workshop and delete
  
   * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
-8. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
-9. If you modified the namespace or name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
-10. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
+9. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
+10. If you modified the name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
+11. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
 
-----
-PLAY RECAP *********************************************************************
-[0;33mlocalhost[0m                  : [0;32mok=32  [0m [0;33mchanged=10  [0m unreachable=0    failed=0    [0;36mskipped=17  [0m rescued=0    ignored=0   
-----
+  PLAY RECAP *********************************************************************
+  [0;33mlocalhost[0m                  : [0;32mok=32  [0m [0;33mchanged=10  [0m unreachable=0    failed=0    [0;36mskipped=17  [0m rescued=0    ignored=0
 
-which indicates that the Reconciliation is complete. This should take 8-10 minutes.
+- This message indicates that the Reconciliation is complete. It should appear within 8-10 minutes.
 
-11. Then create a `TsscPipeline` instance, which should create and start your pipeline job in Jenkins:
+12. Then create a `TsscPipeline` instance, which should create and start your pipeline job in Jenkins:
 
 ----
 oc apply -n devsecops -f - << EOF
@@ -178,7 +175,7 @@ Each CRD maps to a playbook named the same. Each playbook will call specific tas
 
 Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
 
-=== Design Quarks
+=== Design Quirks
 
 Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
 
