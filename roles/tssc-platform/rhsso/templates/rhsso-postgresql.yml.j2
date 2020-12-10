@@ -1,17 +1,3 @@
-# Create the PostgreSQL DB secret
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: {{ database_secret_name }}
-    namespace: {{ rhsso_project_name }}
-  stringData:
-    POSTGRES_DATABASE: "{{ postgresql_database }}"
-    POSTGRES_PASSWORD: "{{ postgresql_password }}"
-    POSTGRES_USERNAME: "{{ postgresql_user }}"
-    POSTGRES_SUPERUSER: "true"
-    POSTGRES_EXTERNAL_ADDRESS: "{{ database_service_name }}.{{ rhsso_project_name }}.svc.cluster.local"
-    POSTGRES_EXTERNAL_PORT: "5432"
-
 # Create the PostgreSQL DB Service
 - apiVersion: v1
   kind: Service
