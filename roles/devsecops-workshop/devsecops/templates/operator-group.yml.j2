@@ -1,8 +1,0 @@
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: {{ operator_group_name | default(tssc_namespace + '-operatorgroup') }}
-  namespace: {{ tssc_namespace }}
-spec:
-  targetNamespaces:
-  - {{ tssc_namespace }}

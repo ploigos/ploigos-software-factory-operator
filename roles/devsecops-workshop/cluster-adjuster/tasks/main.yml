@@ -1,8 +1,0 @@
----
-- name: Ensure that the cluster tmp directory exists
-  file:
-    path: '{{ tmp_dir }}'
-    state: directory
-
-- include_tasks: create_users.yml
-  when: create_users

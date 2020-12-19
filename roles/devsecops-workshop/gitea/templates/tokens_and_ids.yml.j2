@@ -1,5 +1,0 @@
-{% for line in gitea_users.stdout_lines %}{% if line.startswith('token ') %}
-- username: {{ line.split(' ')[1] }}
-  token: {{ line.split(' ')[2] }}
-  uid: {{ gitea_user_ids|json_query('results[?json.username == `' + line.split(' ')[1] + '`].json.id | [0]') }}
-{% endif %}{% endfor %}

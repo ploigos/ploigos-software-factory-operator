@@ -1,4 +1,0 @@
----
-eap_imagestream_source: 'https://raw.githubusercontent.com/jboss-container-images/jboss-eap-7-openshift-image/7.2.x/templates/eap72-image-stream.json'
-
-deploy_automated_build: true

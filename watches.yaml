@@ -19,14 +19,3 @@
   vars:
     cr_state: present
     cr_type: pipeline
-- version: v1alpha1
-  group: redhatgov.io
-  kind: DevSecOpsWorkshop
-  playbook: playbooks/devsecops-workshop.yml
-  watchDependentResources: false
-  vars:
-    cr_state: present
-  finalizer:
-    name: finalizer.devsecopsworkshop.redhatgov.io
-    vars:
-      cr_state: absent

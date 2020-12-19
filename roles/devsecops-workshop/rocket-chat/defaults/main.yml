@@ -1,7 +1,0 @@
----
-rocketchat_project_name: devsecops
-rocketchat_project_display: DevSecOps Common Resources
-
-create_workshop_users: true
-rocketchat_url: https://rocketchat-{{ rocketchat_project_name }}.{{ cluster_router }}
-rocketchat_password: '{{ lookup("password", tmp_dir + "/rocketchat.password chars=ascii_letters,digits") }}'
