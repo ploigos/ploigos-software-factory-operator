@@ -1,9 +1,0 @@
----
-gitea_project_name: devsecops
-gitea_project_display: DevSecOps Common Resources
-
-# The github account from which to pull the openshift-tasks project
-tasks_github_project: "{{ github_project }}"
-
-repos_to_load:
-  - openshift-tasks

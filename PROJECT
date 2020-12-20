@@ -6,6 +6,6 @@ resources:
   kind: TsscPlatform
   version: v1alpha1
 - group: redhatgov
-  kind: DevSecOpsWorkshop
+  kind: TsscPipeline
   version: v1alpha1
 version: 3-alpha

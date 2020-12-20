@@ -11,7 +11,7 @@ metadata:
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions: {}
-  description: Deploys and manages TSSC and dependent database.
+  description: Deploys and manages TSSC.
   displayName: TSSC Operator
   icon:
   - base64data: |

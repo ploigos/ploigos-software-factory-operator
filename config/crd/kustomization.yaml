@@ -7,4 +7,3 @@ kind: Kustomization
 resources:
 - bases/redhatgov.io_tsscplatforms.yaml
 - bases/redhatgov.io_tsscpipelines.yaml
-- bases/redhatgov.io_devsecopsworkshops.yaml

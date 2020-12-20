@@ -8,6 +8,4 @@ resources:
 - leader_election_role_binding.yaml
 - tsscplatform_editor_role.yaml
 - tsscplatform_viewer_role.yaml
-- devsecopsworkshop_editor_role.yaml
-- devsecopsworkshop_viewer_role.yaml
 - service_account.yaml

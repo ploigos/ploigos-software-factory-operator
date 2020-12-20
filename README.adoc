@@ -23,16 +23,12 @@ This operator services the following https://docs.openshift.com/container-platfo
 
 The above https://docs.openshift.com/container-platform/4.5/operators/understanding/crds/crd-managing-resources-from-crds.html[CRDs] enable the following use cases:
 
-* <<DevSecOps Workshop>>
 * <<TSSC Workshop to Onboard an App>>
 * <<TSSC Demo with a Reference App>>
 * <<Production Deployment of TSSC Platform>>
 * <<Production Deployment of TSSC Pipeline>>
 
 == Use Cases
-=== DevSecOps Workshop
-
-Deploy and configure the resources required by the https://github.com/RedHatGov/devsecops-workshop-dashboard/blob/develop/tekton/workshop/content/index.md[DevSecOps workshop]. The workshop should be ready for an SA to conduct after this operator has completed execution.
 
 === TSSC Workshop to Onboard an App
 
@@ -130,10 +126,6 @@ This CRD is responsible for the service tooling, or platform, required to suppor
 
 Wherever possible we delegate to another operator to create/manage the platform services. For example the https://github.com/RedHatGov/gitea-operator[gitea-operator] happens to also be part of this GitHub org. That allows us to make changes to that operator to fulfill the needs of TSSC. Another example is the rhsso-operator; which is not an operator the TSSC group controls. If you compare the gitea and rhsso roles in this repo you will notice that the gitea role simply subscribes to the operator and applies one or more CRs. The rhsso role includes more tasks as there are gaps between what TSSC needs and what the rhsso-operator fulfills with it's CRs.
 
-==== Note
-
-This CRD is used to support all the use cases including: <<DevSecOps Workshop>>.
-
 === TsscWorkshop CRD
 
 This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
@@ -144,7 +136,7 @@ After this operator has completed execution in response to this CR an SA should 
 
 This CRD's responsibilities may include deploy or configuring addition services/tools beyond what the TsscPlatform CRD does(eg. username-distribution).
 
-This CRD supports both use cases: <<TSSC Workshop to Onboard an App>> and <<DevSecOps Workshop>>.
+This CRD supports the use case: <<TSSC Workshop to Onboard an App>>.
 
 === TsscPipeline CRD
 
@@ -157,8 +149,6 @@ This operator will not attempt to alter a target git repository(s) to integrate 
 This CRD supports both use cases: <<TSSC Demo with a Reference App>> and <<Production Deployment of TSSC Pipeline>>.
 
 == Intended Design vs Current Layout
-
-Please keep in mind that at the moment we are merging what was the devsecops workshop with the TSSC platform and the intended design is not yet obvious from the current layout. 
 
 Each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
 
@@ -228,7 +218,7 @@ hack/operate.sh --overlay=namespaced --namespace=mynamespace
 == Custom Resources
 
 * `TsscPlatform` - deploys platform components which support the Trusted Software Supply Chain. For a list of these components, see the link:roles/tssc-platform/[tssc-platform roles directory].
-* `DevSecOpsWorkshop` - deploys tooling, pipelines, and user resources to support the OpenShift DevSecOps workshop. For a list of related roles, see the link:roles/devsecops-workshop/[devsecops-workshop roles directory].
+
 
 == Deploying a custom TsscPlatform instance using the Operator
 

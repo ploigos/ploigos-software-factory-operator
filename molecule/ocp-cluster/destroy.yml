@@ -12,25 +12,24 @@
 
     - set_fact:
         custom_resources:
-        - DevSecOpsWorkshop
         - TsscPlatform
 
-    - name: Remove CRs
+    - name: Remove CR
       k8s:
         api_version: v1alpha1
         kind: '{{ item }}'
         state: absent
         name: '{{ item | lower }}-testing'
-        namespace: 'travis-{{ item | lower }}'
+        namespace: '{{ namespace }}'
       ignore_errors: true
       loop: '{{ custom_resources }}'
 
-    - name: Wait for CRs to be deleted
+    - name: Wait for CR to be deleted
       k8s_info:
         api_version: v1alpha1
         kind: '{{ item }}'
         name: '{{ item | lower }}-testing'
-        namespace: 'travis-{{ item | lower }}'
+        namespace: '{{ namespace }}'
       register: result
       until: result.resources | length == 0
       ignore_errors: true
@@ -42,17 +41,6 @@
       k8s:
         api_version: v1
         kind: Namespace
-        name: 'travis-{{ item | lower}}'
+        name: '{{ namespace }}'
         state: absent
-      loop: '{{ custom_resources }}'
-
-    - name: Wait for Namespaces to be deleted
-      k8s_info:
-        api_version: v1
-        kind: Namespace
-        name: 'travis-{{ item | lower}}'
-      register: result
-      until: result.resources | length == 0
-      retries: 30
-      delay: 10
       loop: '{{ custom_resources }}'

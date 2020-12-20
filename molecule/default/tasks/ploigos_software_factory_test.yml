@@ -1,24 +1,23 @@
 ---
 - set_fact:
     custom_resources:
-    - DevSecOpsWorkshop
     - TsscPlatform
 
-- name: Create CRs
+- name: Create CR
   k8s:
     state: present
-    namespace: 'travis-{{ item | lower }}'
+    namespace: '{{ namespace }}'
     definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
   vars:
     cr_file: 'redhatgov_v1alpha1_{{ item | lower }}_molecule.yaml'
   loop: '{{ custom_resources }}'
 
 # Ensure regular Ansible output to avoid Travis build timeouts
-- name: Wait for CRs to be Reconciled
+- name: Wait for CR to be Reconciled
   k8s_info:
     api_version: v1alpha1
     kind: '{{ item }}'
-    namespace: 'travis-{{ item | lower}}'
+    namespace: '{{ namespace }}'
     name: '{{ item | lower}}-testing'
   register: result
   until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
