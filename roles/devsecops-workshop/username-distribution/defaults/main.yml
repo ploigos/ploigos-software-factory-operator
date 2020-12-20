@@ -1,6 +1,0 @@
----
-username_distribution_project_name: devsecops
-username_distribution_project_display: DevSecOps Common Resources
-username_distribution_admin_password: '{{ lookup("password", tmp_dir + "/username.distribution.password chars=ascii_letters,digits") }}'
-
-user_access_token: redhatgov

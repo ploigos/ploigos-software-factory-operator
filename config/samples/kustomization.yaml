@@ -8,6 +8,3 @@ resources:
 - redhatgov_v1alpha1_tsscpipeline.yaml
 - redhatgov_v1alpha1_tsscpipeline_molecule.yaml
 - redhatgov_v1alpha1_tsscpipeline_openshift.yaml
-- redhatgov_v1alpha1_devsecopsworkshop.yaml
-- redhatgov_v1alpha1_devsecopsworkshop_molecule.yaml
-- redhatgov_v1alpha1_devsecopsworkshop_openshift.yaml

@@ -1,2 +1,2 @@
-- name: Configure CRW of the indicated type (tssc or devsecops)
+- name: Configure CRW of the indicated type
   include_tasks: "{{ 'configure_crw_' + crw_deployment_type + '.yml' }}"

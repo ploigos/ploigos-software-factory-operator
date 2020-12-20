@@ -14,8 +14,6 @@
         name: '{{ item }}'
       loop:
       - '{{ namespace }}'
-      - travis-devsecopsworkshop
-      - travis-tsscplatform
 
     - import_tasks: kustomize.yml
       vars:

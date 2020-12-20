@@ -1,6 +1,0 @@
----
-certificate_path: '{{ tmp_dir }}/certs'
-quay_route: quay.{{ cluster_router }}
-quay_project_name: devsecops
-quay_project_display: DevSecOps Common Resources
-enable_quay_repo_mirroring: false

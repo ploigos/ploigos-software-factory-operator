@@ -1,7 +1,0 @@
-apiVersion: redhatgov.io/v1alpha1
-kind: DevSecOpsWorkshop
-metadata:
-  name: devsecopsworkshop
-  # annotations:
-    # ansible.sdk.operatorframework.io/verbosity: '4'
-spec: {}
