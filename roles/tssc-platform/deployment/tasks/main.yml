@@ -1,4 +1,38 @@
 ---
+- name: Add redhatgov catalog source
+  k8s:
+    definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
+
+- name: Get a list of operator groups
+  k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: '{{ tssc_namespace }}'
+  register: operator_groups
+
+- set_fact:
+    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
+  when: operator_groups.resources
+
+- name: Ensure OperatorGroup exists
+  k8s:
+    definition: '{{ lookup("template", "operator-group.yml.j2") }}'
+
+- name: 'Create Subscription for {{ operator_app }}'
+  k8s:
+    definition: '{{ lookup("template", "subscriptions/" + operator_app + ".yml.j2") }}'
+  loop: '{{ operator_list }}'
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
+
+- include_tasks: deploy_jenkins.yml
+  when: deploy_legacy_jenkins
+
+- include_role:
+    name: tssc-platform/configuration/rhsso
+  when: deploy_rhsso
+
 - name: Fetch tssc-service-account secret
   set_fact:
     secret_data: "{{ lookup('k8s', kind='Secret', namespace=tssc_namespace, resource_name=tssc_service_account_secret) }}"
@@ -31,76 +65,21 @@
   when:
     - secret_data == []
 
-- name: Generate GPG Key
-  import_tasks: generate_gpg_key.yml
-  when: cr_state == 'present'
-
-- include_role:
-    name: common/redhatgov-catalog
-
-- name: Get a list of operator groups
-  k8s_info:
-    api_version: operators.coreos.com/v1
-    kind: OperatorGroup
-    namespace: '{{ tssc_namespace }}'
-  register: operator_groups
-
-- set_fact:
-    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
-  when: operator_groups.resources
-
-- name: Ensure OperatorGroup exists
+- name: 'Set CustomResource for {{ operator_app }} to {{ cr_state }}'
   k8s:
-    definition: '{{ lookup("template", "operator-group.yml.j2") }}'
-
-- name: 'Create Subscription for {{ item }}'
-  k8s:
-    definition: '{{ lookup("template", "subscriptions/" + item + ".yml.j2") }}'
-  loop: '{{ operator_list }}'
-
-- include_role:
-    name: tssc-platform/rhsso
-  when: deploy_rhsso
-
-- name: 'Set CustomResource for {{ item }} to {{ cr_state }}'
-  k8s:
-    definition: '{{ lookup("template", "custom-resources/" + item + ".yml.j2") }}'
+    definition: '{{ lookup("template", "custom-resources/" + operator_app + ".yml.j2") }}'
     state: '{{ cr_state }}'
   register: deployment
   until: not deployment.failed
   retries: 5
   delay: 10
   loop: '{{ operator_list }}'
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
 
-- name: App level configuration
-  block:
-  - include_role:
-      name: tssc-platform/gitea
-    when: deploy_gitea
-  - include_role:
-      name: tssc-platform/argocd
-    when: deploy_argocd
-  - include_role:
-      name: tssc-platform/sonarqube
-    when: deploy_sonarqube
-  - include_role:
-      name: tssc-platform/nexus
-    when: deploy_nexus
-  - include_role:
-      name: tssc-platform/quay
-    when: deploy_quay
-  - include_role:
-      name: tssc-platform/legacy-jenkins
-    when: deploy_legacy_jenkins
-  - include_role:
-      name: tssc-platform/mattermost
-    when: deploy_mattermost_operator
-  - include_role:
-      name: common/codeready-workspaces
-    when: deploy_crw
-  - include_role:
-      name: tssc-platform/selenium-grid
-    when: deploy_selenium_grid
+- name: Generate GPG Key
+  import_tasks: generate_gpg_key.yml
   when: cr_state == 'present'
 
 - name: Get registry pull secret
@@ -141,3 +120,17 @@
         namespace: '{{ tssc_namespace }}'
       data:
         tssc-config-secrets.yml: '{{ tssc_config_secrets }}'
+
+- name: 'Apply configuration for {{ operator_app }}'
+  include_role:
+    name: 'tssc-platform/configuration/{{ operator_app }}'
+  loop: '{{ operator_list }}'
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
+  when: cr_state == 'present'
+
+- name: Apply configuration for jenkins
+  include_role:
+    name: tssc-platform/configuration/legacy_jenkins
+  when: cr_state == 'present'

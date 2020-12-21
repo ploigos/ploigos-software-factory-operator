@@ -53,7 +53,7 @@
       when: rhedsord_included is not defined or not rhedsord_included
 
     - include_role:
-        name: tssc-platform/rhedsord
+        name: tssc-platform/deployment
       when: cr_type == 'platform'
 
     - include_role:

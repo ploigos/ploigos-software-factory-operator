@@ -12,6 +12,10 @@ deploy_mattermost_operator: true
 
 subdomain: '{{ full_cluster_name }}'
 
+redhat_gov_catalog_tag: "latest"
+
+jenkins_repository_name: openshift-release-dev
+
 crw_admin_user:
   username: codeready-admin
   password: demo123
