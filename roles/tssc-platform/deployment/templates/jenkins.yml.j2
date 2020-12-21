@@ -13,7 +13,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
   spec:
     host: ""
     tls:
@@ -36,7 +36,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
   spec:
     accessModes:
     - ReadWriteOnce
@@ -56,7 +56,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
   spec:
     replicas: 1
     selector:
@@ -166,7 +166,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
 - apiVersion: authorization.openshift.io/v1
   groupNames: null
   kind: RoleBinding
@@ -179,7 +179,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins_edit
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
   roleRef:
     name: edit
   subjects:
@@ -197,7 +197,7 @@ items:
       template: jenkins-persistent-template
       app.kubernetes.io/part-of: jenkins
     name: jenkins-jnlp
-    namespace: {{ jenkins_project_name }}
+    namespace: {{ tssc_namespace }}
   spec:
     ports:
     - name: agent
