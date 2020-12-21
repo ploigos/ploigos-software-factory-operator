@@ -133,3 +133,4 @@
 - name: Apply configuration for jenkins
   include_role:
     name: tssc-platform/configuration/legacy_jenkins
+  when: cr_state == 'present'
