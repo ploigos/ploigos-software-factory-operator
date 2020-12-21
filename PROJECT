@@ -1,6 +1,6 @@
 domain: io
 layout: ansible.sdk.operatorframework.io/v1
-projectName: tssc-operator
+projectName: ploigos-software-factory-operator
 resources:
 - group: redhatgov
   kind: TsscPlatform
