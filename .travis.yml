@@ -12,7 +12,6 @@ install:
 - tar xvzf $HOME/oc.tar.gz -C $HOME/.local/bin oc
 - curl -Lo $HOME/helm.tgz https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz
 - tar xvzf $HOME/helm.tgz -C $HOME/.local/bin --strip-components 1 linux-amd64/helm
-- helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 sudo: true
 before_script:
 - sudo sysctl -w vm.max_map_count=262144
