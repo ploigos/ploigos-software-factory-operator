@@ -29,5 +29,10 @@ spec:
             - "--leader-election-id=tssc-operator"
             - "--inject-owner-ref=false"
           image: controller:latest
+          env:
+          - name: WATCH_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations['olm.targetNamespaces']
       terminationGracePeriodSeconds: 10
       serviceAccountName: tssc-operator-sa

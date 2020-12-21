@@ -1,0 +1,30 @@
+- name: Ensure Jenkins controller ImageStream exists in disconnected cluster
+  when: not connected_cluster
+  block:
+  - name: List Jenkins repository image tags
+    uri:
+      url: 'https://{{ rhedsord_registry }}/v2/{{ jenkins_repository_name }}/tags/list'
+      method: GET
+      user: '{{ rhedsord_registry_username }}'
+      password: '{{ rhedsord_registry_password }}'
+      force_basic_auth: yes
+      status_code: 200
+      validate_certs: false
+    register: openshift_release_dev_image_tags
+
+  - set_fact:
+      jenkins_image_path: '{{ rhedsord_registry }}/{{ jenkins_repository_name }}:{{ item }}'
+    loop: '{{ openshift_release_dev_image_tags.json.tags }}'
+    when: item is match('.*jenkins$')
+
+  - name: Create Jenkins ImageStream
+    k8s:
+      namespace: openshift
+      definition: '{{ lookup("template", "jenkins-imagestream.yml.j2")|from_yaml }}'
+      state: '{{ cr_state }}'
+
+- name: Create a Jenkins instance
+  k8s:
+    namespace: '{{ jenkins_project_name }}'
+    definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
+    state: '{{ cr_state }}'
