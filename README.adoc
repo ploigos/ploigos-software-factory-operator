@@ -64,7 +64,7 @@ Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc
 
   oc delete limitrange --all -n devsecops
 
-5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "TSSC Operator". Select it and click **Install**
+5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "Ploigos Software Factory Operator". Select it and click **Install**
 6. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
 7. Leave other options as default and click **Install** once more.
 8. *If you're using an RHPDS-provisioned cluster, you can skip this step, since this secret is created as part of the default provisioning template.* Create a `.dockerconfigjson` secret containing a pull token for registry.redhat.io.
@@ -82,7 +82,7 @@ It is recommended to generate a new service account before a workshop and delete
  
   * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
 
-9. On the TSSC Operator page, create a new `TsscPlatform` CustomResource.
+9. On the Ploigos Software Factory Operator page, create a new `TsscPlatform` CustomResource.
 10. If you modified the name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
 11. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
 
@@ -231,7 +231,7 @@ A TsscPlatform instance is deployed by creating a `kind: TsscPlatform` Custom Re
 oc create -f ./tsscplatform.yaml
 ----
 
-. The operator will deplot a Tssc Platform.
+. The operator will deploy a Tssc Platform.
 . You can validate the existence of your Tssc Platform instance by querying for tsscplatform objects:
 +
 [source,sh]
