@@ -100,26 +100,26 @@
     rhio_username: "{{ rhio_auth.split(':')[0] }}"
     rhio_token: "{{ rhio_auth.split(':')[1] }}"
 
-- name: 'Set tssc-config ConfigMap to {{ cr_state }}'
+- name: 'Set ploigos-platform-config ConfigMap to {{ cr_state }}'
   k8s:
-    definition: '{{ lookup("template", "tssc-config.yml.j2") }}'
+    definition: '{{ lookup("template", "ploigos-platform-config.yml.j2") }}'
     state: '{{ cr_state }}'
 
 - name: Get secret template as base64
   set_fact:
-    tssc_config_secrets: "{{ lookup('template', 'tssc-config-secrets.yml.j2') | b64encode }}"
+    ploigos_platform_config_secrets: "{{ lookup('template', 'ploigos-platform-config-secrets.yml.j2') | b64encode }}"
 
-- name: 'Set tssc-config-secrets Secret to {{ cr_state }}'
+- name: 'Set ploigos-platform-config-secrets Secret to {{ cr_state }}'
   k8s:
     state: '{{ cr_state }}'
     definition: |
       apiVersion: v1
       kind: Secret
       metadata:
-        name: tssc-config-secrets
+        name: ploigos-platform-config-secrets
         namespace: '{{ tssc_namespace }}'
       data:
-        tssc-config-secrets.yml: '{{ tssc_config_secrets }}'
+        config-secrets.yml: '{{ ploigos_platform_config_secrets }}'
 
 - name: 'Apply configuration for {{ operator_app }}'
   include_role:
