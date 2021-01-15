@@ -26,7 +26,7 @@
   shell: >-
     devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
-    --organization platform --repo-name ref-quarkus-mvn-jenkins-std
+    --organization platform --repo-name ref-quarkus-mvn-jenkins-std-fruit
 
 - name: Get gitea token secret
   k8s_info:
@@ -48,7 +48,7 @@
       Authorization: 'token {{ gitea_token }}'
   register: gitea_org_response
 
-- name: Migrate {{ repo_name }} From Upstream into Gitea, in platform org
+- name: Migrate {{ repo.name }} From Upstream into Gitea, in platform org
   uri:
     url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
     validate_certs: no
@@ -58,19 +58,21 @@
       Authorization: 'token {{ gitea_token }}'
     body: |
       {
-        "clone_addr": "{{ repo_url }}",
+        "clone_addr": "{{ repo.url }}",
         "uid": {{ gitea_org_response.json.id }},
-        "repo_name": "{{ repo_name }}"
+        "repo_name": "{{ repo.name }}"
       }
     status_code: 201,409
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
   loop:
-  - http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
-  - http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+  - name: reference-quarkus-mvn_jenkins_workflow-standard
+    url: http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
+  - name: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
+    url: http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
   loop_control:
-    loop_var: repo_url
-    label: repo_url
+    loop_var: repo
+    label: repo.name
 
 - name: Get Service Account token
   set_fact:
