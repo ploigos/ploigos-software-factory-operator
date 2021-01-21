@@ -1,0 +1,327 @@
+# NOTE
+# These are all global so that user doesn't have to know which child chart actually uses them
+# and rather just interacts with the cohesive system.
+#
+# Would have rather had them be scoped to the parent Chart and then re-pass them to child Chart
+# but no way to do that with Helm.
+global:
+  # verbose is whether various Workflow systems are more verbose,
+  # ie setting 'set -x' in *sh commands.
+  # Useful for debugging.
+  # Required
+  verbose: false
+
+  # serviceName is the name of the the service within a given application (applicationName)
+  # that this Workflow is being deployed for.
+  # In many places serviceName and applicationName will be combined to make
+  # unique names for created resources.
+  # Required.
+  serviceName: fruit
+
+  # applicationName is the name of the application that contains the service (serviceName)
+  # that this Workflow is being deployed for.
+  # In many places serviceName and applicationName will be combined to make
+  # unique names for created resources.
+  # Required.
+  applicationName: ref-quarkus-mvn-jenkins-std
+
+  # eventListenerCreateRoute is boolean whether to create a Route to the EventListener.
+  # Routes are specific to OpenShift but are convenient in that they can auto-generate
+  # a host name for the Route.
+  # If true then eventListenerRouteHostOverride maybe specified.
+  # If false then eventListenerRouteHostOverride is ignored.
+  eventListenerCreateRoute: true
+
+  # eventListenerCreateIngress is boolean whether to create an Ingress to the EventListener.
+  # If true then eventListenerIngressHost must be specified.
+  # If false then eventListenerIngressHost is ignored.
+  eventListenerCreateIngress: false
+
+  # eventListenerRouteHostOverride is an optional override to the Kubernetes Route host
+  # field.
+  # If eventListenerCreateRoute is true and eventListenerRouteHostOverride is provided
+  # eventListenerRouteHostOverride will be used as the Route host
+  # (https://docs.openshift.com/container-platform/4.6/rest_api/network_apis/route-route-openshift-io-v1.html).
+  # If eventListenerCreateRoute is false then eventListenerRouteHostOverride is ignored.
+  #
+  # This is useful if you want control over what the URI is for the EventListener which will
+  # ultimately need to be configured in your Source Control projects Webhook settings.
+  # Optional.
+  eventListenerRouteHostOverride:
+
+  # eventListenerIngressHost is the value to use for the host filed for the Ingress resource
+  # directed to the Service created by the EventListener.
+  # Ignored if eventListenerCreateIngress is false.
+  # Required if eventListenerCreateIngress is true.
+  eventListenerIngressHost:
+
+  # cleanupPipelineRunsToKeep is the number of Tekton PipelineRuns to keep when automatically
+  # deleting old PipelineRuns for a given Pipeline.
+  # Required.
+  cleanupPipelineRunsToKeep: 10
+  # cleanupPipelineRunsSchedule is the cron schedule for how often the CronJob for deleting
+  # old PipelineRuns is run.
+  # Required.
+  cleanupPipelineRunsSchedule: "*/15 * * * *"
+  # cleanupPipelineSuccessfulJobHistoryLimit is the number of Job resources to keep created
+  # by the CronJob for deleting old PipelineRuns.
+  # Required.
+  cleanupPipelineSuccessfulJobHistoryLimit: 5
+  # cleanupPipelineFailedJobHistoryLimit is the number of failed Job resources to keep created
+  # by the CronJob for deleting old PipelineRuns.
+  # Required.
+  cleanupPipelineFailedJobHistoryLimit: 1
+  # cleanupPipelineStartingDeadlineSeconds is the startingDeadlineSeconds for the CronJob
+  # that deletes old PipelineRuns.
+  # This is important if your Kubernetes Cluster isn't always on because the CronJob will
+  # think it failed to run while the Kubernetes Cluster was off and then stop attempting to run
+  # all together. Therefor this number should be long enough to cover any planned outage periods.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-job-limitations
+  # Required.
+  cleanupPipelineStartingDeadlineSeconds: 600
+  # cleanupPipelineCronJobImage is the container image to use when running the CronJob to
+  # delete old PipelineRuns.
+  # This image must have the 'kubectl' binary installed compatible with the Kubernetes Cluster
+  # the CronJob is running on.
+  # Required.
+  cleanupPipelineCronJobImage: ploigos/ploigos-base:latest
+
+  # stepRunnerPackageName is the name of the python package to use as the Workflow Step Runner.
+  stepRunnerPackageName: ploigos-step-runner
+  # stepRunnerUpdateLibrary is whether or not to update the Workflow Step Runner Python library
+  # installed in the workflow worker images.
+  # If 'true', then pull the Workflow Step Runner library source code and build it.
+  # If 'false', use the version of the Workflow Step Runner library that is pre-installed
+  # in the CI worker images.
+  #
+  # If 'false' then the following parameters are ignored:
+  #   - 'stepRunnerLibSourceUrl'
+  #   - 'stepRunnerLibIndexUrl'
+  #   - 'stepRunnerLibExtraIndexUrl'
+  #   - 'stepRunnerLibVersion'
+  # Required.
+  stepRunnerUpdateLibrary: false
+  # stepRunnerLibSourceUrl is the optional URI for where to install/update the Workflow Step Runner
+  # from.
+  # If none empty value given and 'stepRunnerUpdateLibrary' is true this will be used as the source
+  # location to install the Workflow Step Runner library from rather then from a PEP 503 compliant
+  # repository.
+  #
+  # If given then the following parameters are ignored:
+  #   - 'stepRunnerLibIndexUrl'
+  #   - 'stepRunnerLibExtraIndexUrl'
+  #   - 'stepRunnerLibVersion'
+  #
+  # EXAMPLES
+  # --------
+  # git+https://github.com/ploigos/ploigos-step-runner.git@feature/NAPSSPO-1018
+  # installs from the public 'ploigos' fork from the 'feature/NAPSSPO-1018' branch.
+  #
+  # git+https://gitea.internal.example.xyz/tools/ploigos-step-runner.git@main
+  # installs from an internal fork of the step runner library from the 'main' branch.
+  # Optional.
+  stepRunnerLibSourceUrl:
+  # stepRunnerLibIndexUrl is the optional Python PIP index url to use when
+  # installing/updateing the Step Runner python library.
+  # If 'stepRunnerUpdateLibrary' is true and 'stepRunnerLibSourceUrl' is not supplied then this
+  # will be passed to pip as '--index-url' for installing the Workflow Step Runner library
+  # and its dependencies.
+  #
+  # NOTE
+  # ----
+  # PIP is indeterminate whether it will pull packages from '--index-url' or
+  # '--extra-index-url', therefor be sure to specify 'stepRunnerLibVersion'
+  # if trying to pull a specific version from a specific index.
+  #
+  # SEE
+  # ---
+  # - https://pip.pypa.io/en/stable/reference/pip_install/#id48
+  # Optional.
+  stepRunnerLibIndexUrl: https://pypi.org/simple/
+  # stepRunnerLibExtraIndexUrl is the optional Python PIP extra index url to use when
+  # installing/updateing the Step Runner python library.
+  # If 'stepRunnerUpdateLibrary' is true and 'stepRunnerLibSourceUrl' is not supplied then this
+  # will be passed to pip as '--extra-index-url' for installing the Workflow Step Runner library
+  # and its dependencies.
+  #
+  # NOTE
+  # ----
+  # PIP is indeterminate whether it will pull packages from '--index-url' or
+  # '--extra-index-url', therefor be sure to specify 'stepRunnerLibVersion'
+  # if trying to pull a specific version from a specific index.
+  #
+  # SEE
+  # ---
+  # - https://pip.pypa.io/en/stable/reference/pip_install/#id48
+  # Optional.
+  stepRunnerLibExtraIndexUrl: https://pypi.org/simple/
+  # stepRunnerLibVersion is the version of the Workflow Step Runner Python library to install.
+  # If 'stepRunnerUpdateLibrary' is true and 'stepRunnerLibSourceUrl' is not supplied then this
+  # will be passed to pip as as the version of the Workflow Step Runner library to install.
+  #
+  # NOTE
+  # ----
+  # If not given pip will install the latest from either 'stepRunnerLibIndexUrl' or
+  # 'stepRunnerLibExtraIndexUrl' indeterminately.
+  # Optional.
+  stepRunnerLibVersion:
+
+  # envNameDev is the name of the "Development" environment used in the Step Runner configuration
+  # files and to pass to the Workflow Step Runner when running a step targeted to
+  # the "Development" environment.
+  # Required.
+  envNameDev: DEV
+  # envNameTest is the name of the "Test" environment used in the Step Runner configuration
+  # files and to pass to the Workflow Step Runner when running a step targeted to
+  # the "Test" environment.
+  # Required.
+  envNameTest: TEST
+  # envNameProd is the name of the "Production" environment used in the Step Runner configuration
+  # files and to pass to the Workflow Step Runner when running a step targeted to
+  # the "Production" environment.
+  # Required.
+  envNameProd: PROD
+
+  # ciOnlyGitRefPatterns is the regex pattern for git references that should only go through the
+  # Continues Integration (CI) workflow.
+  # Required.
+  ciOnlyGitRefPatterns: "^$"
+  # devGitRefPatterns is the Regex pattern for git references that should go through the
+  # Continues Integration (CI) workflow and then the deployment to
+  # "Development" environment(s) (IE: "DEV" environment) workflow.
+  # Required.
+  devGitRefPatterns: "^feature/.+$|^PR-.+$"
+  # releaseGitRefPatterns is the Regex pattern for git references that should go through the
+  # Continues Integration (CI) workflow and then the deployment to
+  # "Release" environment(s) (IE: "TEST" and then "PROD" environments) workflow.
+  # Required.
+  releaseGitRefPatterns: "^main$"
+
+  # pgpKeysSecretNameOverride is the optional override for Kubernetes Secret name to
+  # attach to the workflow worker containers for importing PGP keys, most notably used to
+  # decrypt SOPS encrypted configuration files.
+  #
+  # This is most useful if you don't want to supply your PGP keys via the pgpKeys parameter
+  # and have a Kubernetes Secret automatically created for you but rather reference an already
+  # existing Secret.
+  # Optional.
+  pgpKeysSecretNameOverride: tssc-gpg-key
+  # pgpKeys is a dictionary of PGP keys to place into a Kubernetes Secret and then attach to the
+  # Workflow worker containers to then import for usel most notably used to decrypt SOPS
+  # encrypted configuration files.
+  # Optional.
+  pgpKeys: {}
+
+  # stepRunnerConfigDir is the path to the Step Runner configuration to pass to the
+  # Workflow Step Runner when running workflow steps.
+  stepRunnerConfigDir: "/opt/platform-config cicd/ploigos-step-runner-config/"
+
+  # workflowWorkerHomeDirPVCRequestSize is the size of the PVC to request for the home directory
+  # of the workflow worker containers.
+  # The home directory is typically where tools like Buildah will store built container images
+  # so this needs to be large enough to fit all the layers and dependencies of whatever container
+  # images are being built.
+  workflowWorkerHomeDirPVCRequestSize: 10Gi
+  # workflowWorkerAppDirPVCRequestSize is the size of the PVC to request for the application
+  # directory of the workflow worker containers.
+  # The application directory is where the application will be checkedout from source and where
+  # any building/packaging for the application will take place so it must be large enough to
+  # fit those resources.
+  workflowWorkerAppDirPVCRequestSize: 1Gi
+
+  # workflowWorkerRunAsUser is the UID to run the workflow worker containers as.
+  #
+  # IMPORTANT:
+  #  From experimentation this NEEDS be a UID that exists in the worker container images
+  #  images. This is due to limitations of how subuid, subgid, and namespaces work
+  #  and their appropriate ranges not being created for random UID is not created
+  #  with `useradd` and how that interacts with `buildah unshare` for rootless
+  #  container builds within a container.
+  #
+  # NOTE:
+  #  The quay.io/ploigos/ploigos-base image uses UID 1001 but if you don't like that UID
+  #  then you can use https://github.com/ploigos/ploigos-containers to create custom
+  #  versions of the Ploigos workflow containers and passing in the container ARG
+  #  `PLOIGOS_USER_UID` to change the UID.
+  workflowWorkerRunAsUser: 1001
+  # workflowWorkerRunAsUserRoleName is the name of the Kubernetes Role that has permissions
+  # to run as the UID specified with workflowWorkerRunAsUser.
+  # A RoleBinding will be created and attached the ServiceAccount that is used to run
+  # the workflow Pods.
+  workflowWorkerRunAsUserRoleName: ploigos-run-as-user-1001
+
+  # workflowWorkerImageDefault is the container image to use when creating a workflow worker
+  # to run pipeline steps when no other specific container image has been specified for that step.
+  workflowWorkerImageDefault: ploigos/ploigos-base:latest
+  # workflowWorkerImageSourceClone is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing source clone step(s).
+  workflowWorkerImageSourceClone: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.12.1'
+  # workflowWorkerImageUnitTest is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing unit test step(s).
+  workflowWorkerImageUnitTest: ploigos/ploigos-tool-maven:latest
+  # workflowWorkerImagePackage is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing package application step(s).
+  workflowWorkerImagePackage: ploigos/ploigos-tool-maven:latest
+  # workflowWorkerImageStaticCodeAnalysis is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing static code analysis step(s).
+  workflowWorkerImageStaticCodeAnalysis: ploigos/ploigos-tool-sonar:latest
+  # workflowWorkerImagePushArtifacts is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing push push packaged artifacts step(s).
+  workflowWorkerImagePushArtifacts: ploigos/ploigos-tool-maven:latest
+  # workflowWorkerImageContainerOperations is the
+  # container image to use when creating a workflow worker
+  # to run pipeline steps when performing container operations (build/push/etc) step(s).
+  workflowWorkerImageContainerOperations: ploigos/ploigos-tool-containers:latest
+  # workflowWorkerImageContainerImageStaticComplianceScan is the
+  # container image to use when creating a workflow worker
+  # to run pipeline steps when performing container image static compliance scan step(s).
+  workflowWorkerImageContainerImageStaticComplianceScan: ploigos/ploigos-tool-openscap:latest
+  # workflowWorkerImageContainerImageStaticVulnerabilityScan is the
+  # container image to use when creating a workflow worker to run pipeline steps
+  # when performing container image static vulnerability scan step(s).
+  workflowWorkerImageContainerImageStaticVulnerabilityScan: ploigos/ploigos-tool-openscap:latest
+  # workflowWorkerImageDeploy is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing deploy step(s).
+  workflowWorkerImageDeploy: ploigos/ploigos-tool-argocd:latest
+  # workflowWorkerImageValidateEnvironmentConfiguraiton is the
+  # container image to use when creating a workflow worker
+  # to run pipeline steps when performing validate environment configuration step(s).
+  workflowWorkerImageValidateEnvironmentConfiguraiton: ploigos/ploigos-tool-config-lint:latest
+  # workflowWorkerImageUAT is the container image to use when creating a workflow worker
+  # to run pipeline steps when performing user acceptance tests (UAT) step(s).
+  workflowWorkerImageUAT: ploigos/ploigos-tool-maven:latest
+
+  # tektonGitSSHKeys is a dictionary of private SSH keys to use with various
+  # Git source control services.
+  #
+  # EXMAPLE
+  # -------
+  # tektonGitSSHKeys
+  #   gitea-external: # this can be arbitrary
+  #     gitURLs: # this should be an array of git URIs to use this SSH key for
+  #     - gitea-ext.gitea:2022
+  #     - gitea.ploigos.xyz:2022
+  #     known_hosts: | # values to put in known hosts to trust the the certificates from the Git server
+  #       [gitea.ploigos.xyz]:2022,[gitea-ext.gitea]:2022 ssh-rsa AAAAB3NzaC1yc2EAAAADAQAB...
+  #     ssh-privatekey: | # SSH private key to use for authentication
+  #       <recommend this value this be put in a SOPS encrypted yaml file>
+  #
+  # SEE
+  # ---
+  # https://github.com/tektoncd/pipeline/blob/master/docs/auth.md#configuring-ssh-auth-authentication-for-git
+  tektonGitSSHKeys: {}
+
+  # Flag indicating that platform-level configuration is separate from
+  # app-level configuration, and that the ploigos-step-runner ClusterTask
+  # should expect to find:
+  # - Platform config mounted in /opt/ploigos-platform-config
+  # - Platform config secrets mounted in /opt/ploigos-platform-config-secrets
+  #
+  # This flag also adds two workspaces to the pipeline template:
+  # - ploigos-platform-config: for mounting a ConfigMap
+  # - ploigos-platform-config-secrets: for mounting a Secret
+  separatePlatformConfig: true
+
+
+ploigos-workflow-tekton-shared-resources:
+  nameOverride: ploigos-workflow-standard-tekton-pipeline
