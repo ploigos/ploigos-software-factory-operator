@@ -9,7 +9,9 @@ RUN curl http://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshi
     tar xvzf /root/oc.tar.gz -C /usr/local/bin oc
 USER ansible
 RUN ansible-galaxy collection install -r ${HOME}/requirements.yml \
- && chmod -R ug+rwx ${HOME}/.ansible
+ && chmod -R ug+rwx ${HOME}/.ansible \
+ && curl -Lo ${HOME}/helm.tgz https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz \
+ && tar xvzf ${HOME}/helm.tgz -C /usr/local/bin --strip-components 1 linux-amd64/helm
 
 COPY watches.yaml ${HOME}/watches.yaml
 COPY library/ /usr/share/ansible/openshift/
