@@ -154,6 +154,7 @@
       chart_ref: ploigos_charts/ploigos-workflow-tekton-cluster-resources
       values: "{{ lookup('template', 'ploigos-cluster-chart-values.yaml.j2') | from_yaml }}"
       release_namespace: "{{ tssc_namespace }}"
+      release_state: "{{ cr_state }}"
     register: cluster_resources_chart
     ignore_errors: true
   when: tssc_platform.ci_tool == 'tekton'
