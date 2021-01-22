@@ -11,7 +11,7 @@
 
 - name: Get ci tool from TsscPlatform
   set_fact:
-    platform_ci_tool: (tssc_platform_result.resources[0].spec.tsscPlatform.providers.ciTool | join ) | default('jenkins')
+    platform_ci_tool: "{{ tssc_platform_result.resources[0].spec.tssc_platform.ci_tool | default('jenkins') }}"
 
 - name: Fetch tssc-service-account secret
   set_fact:
