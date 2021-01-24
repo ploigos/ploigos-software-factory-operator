@@ -30,7 +30,7 @@
   shell: >-
     devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
-    --organization platform --repo-name ref-quarkus-mvn-jenkins-std-fruit
+    --organization platform --repo-name {{ app_name}}-{{ service_name }}
 
 - name: Get gitea token secret
   k8s_info:
@@ -52,7 +52,7 @@
       Authorization: 'token {{ gitea_token }}'
   register: gitea_org_response
 
-- name: Migrate {{ repo.name }} From Upstream into Gitea, in platform org
+- name: Migrate app and helm repos From Upstream into Gitea, in platform org
   uri:
     url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
     validate_certs: no
@@ -70,10 +70,10 @@
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
   loop:
-  - name: 'reference-quarkus-mvn_{{ platform_ci_tool }}_workflow-standard'
-    url: 'http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_{{ platform_ci_tool }}_workflow-standard.git'
-  - name: 'reference-quarkus-mvn-cloud-resources_{{ platform_ci_tool }}_workflow-standard'
-    url: 'http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_{{ platform_ci_tool }}_workflow-standard.git'
+  - name: '{{ app_repo.destination_repo_name }}'
+    url: '{{ app_repo.source_url }}'
+  - name: '{{ helm_repo.destination_repo_name }}'
+    url: '{{ helm_repo.source_url }}'
   loop_control:
     loop_var: repo
     label: repo.name
@@ -108,7 +108,8 @@
       values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
       release_namespace: "{{ tssc_namespace }}"
 
-  - name: Create PipelineRun
+  - name: Create PipelineRun, if autoStartPipeline is true
     community.kubernetes.k8s:
       definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
+    when: auto_start_pipeline
   when: platform_ci_tool == 'tekton'

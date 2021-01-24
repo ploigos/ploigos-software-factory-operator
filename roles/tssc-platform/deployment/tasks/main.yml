@@ -27,13 +27,17 @@
     label: operator_app
 
 # Deploy Jenkins or Tekton based on ciTool defined in CR
+- name: Get ci tool fact from TsscPlatform
+  set_fact:
+    platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
+
 - include_tasks: deploy_jenkins.yml
-  when: tssc_platform.providers.ci_tool == 'jenkins'
+  when: platform_ci_tool == 'jenkins'
 
 - name: Create Subscription for OpenShift Pipelines
   k8s:
     definition: '{{ lookup("template", "subscriptions/tekton.yml.j2") }}'
-  when: tssc_platform.providers.ci_tool == 'tekton'
+  when: platform_ci_tool == 'tekton'
 
 - include_role:
     name: tssc-platform/configuration/rhsso
@@ -139,7 +143,7 @@
 - name: Apply configuration for jenkins
   include_role:
     name: tssc-platform/configuration/legacy_jenkins
-  when: cr_state == 'present' and tssc_platform.providers.ci_tool == 'jenkins'
+  when: cr_state == 'present' and platform_ci_tool == 'jenkins'
 
 - name: Deploy Helm Chart for Tekton Cluster Resources
   block:
@@ -157,4 +161,4 @@
       release_state: "{{ cr_state }}"
     register: cluster_resources_chart
     ignore_errors: true
-  when: tssc_platform.providers.ci_tool == 'tekton'
+  when: platform_ci_tool == 'tekton'

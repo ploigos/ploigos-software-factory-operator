@@ -59,6 +59,7 @@ spec:
                         description: Name of the CI tool used for workflow orchestration
                         type: string
                         pattern: ^jenkins|tekton$
+                        default: jenkins
                 type: object
             type: object
           status:
