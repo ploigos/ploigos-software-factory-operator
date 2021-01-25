@@ -62,18 +62,16 @@
       Authorization: 'token {{ gitea_token }}'
     body: |
       {
-        "clone_addr": "{{ repo.url }}",
+        "clone_addr": "{{ repo.source_url }}",
         "uid": {{ gitea_org_response.json.id }},
-        "repo_name": "{{ repo.name }}"
+        "repo_name": "{{ repo.destination_repo_name }}"
       }
     status_code: 201,409
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
   loop:
-  - name: '{{ app_repo.destination_repo_name }}'
-    url: '{{ app_repo.source_url }}'
-  - name: '{{ helm_repo.destination_repo_name }}'
-    url: '{{ helm_repo.source_url }}'
+  - '{{ app_repo }}'
+  - '{{ helm_repo }}'
   loop_control:
     loop_var: repo
     label: repo.name
