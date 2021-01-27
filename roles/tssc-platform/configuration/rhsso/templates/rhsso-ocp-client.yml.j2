@@ -23,6 +23,7 @@
         - 'https://oauth-openshift.apps.{{ subdomain }}/*'
       rootUrl: 'https://console-openshift-console.apps.{{ subdomain }}/'
       protocol: openid-connect
+      standardFlowEnabled: true
 
 ## FIXME Need to copy keycloak-client-secret-openshift from rhsso namespace
 # Add Client ID and Secret to OpenShift Config
