@@ -1,0 +1,36 @@
+---
+# workflowWorkerRunAsUser is the UID of the user to run the containers as in the ClusterTasks
+# Optional.
+#
+# If given then all ClusterTasks created by this chart will be hard coded to run as this user.
+# If 'rbacCreate' is also true then ClusterRole and SecurityContextConstraints will be created
+# for this UID as well.
+#
+# If not given then all ClusterTasks created by this chart will run as whatever UID
+# the Kubernetes platform they run on assigns them.
+workflowWorkerRunAsUser: 1001
+
+# rbacCreate if true and workflowWorkerRunAsUser is provided  then chart will create ClusterRole and
+# SecurityContextConstraints for the given workflowWorkerRunAsUser UID, else if false then ClusterRole
+# and SecurityContextConstraints will not be created even if workflowWorkerRunAsUser is specified leaving it
+# to another process to create the appropriate RBAC resources.
+rbacCreate: true
+
+# imagePullPolicy is the image pull policy to use for the ClusterTasks installed by this chart.
+#
+# NOTE
+# ----
+# This is a temporary parameter until See https://github.com/tektoncd/pipeline/issues/3423 is
+# resolved and this parameter can be passed at runtime.
+imagePullPolicy: IfNotPresent
+
+# Flag indicating that platform-level configuration is separate from
+# app-level configuration, and that the ploigos-step-runner ClusterTask
+# should expect to find:
+# - Platform config mounted in /opt/ploigos-platform-config
+# - Platform config secrets mounted in /opt/ploigos-platform-config-secrets
+#
+# This flag also adds two workspaces to the pipeline template:
+# - ploigos-platform-config: for mounting a ConfigMap
+# - ploigos-platform-config-secrets: for mounting a Secret
+separatePlatformConfig: true

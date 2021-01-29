@@ -1,0 +1,8 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: TsscPlatform
+metadata:
+  name: tsscplatform-tekton
+spec:
+  tsscPlatform:
+    providers:
+      ciTool: tekton

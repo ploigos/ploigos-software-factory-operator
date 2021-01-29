@@ -4,10 +4,14 @@
     api_version: redhatgov.io/v1alpha1
     kind: TsscPlatform
     namespace: '{{ tssc_namespace }}'
-  register: result
-  until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
+  register: tssc_platform_result
+  until: tssc_platform_result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 20
   delay: 60
+
+- name: Get ci tool from TsscPlatform
+  set_fact:
+    platform_ci_tool: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.providers.ciTool  | default('jenkins') }}"
 
 - name: Fetch tssc-service-account secret
   set_fact:
@@ -26,7 +30,7 @@
   shell: >-
     devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
-    --organization platform --repo-name ref-quarkus-mvn-jenkins-std-fruit
+    --organization platform --repo-name {{ app_name}}-{{ service_name }}
 
 - name: Get gitea token secret
   k8s_info:
@@ -48,7 +52,7 @@
       Authorization: 'token {{ gitea_token }}'
   register: gitea_org_response
 
-- name: Migrate {{ repo.name }} From Upstream into Gitea, in platform org
+- name: Migrate app and helm repos From Upstream into Gitea, in platform org
   uri:
     url: 'https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
     validate_certs: no
@@ -58,31 +62,52 @@
       Authorization: 'token {{ gitea_token }}'
     body: |
       {
-        "clone_addr": "{{ repo.url }}",
+        "clone_addr": "{{ repo.source_url }}",
         "uid": {{ gitea_org_response.json.id }},
-        "repo_name": "{{ repo.name }}"
+        "repo_name": "{{ repo.destination_repo_name }}"
       }
     status_code: 201,409
   register: gitea_repo_migration_task
   changed_when: gitea_repo_migration_task.status == 201
   loop:
-  - name: reference-quarkus-mvn_jenkins_workflow-standard
-    url: http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
-  - name: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
-    url: http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+  - '{{ app_repo }}'
+  - '{{ helm_repo }}'
   loop_control:
     loop_var: repo
     label: repo.name
 
-- name: Get Service Account token
-  set_fact:
-    ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+- name: Create pipeline in Jenkins
+  block:
+  - name: Get Service Account token
+    set_fact:
+      ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
 
-- name: Scan Gitea Org to create Jenkins job
-  uri:
-    url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
-    method: POST
-    validate_certs: false
-    headers:
-      Authorization: 'Bearer {{ ocp_token }}'
-    status_code: "302"
+  - name: Scan Gitea Org to create Jenkins job
+    uri:
+      url: 'https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
+      method: POST
+      validate_certs: false
+      headers:
+        Authorization: 'Bearer {{ ocp_token }}'
+      status_code: "302"
+  when: platform_ci_tool == 'jenkins'
+
+- name: Create pipeline in Tekton
+  block:
+  - name: Add ploigos chart repo
+    community.kubernetes.helm_repository:
+      name: ploigos_charts
+      repo_url: "https://ploigos.github.io/ploigos-charts"
+
+  - name: Deploy cluster resources chart
+    community.kubernetes.helm:
+      name: ploigos-workflow-standard-tekton-pipeline
+      chart_ref: ploigos_charts/ploigos-workflow-standard-tekton-pipeline
+      values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
+      release_namespace: "{{ tssc_namespace }}"
+
+  - name: Create PipelineRun, if autoStartPipeline is true
+    community.kubernetes.k8s:
+      definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
+    when: auto_start_pipeline
+  when: platform_ci_tool == 'tekton'
