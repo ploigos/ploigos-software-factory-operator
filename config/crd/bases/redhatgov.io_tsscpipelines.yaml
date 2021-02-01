@@ -38,9 +38,52 @@ spec:
           spec:
             description: Spec defines the desired state of TsscPipeline
             properties:
-              tsscPipeline:
-                description: Defines the desired state of the TsscPipeline Deployment
+              appName:
+                description: Name of the application the artifact built and deployed by this workflow is part of.
+                type: string
+                default: ref-quarkus-mvn-jenkins-std
+              serviceName:
+                description: Name of the service the artifact built and deployed by this workflow implements as part of the application it is a part of.
+                type: string
+                default: fruit
+              appRepo:
+                description: Attributes of the application repository.
                 type: object
+                properties:
+                  sourceUrl:
+                    description: Upstream repository for migration into platform-managed source control.
+                    type: string
+                    default: http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
+                  destinationRepoName:
+                    description: Name given to the newly-created repository migration in platform-managed source control
+                    type: string
+                    default: reference-quarkus-mvn_jenkins_workflow-standard
+                required:
+                - sourceUrl
+                - destinationRepoName
+              helmRepo:
+                description: Attributes of the application's helm repository.
+                type: object
+                properties:
+                  sourceUrl:
+                    description: Upstream repository for migration into platform-managed source control.
+                    type: string
+                    default: http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+                  destinationRepoName:
+                    description: Name given to the newly-created repository migration in platform-managed source control.
+                    type: string
+                    default: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
+                required:
+                - sourceUrl
+                - destinationRepoName
+              autoStartPipeline:
+                type: boolean
+                default: true
+            required:
+            - appName
+            - serviceName
+            - appRepo
+            - helmRepo
             type: object
           status:
             description: Status defines the observed state of TsscPipeline

@@ -73,6 +73,21 @@ items:
           name: jenkins
           app.kubernetes.io/part-of: jenkins
       spec:
+        initContainers:
+        - name: ploigos-plugins
+          command:
+            - /bin/bash
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: jenkins-data
+              mountPath: /var/lib/jenkins
+          image: >-
+            quay.io/akrohg/ploigos-jenkins-sidecar:latest
+          args:
+            - '-c'
+            - >-
+              mkdir -p /var/lib/jenkins/plugins ; cp --remove-destination -v
+              /ploigos-jenkins-plugins/* /var/lib/jenkins/plugins
         containers:
         - env:
           - name: OPENSHIFT_ENABLE_OAUTH
@@ -93,8 +108,6 @@ items:
             value: "false"
           - name: JENKINS_UC_INSECURE
             value: "false"
-          - name: INSTALL_PLUGINS
-            value: "handy-uri-templates-2-api:2.1.8-1.0,display-url-api:2.3.3,credentials:2.3.5,plain-credentials:1.6,workflow-aggregator:2.6,workflow-multibranch:2.22,gitea:1.2.1,ansicolor:0.7.3,durable-task:1.33,jackson2-api:2.10.2,pipeline-model-extensions:1.6.0,pipeline-model-definition:1.6.0,openshift-client:1.0.34,openshift-sync:1.0.45,blueocean-rest:1.24.3,blueocean-git-pipeline:1.24.3,blueocean:1.24.3,kubernetes:1.25.7"
           image: ' '
           imagePullPolicy: IfNotPresent
           livenessProbe:

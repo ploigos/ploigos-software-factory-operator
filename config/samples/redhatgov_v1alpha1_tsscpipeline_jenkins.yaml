@@ -1,7 +1,7 @@
 apiVersion: redhatgov.io/v1alpha1
 kind: TsscPipeline
 metadata:
-  name: tsscpipeline-testing
+  name: tsscpipeline-jenkins
 spec:
   appName: ref-quarkus-mvn-jenkins-std
   serviceName: fruit

@@ -7,7 +7,6 @@ deploy_sonarqube: true
 deploy_nexus: true
 deploy_crw: true
 deploy_selenium_grid: true
-deploy_legacy_jenkins: true
 deploy_mattermost_operator: true
 
 subdomain: '{{ full_cluster_name }}'
@@ -29,3 +28,4 @@ operator_list:
 - mattermost
 - crw
 - selenium_grid
+

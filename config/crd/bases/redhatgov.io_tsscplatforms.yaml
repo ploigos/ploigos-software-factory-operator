@@ -51,6 +51,15 @@ spec:
                       namespace:
                         description: The pull secret namespace
                         type: string
+                  providers:
+                    description: Describes the providers for tooling supporting the Ploigos deployment
+                    type: object
+                    properties:
+                      ciTool:
+                        description: Name of the CI tool used for workflow orchestration
+                        type: string
+                        pattern: ^jenkins|tekton$
+                        default: jenkins
                 type: object
             type: object
           status:
