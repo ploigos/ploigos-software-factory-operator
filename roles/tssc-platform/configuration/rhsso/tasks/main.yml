@@ -1,7 +1,13 @@
 ---
-# Install and setup Red Hat Single Sign-On
+- name: Wait for KeyCloak to respond to requests
+  uri:
+    url: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}'
+    return_content: yes
+    validate_certs: no
+  register: keycloak_endpoint
+  until: keycloak_endpoint.status == 200
+  retries: 10
+  delay: 30
 
-- include: rhsso-operator.yml
-- include: rhsso.yml
 - include: rhsso-ocp-idp.yml
 - include: rhsso-users.yml
