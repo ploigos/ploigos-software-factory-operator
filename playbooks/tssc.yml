@@ -52,6 +52,9 @@
         msg: Unable to continue without rhedsord variables set
       when: rhedsord_included is not defined or not rhedsord_included
 
+    - include_tasks: cleanup-tssc-platform.yml
+      when: cr_state == 'absent'
+
     - include_role:
         name: tssc-platform/deployment
       when: cr_type == 'platform'
@@ -59,6 +62,3 @@
     - include_role:
         name: tssc-pipeline
       when: cr_type == 'pipeline'
-
-    - include_tasks: cleanup-tssc-platform.yml
-      when: cr_state == 'absent'

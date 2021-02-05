@@ -1,5 +1,4 @@
 ---
-deploy_rhsso: true
 deploy_quay: true
 deploy_gitea: true
 deploy_argocd: true
@@ -20,6 +19,7 @@ crw_admin_user:
   password: demo123
 
 operator_list:
+- rhsso
 - gitea
 - argocd
 - sonarqube
