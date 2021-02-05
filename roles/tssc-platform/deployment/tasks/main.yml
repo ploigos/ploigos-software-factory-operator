@@ -39,10 +39,6 @@
     definition: '{{ lookup("template", "subscriptions/tekton.yml.j2") }}'
   when: platform_ci_tool == 'tekton'
 
-- include_role:
-    name: tssc-platform/configuration/rhsso
-  when: deploy_rhsso
-
 - name: Fetch tssc-service-account secret
   set_fact:
     secret_data: "{{ lookup('k8s', kind='Secret', namespace=tssc_namespace, resource_name=tssc_service_account_secret) }}"

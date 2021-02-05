@@ -1,4 +1,0 @@
----
-- name: Subscribe to RH-SSO Operator
-  k8s:
-    definition: '{{ lookup("template", "rhsso-operator.yml.j2")|from_yaml }}'
