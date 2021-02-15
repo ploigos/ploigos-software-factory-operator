@@ -23,6 +23,7 @@ operator_list:
 - gitea
 - argocd
 - sonarqube
+- nexus
 - mattermost
 - crw
 - selenium_grid
