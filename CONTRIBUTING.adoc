@@ -5,7 +5,7 @@
 
 == Development Environment
 
-. `$ git clone https://github.com/RedHatGov/tssc-operator.git`
+. `$ git clone https://github.com/ploigos/ploigos-software-factory-operator.git`
 . install docker, podman will not work with the molecule tests right now
 . install make
 . install python3
