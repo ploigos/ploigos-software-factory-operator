@@ -24,7 +24,7 @@
 == Development Workflow
 
 . `$ oc login` <- as cluster admin
-. `$ hack/operate.sh -o namespaced` <- install the operator. It will be deployed into the tssc-operator-system namespace by default.
+. `$ hack/operate.sh` <- install the operator. It will be deployed into the tssc-operator-system namespace by default.
 . Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform.yaml -n tssc-operator-system`. This will provision a TsscPlatform in the tssc-operator-system namespace.
 . If you make some Ansible changes and need to test them, you need to rebuild the operator image. 
 .. Carefully cleanup the tssc-operator-system project (so as not to orphan resources and leave the project stuck in Terminating) by deleting the CustomResources that have been created (e.g. `oc delete -n tssc-operator-system ArgoCD,CheCluster,Gitea,Mattermost,Nexus,QuayEcosystem,Keycloak,SeleniumGrid,Sonarqube --all`), and then removing the operator installation by running `hack/operate.sh -r`
