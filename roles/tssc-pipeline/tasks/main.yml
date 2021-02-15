@@ -26,12 +26,6 @@
       first_name: "{{ secret_data.data.first_name | b64decode }}"
       last_name: "{{ secret_data.data.last_name | b64decode }}"
 
-- name: Create quay repository
-  shell: >-
-    devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
-    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
-    --organization platform --repo-name {{ app_name}}-{{ service_name }}
-
 - name: Get gitea token secret
   k8s_info:
     kind: Secret
