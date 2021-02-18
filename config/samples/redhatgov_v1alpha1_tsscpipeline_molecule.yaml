@@ -9,6 +9,6 @@ spec:
     sourceUrl: http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
     destinationRepoName: reference-quarkus-mvn_jenkins_workflow-standard
   helmRepo:
-    sourceUrl: http://gitea.tssc.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+    sourceUrl: http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
     destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
   autoStartPipeline: true
