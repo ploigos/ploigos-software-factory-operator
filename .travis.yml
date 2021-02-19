@@ -10,7 +10,7 @@ install:
 - sudo apt install software-properties-common
 - sudo apt-add-repository --yes --update ppa:ansible/ansible
 - sudo apt install ansible
-- pip3 install docker==4.2.2 molecule==3.1.5 ansible-lint yamllint flake8 openshift jmespath
+- pip install docker==4.2.2 molecule==3.1.5 ansible-lint yamllint flake8 openshift jmespath
 - ansible-galaxy collection install -r requirements.yml
 - curl -Lo $HOME/oc.tar.gz http://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
 - tar xvzf $HOME/oc.tar.gz -C $HOME/.local/bin oc
