@@ -3,6 +3,16 @@
   k8s:
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
 
+- name: Get providers from TsscPlatform
+  set_fact:
+    platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
+    platform_container_registry: "{{ tssc_platform.providers.container_registry  | default('nexus') }}"
+
+- name: Add Quay to operator list if using it as container registry
+  set_fact:
+    operator_list: '{{ operator_list + ["quay"] }}'
+  when: platform_container_registry == 'quay'
+
 - name: Get a list of operator groups
   k8s_info:
     api_version: operators.coreos.com/v1
@@ -25,11 +35,6 @@
   loop_control:
     loop_var: operator_app
     label: operator_app
-
-# Deploy Jenkins or Tekton based on ciTool defined in CR
-- name: Get ci tool fact from TsscPlatform
-  set_fact:
-    platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
 
 - include_tasks: deploy_jenkins.yml
   when: platform_ci_tool == 'jenkins'
