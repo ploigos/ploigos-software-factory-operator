@@ -11,8 +11,8 @@ spec:
       uri: gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     volumeSize: 4Gi
     resources:
-      limits:
-        memory: 2Gi
+      memory:
+        limit: 2Gi
   persistent: true
   postgresql:
     volumeSize: 10Gi

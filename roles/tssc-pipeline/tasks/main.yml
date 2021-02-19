@@ -34,16 +34,6 @@
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
   when: platform_container_registry == 'quay'
 
-- name: Create nexus repository
-  shell: >-
-    devsecops-api nexus add-docker-repository
-    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
-    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
-    --repository-names {{ app_name}}-{{ service_name }}
-  register: docker_repo
-  failed_when: docker_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or docker_repo.rc != 0
-  when: platform_container_registry == 'nexus'
-
 - name: Get gitea token secret
   k8s_info:
     kind: Secret
