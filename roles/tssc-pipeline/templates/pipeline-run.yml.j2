@@ -91,7 +91,7 @@ spec:
           - ReadWriteOnce
           resources:
             requests:
-              storage: 5Gi
+              storage: 10Gi
     - name: app
       volumeClaimTemplate:
         spec:
@@ -99,7 +99,7 @@ spec:
           - ReadWriteOnce
           resources:
             requests:
-              storage: 5Gi
+              storage: 1Gi
     - name: ploigos-platform-config
       configMap:
         name: ploigos-platform-config

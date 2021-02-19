@@ -24,7 +24,6 @@ operator_list:
 - argocd
 - sonarqube
 - nexus
-- quay
 - mattermost
 - crw
 - selenium_grid

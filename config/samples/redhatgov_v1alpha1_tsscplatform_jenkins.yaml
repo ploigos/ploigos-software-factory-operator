@@ -6,3 +6,4 @@ spec:
   tsscPlatform:
     providers:
       ciTool: jenkins
+      containerRegistry: nexus

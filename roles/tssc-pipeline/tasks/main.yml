@@ -9,9 +9,10 @@
   retries: 20
   delay: 60
 
-- name: Get ci tool from TsscPlatform
+- name: Get providers from TsscPlatform
   set_fact:
     platform_ci_tool: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.providers.ciTool  | default('jenkins') }}"
+    platform_container_registry: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.providers.containerRegistry  | default('nexus') }}"
 
 - name: Fetch tssc-service-account secret
   set_fact:
@@ -31,6 +32,7 @@
     devsecops-api quay add-repo https://quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
+  when: platform_container_registry == 'quay'
 
 - name: Get gitea token secret
   k8s_info:

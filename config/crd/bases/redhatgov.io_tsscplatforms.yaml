@@ -60,6 +60,11 @@ spec:
                         type: string
                         pattern: ^jenkins|tekton$
                         default: jenkins
+                      containerRegistry:
+                        description: Name of the tool used for the container registry
+                        type: string
+                        pattern: ^quay|nexus$
+                        default: nexus
                 type: object
             type: object
           status:

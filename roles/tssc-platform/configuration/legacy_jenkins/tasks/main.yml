@@ -60,7 +60,14 @@
     headers:
       Authorization: 'Bearer {{ ocp_token }}'
     body:
-      script: 'giteaServers = Jenkins.instance.getExtensionList(org.jenkinsci.plugin.gitea.servers.GiteaServers.class)[0];giteaServers.updateServer(new org.jenkinsci.plugin.gitea.servers.GiteaServer("platform", "http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000", true, "platform-gitea-token", "https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/"));giteaServers.save();["BranchSpec getName", "GitSCM getBranches", "GitSCM getUserRemoteConfigs", "UserRemoteConfig getUrl"].each{ method -> org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval.get().approveSignature("method hudson.plugins.git.${method}")}'
+      script: >
+        JenkinsLocationConfiguration.get().setUrl("https://jenkins-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/");
+        giteaServers = Jenkins.instance.getExtensionList(org.jenkinsci.plugin.gitea.servers.GiteaServers.class)[0];
+        giteaServers.updateServer(new org.jenkinsci.plugin.gitea.servers.GiteaServer("platform", "http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000", true, "platform-gitea-token", "https://gitea-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/"));
+        giteaServers.save();
+        ["BranchSpec getName", "GitSCM getBranches", "GitSCM getUserRemoteConfigs", "UserRemoteConfig getUrl"].each{
+          method -> org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval.get().approveSignature("method hudson.plugins.git.${method}")
+        }
   register: org_response
 
 - name: Create platform Gitea Organization
