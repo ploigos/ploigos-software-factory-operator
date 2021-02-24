@@ -46,7 +46,7 @@
 - name: Change the settings on the maven-releases repo to allow artifacts to be overwritten
   shell: >-
     devsecops-api nexus update-repository
-    http://nexus.{{ nexus_project_name }}.svc.cluster.local:8081
+    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
     --login-username admin --login-password '{{ nexus_admin_password }}'
     --repository-names 'maven-releases'
     --write-policy 'ALLOW'
@@ -59,7 +59,7 @@
 - name: Add container-image-signatures raw repository
   shell: >-
     devsecops-api nexus add-raw-repository
-    http://nexus.{{ nexus_project_name }}.svc.cluster.local:8081
+    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
     --login-username admin --login-password '{{ nexus_admin_password }}'
     --repository-names 'container-image-signatures'
   register: signatures_repo
@@ -71,7 +71,7 @@
 - name: Create docker repository if using nexus as container registry
   shell: >-
     devsecops-api nexus add-docker-repository
-    http://nexus.{{ nexus_project_name }}.svc.cluster.local:8081
+    http://nexus-bypass.{{ nexus_project_name }}.svc.cluster.local:8081
     --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
     --repository-names docker-hosted
   register: docker_repo
