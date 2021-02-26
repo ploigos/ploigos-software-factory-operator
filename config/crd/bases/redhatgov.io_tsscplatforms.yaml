@@ -65,6 +65,24 @@ spec:
                         type: string
                         pattern: ^quay|nexus$
                         default: nexus
+                  tls:
+                    description: Describes how TLS should be managed between platform components
+                    type: object
+                    properties:
+                      verify:
+                        description: Whether TLS Verification should be enabled
+                        type: boolean
+                        default: True
+                      trustedCaBundle:
+                        description: |
+                          If enabled, store the OpenShift Router's CA Certificate into a ConfigMap
+                          named trustedcabundle, and mount it into pipeline containers to be used as
+                          a trust store. This should be used if OpenShift is not using a well-known CA.
+                        type: boolean
+                        default: False
+                    required:
+                    - verify
+                    - trustedCaBundle
                 type: object
             type: object
           status:

@@ -3,10 +3,12 @@
   k8s:
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
 
-- name: Get providers from TsscPlatform
+- name: Get attributes from TsscPlatform
   set_fact:
     platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
     platform_container_registry: "{{ tssc_platform.providers.container_registry  | default('nexus') }}"
+    platform_tls_verify: "{{ tssc_platform.tls.verify | default(true) }}"
+    platform_tls_trusted_ca_bundle: "{{ tssc_platform.tls.trusted_ca_bundle | default(false) }}"
 
 - name: Add Quay to operator list if using it as container registry
   set_fact:
