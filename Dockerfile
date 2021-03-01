@@ -2,7 +2,7 @@ FROM quay.io/operator-framework/ansible-operator:v1.0.0
 
 COPY requirements.yml ${HOME}/requirements.yml
 USER root
-RUN dnf -y install git httpd-tools && \
+RUN dnf -y install git httpd-tools openssl && \
     dnf -y clean all --enablerepo='*'
 RUN pip3 install --upgrade --no-cache-dir jmespath git+https://github.com/RedHatGov/devsecops-api-collection.git
 RUN curl http://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz -o /root/oc.tar.gz && \
