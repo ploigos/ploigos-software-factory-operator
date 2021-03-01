@@ -10,6 +10,7 @@ data:
       - implementer: SOPS
       global-defaults:
         organization: platform
+        tls-verify: {{ platform_tls_verify }}
         maven-servers:
           internal-mirror:
             id: maven-public

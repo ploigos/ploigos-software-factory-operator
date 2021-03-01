@@ -10,6 +10,29 @@
     platform_tls_verify: "{{ tssc_platform.tls.verify | default(true) }}"
     platform_tls_trusted_ca_bundle: "{{ tssc_platform.tls.trusted_ca_bundle | default(false) }}"
 
+- name: Create Trusted CA Bundle ConfigMap
+  when: platform_tls_trusted_ca_bundle
+  block:
+  - name: Get OpenShift Console Route
+    k8s_info:
+      api_version: route.openshift.io/v1
+      kind: Route
+      namespace: openshift-console
+      name: console
+    register: console_route
+
+  - name: Get Certificate Chain
+    shell: |
+        echo quit | openssl s_client -showcerts -connect {{ console_route.resources[0].spec.host }}:443
+    register: openssl_certificate_chain
+
+  - set_fact:
+      router_ca_certificate: "{{ openssl_certificate_chain.stdout | regex_findall('-----BEGIN CERTIFICATE-----[\na-zA-Z0-9+/=]*-----END CERTIFICATE-----', multiline=True) | last }}"
+
+  - name: Apply ConfigMap
+    k8s:
+      definition: "{{ lookup('template', 'trustecabundle.yml.j2') }}"
+
 - name: Add Quay to operator list if using it as container registry
   set_fact:
     operator_list: '{{ operator_list + ["quay"] }}'
