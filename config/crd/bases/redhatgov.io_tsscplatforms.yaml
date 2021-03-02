@@ -73,16 +73,16 @@ spec:
                         description: Whether TLS Verification should be enabled
                         type: boolean
                         default: True
-                      trustedCaBundle:
+                      trustBundleConfigMap:
                         description: |
-                          If enabled, store the OpenShift Router's CA Certificate into a ConfigMap
-                          named trustedcabundle, and mount it into pipeline containers to be used as
-                          a trust store. This should be used if OpenShift is not using a well-known CA.
-                        type: boolean
-                        default: False
+                          The name of a ConfigMap of CA certificates to mount into pipeline pods. The ConfigMap
+                          should have a single key named ca-bundle.crt. This key has a collection of CA certificates
+                          as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be
+                          generated using a label of config.openshift.io/inject-trusted-cabundle=true and populated
+                          with the Cluster Network Operator.
+                        type: string
                     required:
                     - verify
-                    - trustedCaBundle
                 type: object
             type: object
           status:

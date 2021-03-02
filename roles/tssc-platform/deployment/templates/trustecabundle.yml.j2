@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trustedcabundle
+  name: {{ platform_trust_bundle_config_map }}
   namespace: {{ tssc_namespace }}
-data:
-  ca-bundle.crt: |
-    {{ router_ca_certificate | regex_replace('\n', '\n    ') }}
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
