@@ -23,7 +23,7 @@
 
   - name: Create ConfigMap, if it doesn't exist
     k8s:
-      definition: "{{ lookup('template', 'trustecabundle.yml.j2') }}"
+      definition: "{{ lookup('template', 'trustedcabundle.yml.j2') }}"
     when: not config_map_results.resources
 
 - name: Add Quay to operator list if using it as container registry
