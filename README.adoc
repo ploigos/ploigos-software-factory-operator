@@ -268,3 +268,5 @@ If you intend on using `hack/operate.sh` it expects you to be in a development e
 
 * `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
 
+== Contributing
+Please see the link:CONTRIBUTING.adoc[Contributing Documentation].
