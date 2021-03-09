@@ -3,10 +3,28 @@
   k8s:
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
 
-- name: Get providers from TsscPlatform
+- name: Get attributes from TsscPlatform
   set_fact:
     platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
     platform_container_registry: "{{ tssc_platform.providers.container_registry  | default('nexus') }}"
+    platform_tls_verify: "{{ tssc_platform.tls.verify | default(true) }}"
+    platform_trust_bundle_config_map: "{{ tssc_platform.tls.trust_bundle_config_map | default(omit) }}"
+
+- name: Create Trusted CA Bundle ConfigMap
+  when: platform_trust_bundle_config_map is defined
+  block:
+  - name: Check to see if provided ConfigMap exists
+    k8s_info:
+      api_version: v1
+      kind: ConfigMap
+      namespace: '{{ tssc_namespace }}'
+      name: '{{ platform_trust_bundle_config_map }}'
+    register: config_map_results
+
+  - name: Create ConfigMap, if it doesn't exist
+    k8s:
+      definition: "{{ lookup('template', 'trustedcabundle.yml.j2') }}"
+    when: not config_map_results.resources
 
 - name: Add Quay to operator list if using it as container registry
   set_fact:
