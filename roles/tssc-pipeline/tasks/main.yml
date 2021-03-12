@@ -5,7 +5,9 @@
     kind: TsscPlatform
     namespace: '{{ tssc_namespace }}'
   register: tssc_platform_result
-  until: tssc_platform_result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
+  until: 
+    - tssc_platform_result.resources[0].status is defined
+    - tssc_platform_result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 20
   delay: 60
 

@@ -5,7 +5,9 @@
     namespace: '{{ gitea_project_name }}'
     name: gitea
   register: result
-  until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
+  until:
+    - result.resources[0].status is defined
+    - result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 10
   delay: 30
 
