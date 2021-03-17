@@ -8,8 +8,8 @@
   until:
     - result.resources[0].status is defined
     - result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
-  retries: 10
-  delay: 30
+  retries: 30
+  delay: 10
 
 - name: Get Gitea Admin Secret
   k8s_info:

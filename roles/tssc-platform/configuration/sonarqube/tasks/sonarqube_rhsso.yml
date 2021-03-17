@@ -5,6 +5,18 @@
     k8s:
       definition: '{{ lookup("template", "../templates/rhsso-sonar4-client.yml.j2")|from_yaml }}'
 
+  - name: Wait for SonarQube KeycloakClient to reconcile
+    k8s_info:
+      api_version: keycloak.org/v1alpha1
+      kind: KeycloakClient
+      name: sonarqube-client
+      namespace: "{{ rhsso_project_name }}"
+    register: sonarqube_kc
+    until:
+      - sonarqube_kc.resources|length > 0
+      - sonarqube_kc.resources[0].status is defined
+      - sonarqube_kc.resources[0].status.ready
+
   - name: Get RHSSO login
     k8s_info:
       api_version: v1
