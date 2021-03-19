@@ -1,9 +1,39 @@
 ---
+- name: Create RHSSO Client definition for Quay
+  k8s:
+    definition: '{{ lookup("template", "../templates/rhsso-quay-client.yml.j2")|from_yaml }}'
+
+- name: Wait for Quay KeycloakClient to reconcile
+  k8s_info:
+    api_version: keycloak.org/v1alpha1
+    kind: KeycloakClient
+    name: quay-client
+    namespace: "{{ rhsso_project_name }}"
+  register: quay_kc
+  until:
+    - quay_kc.resources|length > 0
+    - quay_kc.resources[0].status is defined
+    - quay_kc.resources[0].status.ready
+  delay: 10
+  retries: 6
+
+- name: Wait for client secret to be created
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "keycloak-client-secret-{{ rhsso_quay_client_id }}"
+    namespace: "{{ rhsso_project_name }}"
+  register: quay_secret
+  until:
+    - "quay_secret.resources[0].data['CLIENT_SECRET'] != ''"
+  retries: 12
+  delay: 5
 
 - name: Generate a Quay secret for RHSSO
   set_fact:
-    rhsso_quay_secret: "{{ lookup('password', tmp_dir +'/rhsso_quay.secret length=15 chars=ascii_letters') }}"
+    rhsso_quay_secret: "{{ quay_secret.resources[0].data['CLIENT_SECRET'] | b64decode }}"
 
+# TODO: the below (updating Quay config for SSO) should be moved to the Quay Operator.
 - name: Get Quay pod info
   k8s_info:
     api_version: v1
@@ -13,9 +43,6 @@
       - "quay-enterprise-component=app"
   register: quay_pod
 
-- name: Create RHSSO Client definition for Quay
-  k8s:
-    definition: '{{ lookup("template", "../templates/rhsso-quay-client.yml.j2")|from_yaml }}'
 
 - name: Get Quay config secret
   k8s_info:
