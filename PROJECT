@@ -2,10 +2,16 @@ domain: io
 layout: ansible.sdk.operatorframework.io/v1
 projectName: ploigos-software-factory-operator
 resources:
-- group: redhatgov
+-
+  # controller: true
+  domain: io
+  group: redhatgov
   kind: TsscPlatform
   version: v1alpha1
-- group: redhatgov
+-
+  # controller: true
+  domain: io
+  group: redhatgov
   kind: TsscPipeline
   version: v1alpha1
-version: 3-alpha
+version: "3"
