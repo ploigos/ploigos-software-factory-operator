@@ -74,7 +74,7 @@ data:
       create-container-image:
       - implementer: Buildah
         config:
-          destination: localhost/tssc-reference-app-quarkus-rest-json
+          destination: localhost/myapp
       push-container-image:
       - implementer: Skopeo
         config:
@@ -111,8 +111,6 @@ data:
           argocd-api: argocd-server.{{ tssc_namespace }}.svc.cluster.local
           argocd-username: {{ tssc_service_account.username }}
           argocd-skip-tls: True
-          deployment-config-helm-chart-path: charts/reference-quarkus-mvn-deploy
-          deployment-config-repo: http://gitea.{{ tssc_namespace }}.svc.cluster.local:3000/platform/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
           deployment-config-helm-chart-values-file-image-tag-yq-path: 'image.tag'
           git-username: {{ tssc_service_account.username }}
           git-email: 'napsspo+tssc@redhat.com'
@@ -126,9 +124,6 @@ data:
               deployment-config-helm-chart-environment-values-file: values-PROD.yaml
       validate-environment-configuration:
       - implementer: ConfiglintFromArgocd
-      - implementer: Configlint
-        config:
-          rules: cicd/ValidateEnv/
       uat:
       - implementer: MavenSeleniumCucumber
         config: {

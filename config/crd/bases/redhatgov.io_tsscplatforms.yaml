@@ -56,12 +56,20 @@ spec:
                     type: object
                     properties:
                       ciTool:
-                        description: Name of the CI tool used for workflow orchestration
+                        description: |
+                          Name of the CI tool used for workflow orchestration.
+                          Supported values:
+                          - jenkins (default)
+                          - tekton
                         type: string
                         pattern: ^jenkins|tekton$
                         default: jenkins
                       containerRegistry:
-                        description: Name of the tool used for the container registry
+                        description: |
+                          Name of the tool used for the container registry.
+                          Supported values:
+                          - nexus (default)
+                          - quay
                         type: string
                         pattern: ^quay|nexus$
                         default: nexus
