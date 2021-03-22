@@ -3,13 +3,6 @@
   k8s:
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
 
-- name: Get attributes from TsscPlatform
-  set_fact:
-    platform_ci_tool: "{{ tssc_platform.providers.ci_tool  | default('jenkins') }}"
-    platform_container_registry: "{{ tssc_platform.providers.container_registry  | default('nexus') }}"
-    platform_tls_verify: "{{ tssc_platform.tls.verify | default(true) }}"
-    platform_trust_bundle_config_map: "{{ tssc_platform.tls.trust_bundle_config_map | default(omit) }}"
-
 - name: Create Trusted CA Bundle ConfigMap
   when: platform_trust_bundle_config_map is defined
   block:
@@ -25,11 +18,6 @@
     k8s:
       definition: "{{ lookup('template', 'trustedcabundle.yml.j2') }}"
     when: not config_map_results.resources
-
-- name: Add Quay to operator list if using it as container registry
-  set_fact:
-    operator_list: '{{ operator_list + ["quay"] }}'
-  when: platform_container_registry == 'quay'
 
 - name: Get a list of operator groups
   k8s_info:
@@ -53,14 +41,10 @@
   loop_control:
     loop_var: operator_app
     label: operator_app
+  when: lookup("template", "subscriptions/" + operator_app + ".yml.j2", errors='ignore')
 
 - include_tasks: deploy_jenkins.yml
-  when: platform_ci_tool == 'jenkins'
-
-- name: Create Subscription for OpenShift Pipelines
-  k8s:
-    definition: '{{ lookup("template", "subscriptions/tekton.yml.j2") }}'
-  when: platform_ci_tool == 'tekton'
+  when: tssc_platform.providers.ci_tool == 'jenkins'
 
 - name: Fetch tssc-service-account secret
   set_fact:
@@ -106,6 +90,7 @@
   loop_control:
     loop_var: operator_app
     label: operator_app
+  when: lookup("template", "custom-resources/" + operator_app + ".yml.j2", errors='ignore')
 
 - name: Generate GPG Key
   import_tasks: generate_gpg_key.yml
@@ -158,26 +143,3 @@
     loop_var: operator_app
     label: operator_app
   when: cr_state == 'present'
-
-- name: Apply configuration for jenkins
-  include_role:
-    name: tssc-platform/configuration/legacy_jenkins
-  when: cr_state == 'present' and platform_ci_tool == 'jenkins'
-
-- name: Deploy Helm Chart for Tekton Cluster Resources
-  block:
-  - name: Add ploigos chart repo
-    community.kubernetes.helm_repository:
-      name: ploigos_charts
-      repo_url: "https://ploigos.github.io/ploigos-charts"
-
-  - name: Deploy cluster resources chart
-    community.kubernetes.helm:
-      name: ploigos-workflow-tekton-cluster-resources
-      chart_ref: ploigos_charts/ploigos-workflow-tekton-cluster-resources
-      values: "{{ lookup('template', 'ploigos-cluster-chart-values.yaml.j2') | from_yaml }}"
-      release_namespace: "{{ tssc_namespace }}"
-      release_state: "{{ cr_state }}"
-    register: cluster_resources_chart
-    ignore_errors: true
-  when: platform_ci_tool == 'tekton'

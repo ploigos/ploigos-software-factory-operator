@@ -1,0 +1,14 @@
+- name: Add ploigos chart repo
+  community.kubernetes.helm_repository:
+    name: ploigos_charts
+    repo_url: "https://ploigos.github.io/ploigos-charts"
+
+- name: Deploy cluster resources chart
+  community.kubernetes.helm:
+    name: ploigos-workflow-tekton-cluster-resources
+    chart_ref: ploigos_charts/ploigos-workflow-tekton-cluster-resources
+    values: "{{ lookup('template', 'ploigos-cluster-chart-values.yaml.j2') | from_yaml }}"
+    release_namespace: "{{ tssc_namespace }}"
+    release_state: "{{ cr_state }}"
+  register: cluster_resources_chart
+  ignore_errors: true

@@ -30,7 +30,7 @@ data:
             url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
-{% if platform_container_registry == 'quay' %}
+{% if tssc_platform.providers.container_registry == 'quay' %}
           quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
 {% else %}
           nexus-docker-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
@@ -73,13 +73,12 @@ data:
           maven-push-artifact-repo-url: https://nexus-{{ tssc_namespace }}.apps.{{ full_cluster_name }}/repository/maven-releases
       create-container-image:
       - implementer: Buildah
-        config:
-          destination: localhost/myapp
+
       push-container-image:
       - implementer: Skopeo
         config:
           source: docker-archive:backend.tar
-{% if platform_container_registry == 'quay' %}
+{% if tssc_platform.providers.container_registry == 'quay' %}
           destination-url: quay-{{ tssc_namespace }}.apps.{{ full_cluster_name }}
 {% else %}
           destination-url: nexus-docker-{{ tssc_namespace }}.apps.{{ full_cluster_name }}

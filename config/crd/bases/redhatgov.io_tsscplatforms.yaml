@@ -48,11 +48,13 @@ spec:
                       name:
                         description: The pull secret name
                         type: string
+                        default: pull-secret
                       namespace:
                         description: The pull secret namespace
                         type: string
+                        default: openshift-config
                   providers:
-                    description: Describes the providers for tooling supporting the Ploigos deployment
+                    description: Describes the providers for tooling to support the Ploigos deployment
                     type: object
                     properties:
                       ciTool:
@@ -64,6 +66,30 @@ spec:
                         type: string
                         pattern: ^jenkins|tekton$
                         default: jenkins
+                      sourceControl:
+                        description: |
+                          Name of the tool used for source control.
+                          Supported values:
+                          - gitea (default)
+                        type: string
+                        pattern: ^gitea$
+                        default: gitea
+                      artifactRepository:
+                        description: |
+                          Name of the tool used as an artifact repository.
+                          Supported values:
+                          - nexus (default)
+                        type: string
+                        pattern: ^nexus$
+                        default: nexus
+                      staticCodeAnalysis:
+                        description: |
+                          Name of the tool used for static code analysis.
+                          Supported values:
+                          - sonarqube (default)
+                        type: string
+                        pattern: ^sonarqube$
+                        default: sonarqube
                       containerRegistry:
                         description: |
                           Name of the tool used for the container registry.
@@ -73,6 +99,44 @@ spec:
                         type: string
                         pattern: ^quay|nexus$
                         default: nexus
+                      continuousDeployment:
+                        description: |
+                          Name of the tool used for continuous deployment.
+                          Supported values:
+                          - argocd (default)
+                        type: string
+                        pattern: ^argocd$
+                        default: argocd
+                      uat:
+                        description: |
+                          Name of the tool used for User Acceptance Testing.
+                          Supported values:
+                          - selenium (default)
+                        type: string
+                        pattern: ^selenium$
+                        default: selenium
+                      chat:
+                        description: |
+                          (Optional) Name of the tool used for a chat server.
+                          Supported values:
+                          - mattermost
+                        type: string
+                        pattern: ^mattermost$
+                      ide:
+                        description: |
+                          (Optional) Name of the tool used for in-browser IDE.
+                          Supported values:
+                          - codeready
+                        type: string
+                        pattern: ^codeready$
+                    required:
+                    - ciTool
+                    - sourceControl
+                    - artifactRepository
+                    - staticCodeAnalysis
+                    - containerRegistry
+                    - continuousDeployment
+                    - uat
                   tls:
                     description: Describes how TLS should be managed between platform components
                     type: object
