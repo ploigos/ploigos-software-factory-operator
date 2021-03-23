@@ -4,4 +4,18 @@ metadata:
   name: tsscplatform-testing
 spec:
   tsscPlatform:
-    providers: {}
+    services:
+      continuousIntegration:
+        name: jenkins
+      sourceControl:
+        name: gitea
+      artifactRepository:
+        name: nexus
+      staticCodeAnalysis:
+        name: sonarqube
+      continuousDeployment:
+        name: argocd
+      uat:
+        name: selenium
+      containerRegistry:
+        name: nexus

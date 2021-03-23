@@ -14,4 +14,4 @@ platform_tls_verify: "{{ tssc_platform.tls.verify | default(true) }}"
 platform_trust_bundle_config_map: "{{ tssc_platform.tls.trust_bundle_config_map | default(omit) }}"
 
 # rhsso and gitea need to be first for others to succeed
-operator_list: "{{ (['rhsso', tssc_platform.providers.source_control ] + tssc_platform.providers.values() | list) | unique }}"
+managed_services: "{{ (['rhsso', tssc_platform.services.source_control.name] + tssc_platform.services.values() | list | json_query('[?managed].name')) | unique }}"

@@ -4,6 +4,18 @@ metadata:
   name: tsscplatform-jenkins
 spec:
   tsscPlatform:
-    providers:
-      ciTool: jenkins
-      containerRegistry: nexus
+    services:
+      continuousIntegration:
+        name: jenkins
+      sourceControl:
+        name: gitea
+      artifactRepository:
+        name: nexus
+      staticCodeAnalysis:
+        name: sonarqube
+      continuousDeployment:
+        name: argocd
+      uat:
+        name: selenium
+      containerRegistry:
+        name: nexus

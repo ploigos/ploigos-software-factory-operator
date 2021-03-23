@@ -37,14 +37,14 @@
 - name: 'Create Subscription for {{ operator_app }}'
   k8s:
     definition: '{{ lookup("template", "subscriptions/" + operator_app + ".yml.j2") }}'
-  loop: '{{ operator_list }}'
+  loop: '{{ managed_services }}'
   loop_control:
     loop_var: operator_app
     label: operator_app
   when: lookup("template", "subscriptions/" + operator_app + ".yml.j2", errors='ignore')
 
 - include_tasks: deploy_jenkins.yml
-  when: tssc_platform.providers.ci_tool == 'jenkins'
+  when: tssc_platform.services.continuous_integration.name == 'jenkins'
 
 - name: Fetch tssc-service-account secret
   set_fact:
@@ -86,7 +86,7 @@
   until: not deployment.failed
   retries: 5
   delay: 10
-  loop: '{{ operator_list }}'
+  loop: '{{ managed_services }}'
   loop_control:
     loop_var: operator_app
     label: operator_app
@@ -138,7 +138,7 @@
 - name: 'Apply configuration for {{ operator_app }}'
   include_role:
     name: 'tssc-platform/configuration/{{ operator_app }}'
-  loop: '{{ operator_list }}'
+  loop: '{{ managed_services }}'
   loop_control:
     loop_var: operator_app
     label: operator_app

@@ -53,84 +53,192 @@ spec:
                         description: The pull secret namespace
                         type: string
                         default: openshift-config
-                  providers:
-                    description: Describes the providers for tooling to support the Ploigos deployment
+                  helmRepository:
+                    description: |
+                      Location of helm charts for tekton deployments. This 
+                      is only applicable if you're using OpenShift Pipelines (tekton)
+                      for continuous integration.
+                    type: string
+                    default: https://ploigos.github.io/ploigos-charts
+                  services:
+                    description: Describes the services supporting the Ploigos deployment
                     type: object
                     properties:
-                      ciTool:
-                        description: |
-                          Name of the CI tool used for workflow orchestration.
-                          Supported values:
-                          - jenkins (default)
-                          - tekton
-                        type: string
-                        pattern: ^jenkins|tekton$
-                        default: jenkins
+                      continuousIntegration:
+                        description: Describes the CI service used for workflow orchestration.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - jenkins (default)
+                              - tekton
+                            type: string
+                            pattern: ^jenkins|tekton$
+                            default: jenkins
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       sourceControl:
-                        description: |
-                          Name of the tool used for source control.
-                          Supported values:
-                          - gitea (default)
-                        type: string
-                        pattern: ^gitea$
-                        default: gitea
+                        description: Describes the service used for source control.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - gitea (default)
+                            type: string
+                            pattern: ^gitea$
+                            default: gitea
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       artifactRepository:
-                        description: |
-                          Name of the tool used as an artifact repository.
-                          Supported values:
-                          - nexus (default)
-                        type: string
-                        pattern: ^nexus$
-                        default: nexus
+                        description: Describes the service used as an artifact repository.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - nexus (default)
+                            type: string
+                            pattern: ^nexus$
+                            default: nexus
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       staticCodeAnalysis:
-                        description: |
-                          Name of the tool used for static code analysis.
-                          Supported values:
-                          - sonarqube (default)
-                        type: string
-                        pattern: ^sonarqube$
-                        default: sonarqube
+                        description: Describes the service used for static code analysis.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - sonarqube (default)
+                            type: string
+                            pattern: ^sonarqube$
+                            default: sonarqube
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       containerRegistry:
-                        description: |
-                          Name of the tool used for the container registry.
-                          Supported values:
-                          - nexus (default)
-                          - quay
-                        type: string
-                        pattern: ^quay|nexus$
-                        default: nexus
+                        description: Describes the service used as a container registry.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - nexus (default)
+                              - quay
+                            type: string
+                            pattern: ^nexus|quay$
+                            default: nexus
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       continuousDeployment:
-                        description: |
-                          Name of the tool used for continuous deployment.
-                          Supported values:
-                          - argocd (default)
-                        type: string
-                        pattern: ^argocd$
-                        default: argocd
+                        description: Describes the service used for continuous deployment.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - argocd (default)
+                            type: string
+                            pattern: ^argocd$
+                            default: argocd
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       uat:
-                        description: |
-                          Name of the tool used for User Acceptance Testing.
-                          Supported values:
-                          - selenium (default)
-                        type: string
-                        pattern: ^selenium$
-                        default: selenium
+                        description: Describes the service used for User Acceptance Testing.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - selenium (default)
+                            type: string
+                            pattern: ^selenium$
+                            default: selenium
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       chat:
-                        description: |
-                          (Optional) Name of the tool used for a chat server.
-                          Supported values:
-                          - mattermost
-                        type: string
-                        pattern: ^mattermost$
+                        description: (Optional) Describes the service used as a chat server.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - mattermost
+                            type: string
+                            pattern: ^mattermost$
+                            default: mattermost
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                       ide:
-                        description: |
-                          (Optional) Name of the tool used for in-browser IDE.
-                          Supported values:
-                          - codeready
-                        type: string
-                        pattern: ^codeready$
+                        description: Describes the service used as an in-browser IDE.
+                        type: object
+                        properties:
+                          name:
+                            description: |
+                              This service's name.
+                              Supported values:
+                              - codeready (default)
+                            type: string
+                            pattern: ^codeready$
+                            default: codeready
+                          managed:
+                            description: Whether or not this service is managed by this operator.
+                            type: boolean
+                            default: True
+                        required:
+                        - name
+                        - managed
                     required:
-                    - ciTool
+                    - continuousIntegration
                     - sourceControl
                     - artifactRepository
                     - staticCodeAnalysis
@@ -156,7 +264,8 @@ spec:
                     required:
                     - verify
                 required:
-                - providers
+                - services
+                - helmRepository
                 type: object
             required:
             - tsscPlatform

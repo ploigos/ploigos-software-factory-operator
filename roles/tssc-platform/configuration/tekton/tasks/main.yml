@@ -1,7 +1,7 @@
 - name: Add ploigos chart repo
   community.kubernetes.helm_repository:
     name: ploigos_charts
-    repo_url: "https://ploigos.github.io/ploigos-charts"
+    repo_url: "{{ tssc_platform.helm_repository }}"
 
 - name: Deploy cluster resources chart
   community.kubernetes.helm:
