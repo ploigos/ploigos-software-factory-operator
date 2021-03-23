@@ -55,7 +55,7 @@ spec:
                         default: openshift-config
                   helmRepository:
                     description: |
-                      Location of helm charts for tekton deployments. This 
+                      Location of helm charts for tekton deployments. This
                       is only applicable if you're using OpenShift Pipelines (tekton)
                       for continuous integration.
                     type: string
