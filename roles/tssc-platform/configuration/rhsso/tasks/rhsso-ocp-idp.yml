@@ -40,6 +40,6 @@
     name: cluster
     patch:
     - op: add
-      path: /spec/identityservices/[?name='{{ item.name }}']
+      path: /spec/identityProviders/[?name='{{ item.name }}']
       value: '{{ item }}'
   loop: '{{ lookup("template", "rhsso-ocp-idp.yml.j2")|from_yaml }}'
