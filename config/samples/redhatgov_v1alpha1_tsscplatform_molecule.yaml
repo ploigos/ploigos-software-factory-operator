@@ -2,4 +2,20 @@ apiVersion: redhatgov.io/v1alpha1
 kind: TsscPlatform
 metadata:
   name: tsscplatform-testing
-spec: {}
+spec:
+  tsscPlatform:
+    services:
+      continuousIntegration:
+        name: jenkins
+      sourceControl:
+        name: gitea
+      artifactRepository:
+        name: nexus
+      staticCodeAnalysis:
+        name: sonarqube
+      continuousDeployment:
+        name: argocd
+      uat:
+        name: selenium
+      containerRegistry:
+        name: nexus

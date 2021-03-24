@@ -4,6 +4,7 @@ global:
   applicationName: {{ app_name }}
   eventListenerCreateRoute: true
   eventListenerCreateIngress: false
+  eventListenerRouteHostOverride: el-{{ service_name }}-{{ app_name }}.apps.{{ full_cluster_name }}
   cleanupPipelineRunsToKeep: 10
   cleanupPipelineRunsSchedule: "*/15 * * * *"
   cleanupPipelineSuccessfulJobHistoryLimit: 5

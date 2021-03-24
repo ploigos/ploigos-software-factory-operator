@@ -11,10 +11,11 @@
   retries: 20
   delay: 60
 
-- name: Get providers from TsscPlatform
+- name: Get services from TsscPlatform
   set_fact:
-    platform_ci_tool: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.providers.ciTool  | default('jenkins') }}"
-    platform_container_registry: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.providers.containerRegistry  | default('nexus') }}"
+    platform_continuous_integration: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.services.continuousIntegration.name  | default('jenkins') }}"
+    platform_container_registry: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.services.containerRegistry.name  | default('nexus') }}"
+    platform_helm_repository: "{{ tssc_platform_result.resources[0].spec.tsscPlatform.helmRepository | default('https://ploigos.github.io/ploigos-charts') }}"
 
 - name: Fetch tssc-service-account secret
   set_fact:
@@ -94,14 +95,14 @@
       headers:
         Authorization: 'Bearer {{ ocp_token }}'
       status_code: "302"
-  when: platform_ci_tool == 'jenkins'
+  when: platform_continuous_integration == 'jenkins'
 
 - name: Create pipeline in Tekton
   block:
   - name: Add ploigos chart repo
     community.kubernetes.helm_repository:
       name: ploigos_charts
-      repo_url: "https://ploigos.github.io/ploigos-charts"
+      repo_url: "{{ platform_helm_repository }}"
 
   - name: Deploy cluster resources chart
     community.kubernetes.helm:
@@ -114,4 +115,4 @@
     community.kubernetes.k8s:
       definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
     when: auto_start_pipeline
-  when: platform_ci_tool == 'tekton'
+  when: platform_continuous_integration == 'tekton'
