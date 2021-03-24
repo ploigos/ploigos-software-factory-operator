@@ -3,7 +3,7 @@
 
 
 mkdir -p $HOME/.local/bin
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="/home/runner/.local/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/opt/pipx_bin:/usr/share/rust/.cargo/bin:/usr/local/.ghcup/bin:/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/runner/.dotnet/tools:/home/runner/.config/composer/vendor/bin:/home/runner/.local/bin:/home/runner/.dotnet/tools:/home/runner/.config/composer/vendor/bin:/home/runner/.local/bin"
 export KUBECONFIG=$HOME/.kube/config
 
 # Basic pip prereqs
@@ -12,7 +12,6 @@ pip3 install --user --upgrade setuptools wheel pip
 # Dependencies for test environment
 # NOTE: explicitly downgrading openshift due to https://github.com/kubernetes-client/python/issues/1333
 pip3 install --user docker==4.2.2 ansible molecule ansible-lint yamllint flake8 openshift==0.11.2 jmespath
-find / | grep molecule
 
 # Ansible dependencies
 ansible-galaxy collection install -r requirements.yml
