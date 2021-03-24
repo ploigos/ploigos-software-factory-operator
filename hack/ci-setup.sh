@@ -12,6 +12,7 @@ pip3 install --user --upgrade setuptools wheel pip
 # Dependencies for test environment
 # NOTE: explicitly downgrading openshift due to https://github.com/kubernetes-client/python/issues/1333
 pip3 install --user docker==4.2.2 ansible molecule ansible-lint yamllint flake8 openshift==0.11.2 jmespath
+find / | grep molecule
 
 # Ansible dependencies
 ansible-galaxy collection install -r requirements.yml
