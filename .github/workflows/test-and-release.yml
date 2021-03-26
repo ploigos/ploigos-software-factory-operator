@@ -20,7 +20,7 @@ jobs:
         run: hack/ci-setup.sh
       - name: Test
         run: |
-          molecule test -s ocp-cluster
+          python -m molecule test -s ocp-cluster
         env:
           OCP_USERNAME: ${{ secrets.OCP_USERNAME }}
           OCP_PASSWORD: ${{ secrets.OCP_PASSWORD }}
