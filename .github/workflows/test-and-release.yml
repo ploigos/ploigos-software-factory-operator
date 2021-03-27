@@ -45,5 +45,6 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - name: Build, bundle, and push
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           pip3 install --user --upgrade setuptools wheel pip
           hack/operate.sh --push-images --bundle --extra-tag=latest --verbose --formatter

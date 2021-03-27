@@ -310,7 +310,7 @@ function update_components() {
         else
             error_run "Updating the Operator SDK manager" 'pip3 install --user --upgrade -r "$SCRIPT_ROOT/requirements.txt"' || return 1
         fi
-        error_run "Updating the Operator SDK" 'sdk_version=$(python -m osdk-manager osdk update --no-verify -vvvv | cut -d" " -f 3)' || return 1
+        error_run "Updating the Operator SDK" 'sdk_version=$(osdk-manager osdk update --no-verify -vvvv | cut -d" " -f 3)' || return 1
     fi
     components_updated=true
 }
