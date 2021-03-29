@@ -1,3 +1,7 @@
 ---
 - include: rhsso-ocp-idp.yml
 - include: rhsso-users.yml
+- name: Create Role and RoleBinding to help RHSSO Work
+  k8s:
+    namespace: '{{ rhsso_project_name }}'
+    definition: "{{ lookup('template', 'rhsso-custom-host.yml.j2') | from_yaml }}"

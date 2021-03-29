@@ -6,7 +6,7 @@ spec:
   tsscPlatform:
     services:
       continuousIntegration:
-        name: jenkins
+        name: tekton
       sourceControl:
         name: gitea
       artifactRepository:
