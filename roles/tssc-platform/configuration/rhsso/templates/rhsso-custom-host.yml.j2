@@ -1,0 +1,25 @@
+---
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: rhsso-operator-custom-host
+  rules:
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes/custom-host
+    verbs:
+      - create
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: rhsso-custom-host-binding
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: rhsso-operator-custom-host
+  subjects:
+  - kind: ServiceAccount
+    namespace: {{ rhsso_project_name }}
+    name: rhsso-operator

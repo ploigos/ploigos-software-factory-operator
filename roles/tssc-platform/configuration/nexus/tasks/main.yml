@@ -72,7 +72,7 @@
   shell: >-
     devsecops-api nexus add-docker-repository
     http://nexus.{{ nexus_project_name }}.svc.cluster.local:8081
-    --login-username '{{ tssc_service_account.username }}' --login-password '{{ tssc_service_account.password }}'
+    --login-username admin --login-password '{{ nexus_admin_password }}'
     --repository-names docker-hosted
   register: docker_repo
   changed_when: docker_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
