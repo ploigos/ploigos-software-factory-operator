@@ -66,7 +66,7 @@ Two APIs are offered:
           name: selenium
   EOF
 
-5. Then create a `TsscPipeline` instance for our reference application:
+5. Then create a `TsscPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
 
   oc apply -f - << EOF
   apiVersion: redhatgov.io/v1alpha1
@@ -87,7 +87,7 @@ Two APIs are offered:
     serviceName: fruit
   EOF
 
-6. Watch the magic happen - pop into Jenkins and checkout the pipeline:
+6. Watch the magic happen - pop into Jenkins and check out the pipeline:
 
   oc get route jenkins --template "https://{{.spec.host}}"
 
