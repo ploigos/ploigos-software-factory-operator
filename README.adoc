@@ -1,47 +1,15 @@
-= TSSC Overview
+= Ploigos Software Factory Operator
 
-The Trusted Software Supply Chain(TSSC) has 2 high level pieces: the Platform and the Pipeline. More information on the pipeline can be found https://ploigos.github.io/ploigos-docs/[here]. 
+This operator powers OpenShift-based deployments of https://ploigos.github.io/ploigos-docs/[Ploigos] - a DevSecOps ecosystem modeled after the US DoD's https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)]. Pipeline steps are implemented using the https://github.com/ploigos/ploigos-step-runner[ploigos-step-runner], a python-based abstraction layer equipped with _step implementers_ that enable agnosticity with underlying tools and services.
 
-https://github.com/rhtconsulting/tssc-python-package[The TSSC Pipeline is implemented as a Python command line tool] that can run in any CI service; Jenkins, Tekton, GitLab, etc... It ships with a set of step implementations and can be extended with other step implementations. The Pipeline depends on a variety of services and tools to operate; source control repository, dependency repository, image repository, security scanner, etc... One could set these up and maintain them by hand...or you could just use the TSSC Platform.
+Two APIs are offered:
 
-The TSSC Platform is a set of services and tools deployed on K8s/OCP using operators wherever possible. We aim to keep it compliant with the https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)] in both connected and disconnected clusters. A quick look at the roles folder in this repo will show you what services and tools are available in the TSSC Platform.
+* *TsscPlatform*: an all-in-one resource for provisioning pre-wired infrastructure like a CI tool, static code analysis server, artifact repository, and other services that support a DevSecOps pipeline. 
+* *TsscPipeline*: a resource for creating an end-to-end pipeline for your application's source code.
 
+== Quick Start
 
-= Tssc Operator
-
-== Overview
-
-This repository contains the code to build a Tssc Operator for Kubernetes, including Red Hat OpenShift Container Platform.
-
-It is implemented on top of the Red Hat https://sdk.operatorframework.io/[Operator SDK] - in particular the https://sdk.operatorframework.io/docs/building-operators/ansible/[Ansible Operator].
-
-This operator services the following https://docs.openshift.com/container-platform/4.5/operators/understanding/crds/crd-managing-resources-from-crds.html[CRDs]:
-
-* <<TsscPlatform CRD>>
-* <<TsscWorkshop CRD>>
-* <<TsscPipeline CRD>>
-
-The above https://docs.openshift.com/container-platform/4.5/operators/understanding/crds/crd-managing-resources-from-crds.html[CRDs] enable the following use cases:
-
-* <<TSSC Workshop to Onboard an App>>
-* <<TSSC Demo with a Reference App>>
-* <<Production Deployment of TSSC Platform>>
-* <<Production Deployment of TSSC Pipeline>>
-
-== Use Cases
-
-=== TSSC Workshop to Onboard an App
-
-Deploy and configure the resources required by the ...doesn't exist yet:
-https://github.com/RedHatGov/tssc-operator/issues/57
-
-
-=== TSSC Demo with a Reference App
-
-Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc.rht-set.com/tssc-references/reference-quarkus-mvn-jenkins[TSSC Quarkus reference app]; this includes importing and updating the config of the git repos. You can deploy this using the steps below:
-
-1. Login to an OpenShift cluster (tested on 4.4 or above) as a `cluster-admin`
-2. Create a `CatalogSource` to import the RedHatGov operator catalog.
+1. Create a `CatalogSource` to import the RedHatGov operator catalog.
 
   oc apply -f - << EOF
   apiVersion: operators.coreos.com/v1alpha1
@@ -56,130 +24,127 @@ Deploy and configure a TSSC Platform and Pipeline for the http://gitea.apps.tssc
     publisher: RedHatGov
   EOF
 
-3. Create a project named **devsecops** for your pipeline tooling to live.
+2. Create a project for your pipeline tooling to live.
 
   oc new-project devsecops
 
-4. *If you are using an RHPDS-provisioned cluster:*  delete the limit range for the new project. RHPDS sometimes sets default CPU / memory limits that are too restrictive for certain Pods that the operator will create.
+3. Ploigos is hungry - delete any `LimitRange` that might have been created from project templates:
 
   oc delete limitrange --all -n devsecops
 
-5. In the OpenShift Web Console, navigate to **Operators -> OperatorHub** and search for "Ploigos Software Factory Operator". Select it and click **Install**
-6. Set **Installation Mode** to *A specific namespace on the cluster* and set **Installed Namespace** to *devsecops*.
-7. Leave other options as default and click **Install** once more.
-8. *If you're using an RHPDS-provisioned cluster, you can skip this step, since this secret is created as part of the default provisioning template.* Create a `.dockerconfigjson` secret containing a pull token for registry.redhat.io.
-It is recommended to generate a new service account before a workshop and delete it after, as this token is available in each of the users' projects (and can be used in the future if the service account isn't deleted). To get a service account:
-  * Go to https://access.redhat.com/terms-based-registry/
-  * Login with your Red Hat credentials, then go to Service Accounts (upper right corner) and create a new service account. 
-  * Click on the name of the service account, go to the 'Docker Configuration' tab, click 'view its contents' 
-  * Copy the contents and save it `~/.docker/config.json`
-  * Create the config.json file if not already existed `vi ~/.docker/config.json` and paste the contents there.
-  * Run the below command to create the pull-secret secret in the openshift-config namespace
-  
-  
-  oc create secret generic pull-secret --from-file=.dockerconfigjson=</path/to/.docker/config.json> --type=kubernetes.io/dockerconfigjson -n openshift-config
-  
- 
-  * Remember to replace `</path/to/.docker/config.json>` with the location where the `config.json` file is saved.
+4. Create a `TsscPlatform` to spin up your infrastructure:
 
-9. On the Ploigos Software Factory Operator page, create a new `TsscPlatform` CustomResource.
-10. If you modified the name of your pull secret in Step 7, provide the corresponding values for **Tsscplatform -> Pull Secret** as needed. Otherwise, you can leave this blank.
-11. Watch the logs of the `tssc-operator-controller-manager` pod, and wait for:
+  oc apply -f - << EOF
+  apiVersion: redhatgov.io/v1alpha1
+  kind: TsscPlatform
+  metadata:
+    name: tsscplatform
+  spec:
+    tsscPlatform:
+      helmRepository: 'https://ploigos.github.io/ploigos-charts'
+      services:
+        artifactRepository:
+          managed: true
+          name: nexus
+        containerRegistry:
+          managed: true
+          name: nexus
+        continuousDeployment:
+          managed: true
+          name: argocd
+        continuousIntegration:
+          managed: true
+          name: jenkins
+        sourceControl:
+          managed: true
+          name: gitea
+        staticCodeAnalysis:
+          managed: true
+          name: sonarqube
+        uat:
+          managed: true
+          name: selenium
+  EOF
 
-  PLAY RECAP *********************************************************************
-  [0;33mlocalhost[0m                  : [0;32mok=32  [0m [0;33mchanged=10  [0m unreachable=0    failed=0    [0;36mskipped=17  [0m rescued=0    ignored=0
+5. Then create a `TsscPipeline` instance for our reference application:
 
-- This message indicates that the Reconciliation is complete. It should appear within 8-10 minutes.
+  oc apply -f - << EOF
+  apiVersion: redhatgov.io/v1alpha1
+  kind: TsscPipeline
+  metadata:
+    name: tsscpipeline-reference-app
+  spec:
+    appName: ref-quarkus-mvn-jenkins-std
+    appRepo:
+      destinationRepoName: reference-quarkus-mvn_jenkins_workflow-standard
+      sourceUrl: >-
+        http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
+    autoStartPipeline: true
+    helmRepo:
+      destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
+      sourceUrl: >-
+        http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+    serviceName: fruit
+  EOF
 
-12. Then create a `TsscPipeline` instance, which should create and start your pipeline job in Jenkins:
+6. Watch the magic happen - pop into Jenkins and checkout the pipeline:
 
-----
-oc apply -n devsecops -f - << EOF
-apiVersion: redhatgov.io/v1alpha1
-kind: TsscPipeline
-metadata:
-  name: tsscpipeline
-spec: {}
-EOF
-----
+  oc get route jenkins --template "https://{{.spec.host}}"
 
-==== Note
+== Optional Configuration
 
-This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
+=== Services
 
-=== Production Deployment of TSSC Platform
+You can configure a select number of services in the `tsscPlatform.services` property of your `TsscPlatform` object. 
 
-This use case is simply deploying and integrating the services/tooling that is required by the TSSC Pipeline. This platform could be used by a TSSC Pipeline, a workshop, a custom pipeline, or anything the user desires.
+* The `managed` attribute indicates whether the applicable service should be provisioned by this operator. If `false`, it is assumed to already exist so no action is taken. In the future, we may develop capability to configure existing tooling. 
 
-=== Production Deployment of TSSC Pipeline
+* The `name` attributes indicates the provider for each service. See below for supported services, with defaults appearing in *bold*.
 
-This use case does not included the steps required to alter a target git repository(s) to integrate it with TSSC. This use case includes configuration of a TSSC Platform to support a correctly configured pair of git repositories: source code and deploy config.
+|===========================
+|Service|Required?|Options
+|Continuous Integration|✅ a|
+* *jenkins*
+* tekton
+|Source Control|✅ a|
+* *gitea*
+|Artifact Repository|✅ a|
+* *nexus*
+|Static Code Analysis|✅ a|
+* *sonarqube*
+|Container Registry|✅ a|
+* *nexus*
+* quay
+|Continuous Deployment|✅ a|
+* *argocd*
+|User Acceptance Testing|✅ a|
+* *selenium*
+|Chat Server| a|
+* *matttermost*
+|IDE| a|
+* *codeready*
+|===========================
 
-==== Note
+=== TLS
+The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your cluster uses self-signed certificates, you'll need to disable TLS verification on your `TsscPlatform` CR like this:
 
-This use case supports RHSSO with or without a backing Identity Provider. Without a backing IP KeyCloak users can be created.
+  apiVersion: redhatgov.io/v1alpha1
+  kind: TsscPlatform
+  metadata:
+    name: tsscplatform
+  spec:
+    tls:
+      verify: false
 
-== CRDs
-=== TsscPlatform CRD
+If your certificates are signed using a private CA, you can instead provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
 
-This CRD is responsible for the service tooling, or platform, required to support a TSSC Pipeline: a TSSC Platform. Each service/tool the CDR supports exposes options at a minimum a boolean to install or not to install it. 
-
-Wherever possible we delegate to another operator to create/manage the platform services. For example the https://github.com/RedHatGov/gitea-operator[gitea-operator] happens to also be part of this GitHub org. That allows us to make changes to that operator to fulfill the needs of TSSC. Another example is the rhsso-operator; which is not an operator the TSSC group controls. If you compare the gitea and rhsso roles in this repo you will notice that the gitea role simply subscribes to the operator and applies one or more CRs. The rhsso role includes more tasks as there are gaps between what TSSC needs and what the rhsso-operator fulfills with it's CRs.
-
-=== TsscWorkshop CRD
-
-This CRD is responsible for deploying everything needed to run a workshop on top of a TsscPlatform. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
-
-After this operator has completed execution in response to this CR an SA should be able to conduct the workshop without additional deployments or configurations.
-
-==== Note
-
-This CRD's responsibilities may include deploy or configuring addition services/tools beyond what the TsscPlatform CRD does(eg. username-distribution).
-
-This CRD supports the use case: <<TSSC Workshop to Onboard an App>>.
-
-=== TsscPipeline CRD
-
-This CRD is responsible for configuring the service/tooling deployed by a TsscPlatform CR. If the name of a TsscPlatform is not supplied in this CR a TsscPlatform CR will be created with the same name as this CR.
-
-This operator will not attempt to alter a target git repository(s) to integrate it with TSSC. After this operator has completed execution in response to this CR the only actions that should remain would be to edit contents of the target git repositories.
-
-==== Note
-
-This CRD supports both use cases: <<TSSC Demo with a Reference App>> and <<Production Deployment of TSSC Pipeline>>.
-
-== Intended Design vs Current Layout
-
-Each CRD maps to a playbook named the same. Each playbook will call specific task lists from each role as opposed to calling the default task list main. For example the tssc-platform.yml playbook would call the task list tssc-platform from each role:
-
-----
-  tasks:
-    - import_role:
-        name: gitea
-        tasks_from: tssc-platform
-    
-    - import_role:
-        name: fuzzy-bunny
-        tasks_from: tssc-platform
-----
-
-Both the TsscPipeline and TsscWorkshop CRDs allow you to specify an existing TsscPlatform and if not specified a TsscPlatform CR will be created accordingly.
-
-=== Design Quirks
-
-Please note how defaults behave for a CRD and how you must code to create behaviors that don't surprise the user:
-
-The CRD, if it has defaults set, will cause validation of vars to have their spec fleshed out to include those defaults if they were left out. When the playbook is called, those defaults from the CRD are passed as vars because they now exist in the CR. If you have an optional section in the CRD with no defaults, but the spec is validated, the variables will be passed to the playbook as a literal null value (None in Python).
-
-None provided to a role will not inherit defaults.
-None filtered with Ansible's default filter will be override with the default.
-
-This set of conditions means you should apply defaults in the CRD and the playbook; or, rather, maybe an or would be appropriate.
-
-* a validated but undefaulted CRD variable should have a default in the playbook
-* a defaulted CRD variable should be expected to be passed into the playbook
-
-This is not well documented, and James discovered this "feature" while working on things.
+  apiVersion: redhatgov.io/v1alpha1
+  kind: TsscPlatform
+  metadata:
+    name: tsscplatform
+  spec:
+    tls:
+      trustBundleConfigMap: trustedcabundle
 
 == Building the Operator
 
@@ -214,34 +179,6 @@ hack/operate.sh --deploy-cr
 ----
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
-
-== Custom Resources
-
-* `TsscPlatform` - deploys platform components which support the Trusted Software Supply Chain. For a list of these components, see the link:roles/tssc-platform/[tssc-platform roles directory].
-
-
-== Deploying a custom TsscPlatform instance using the Operator
-
-A TsscPlatform instance is deployed by creating a `kind: TsscPlatform` Custom Resource based on the TsscPlatform Custom Resource Definition. You can see some samples in the link:config/samples/[samples directory]. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, Custom Resource creation can be done through the console UI with embedded documentation or a form view.
-
-. Write the definition to a file (e.g. tsscplatform.yaml) and then create the TsscPlatform instance:
-+
-[source,sh]
-----
-oc create -f ./tsscplatform.yaml
-----
-
-. The operator will deploy a Tssc Platform.
-. You can validate the existence of your Tssc Platform instance by querying for tsscplatform objects:
-+
-[source,sh]
-----
-oc get tsscplatforms
-----
-
-== Deleting a TsscPlatform instance
-
-Deleting a `TsscPlatform` object will not undeploy dependent objects. This functionality is still under construction.
 
 == Developer Uninstalling the Tssc Operator
 
