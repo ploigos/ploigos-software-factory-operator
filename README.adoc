@@ -32,7 +32,23 @@ Two APIs are offered:
 
   oc delete limitrange --all -n devsecops
 
-4. Create a `TsscPlatform` to spin up your infrastructure:
+4. Install this operator into your namespace:
+
+  oc apply -f - << EOF
+  apiVersion: operators.coreos.com/v1alpha1
+  kind: Subscription
+  metadata:
+    name: ploigos-software-factory-operator
+    namespace: devsecops
+  spec:
+    channel: alpha
+    installPlanApproval: Automatic
+    name: ploigos-software-factory-operator
+    source: redhatgov-operators
+    sourceNamespace: openshift-marketplace
+  EOF
+
+5. Create a `TsscPlatform` to spin up your infrastructure:
 
   oc apply -f - << EOF
   apiVersion: redhatgov.io/v1alpha1
@@ -66,7 +82,7 @@ Two APIs are offered:
           name: selenium
   EOF
 
-5. Then create a `TsscPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
+6. Then create a `TsscPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
 
   oc apply -f - << EOF
   apiVersion: redhatgov.io/v1alpha1
@@ -87,7 +103,7 @@ Two APIs are offered:
     serviceName: fruit
   EOF
 
-6. Watch the magic happen - pop into Jenkins and check out the pipeline:
+7. Watch the magic happen - pop into Jenkins and check out the pipeline:
 
   oc get route jenkins --template "https://{{.spec.host}}"
 
