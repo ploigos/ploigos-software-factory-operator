@@ -35,9 +35,9 @@ data:
 {% else %}
           nexus-docker-{{ tssc_namespace }}.apps.{{ full_cluster_name }}:
 {% endif %}
-            username: {{ tssc_service_account.username }}
+            username: "{{ tssc_service_account.username }}"
           registry.redhat.io:
-            username: {{ rhio_username }}
+            username: "{{ rhio_username }}"
       global-environment-defaults:
         DEV:
           kube-app-domain: dev.apps.{{ full_cluster_name }}
