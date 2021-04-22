@@ -25,5 +25,5 @@ curl -Lo $HOME/helm.tgz https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz
 tar xvzf $HOME/helm.tgz -C $HOME/.local/bin --strip-components 1 linux-amd64/helm
 
 # Kustomize CLI
-curl -Lo $HOME/kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v3.10.0/kustomize_v3.10.0_linux_amd64.tar.gz
+curl -Lo $HOME/kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.0.5/kustomize_v4.0.5_linux_amd64.tar.gz
 tar zxvf $HOME/kustomize.tar.gz -C $HOME/.local/bin kustomize
