@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '!**.adoc'
+    paths-ignore:
+      - '**.adoc'
   pull_request:
     branches:
       - main
-    paths:
-      - '!**.adoc'
+    paths-ignore:
+      - '**.adoc'
 
 jobs:
   test-cluster:
