@@ -14,7 +14,6 @@ on:
 
 jobs:
   release:
-    needs: [test-cluster]
     if: >
       github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
