@@ -235,7 +235,7 @@ hack/operate.sh -r
 
 OLM uninstallation for OLM-based operators can be handled through the UI, or by deleting the `Subscription`.
 
-== Notes on disconnected installations
+== Notes on Disconnected Installations
 
 The Operator SDK makes heavy use of Kustomize for development and installation, but intends bundles to be generated for use in an operator catalog. This enables the Operator Lifecycle Manager, deployed onto your cluster, to install and configure operators with a simple `kind: Subscription` object, instead of a large collection of manifests.
 
