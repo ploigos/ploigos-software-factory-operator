@@ -150,7 +150,7 @@ You can configure a select number of services in the `tsscPlatform.services` pro
 |User Acceptance Testing|✅ a|
 * *selenium*
 |Chat Server| a|
-* *matttermost*
+* *mattermost*
 |IDE| a|
 * *codeready*
 |===========================
