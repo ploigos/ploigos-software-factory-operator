@@ -156,18 +156,7 @@ You can configure a select number of services in the `tsscPlatform.services` pro
 |===========================
 
 === TLS
-The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your cluster uses self-signed certificates, you'll need to disable TLS verification on your `TsscPlatform` CR like this:
-
-  apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPlatform
-  metadata:
-    name: tsscplatform
-  spec:
-    tsscPlatform:
-      tls:
-        verify: false
-
-If your certificates are signed using a private CA, you can instead provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
+The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your certificates are signed using a private CA instead, you can provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
 
   apiVersion: redhatgov.io/v1alpha1
   kind: TsscPlatform
@@ -177,6 +166,17 @@ If your certificates are signed using a private CA, you can instead provide the 
     tsscPlatform:
       tls:
         trustBundleConfigMap: trustedcabundle
+
+If you are using self-signed certs, but configuring your own private CA is for some reason not an option, you can instead disable TLS verification. This is not recommended because it is less secure. To disable TLS verification, update your `TsscPlatform` CR like this:
+
+  apiVersion: redhatgov.io/v1alpha1
+  kind: TsscPlatform
+  metadata:
+    name: tsscplatform
+  spec:
+    tsscPlatform:
+      tls:
+        verify: false
 
 === Helm Repository
 
