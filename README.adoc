@@ -198,7 +198,7 @@ Before running the script make sure to update the location of the container imag
 
 == Developer Installation Steps
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Tssc Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Software Factory Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
 
 Perform the following tasks as *cluster-admin*:
 
@@ -224,9 +224,9 @@ hack/operate.sh --deploy-cr
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
 
-== Developer Uninstalling the Tssc Operator
+== Developer Uninstalling the Ploigos Software Factory Operator
 
-In case you wish to uninstall the Tssc Operator, simply delete the operator and its resources with:
+In case you wish to uninstall the Ploigos Software Factory Operator, simply delete the operator and its resources with:
 
 [source,sh]
 ----
