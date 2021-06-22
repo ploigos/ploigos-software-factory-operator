@@ -1,6 +1,6 @@
 = Ploigos Software Factory Operator
 
-This operator powers OpenShift-based deployments of https://ploigos.github.io/ploigos-docs/[Ploigos] - a DevSecOps ecosystem modeled after the US DoD's https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)]. Pipeline steps are implemented using the https://github.com/ploigos/ploigos-step-runner[ploigos-step-runner], a python-based abstraction layer equipped with _step implementers_ that enable agnosticity with underlying tools and services.
+This operator powers OpenShift-based deployments of https://ploigos.github.io/ploigos-docs/[Ploigos] - a DevSecOps ecosystem modeled after the US DoD's https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)]. Pipeline steps are implemented using the https://github.com/ploigos/ploigos-step-runner[ploigos-step-runner], a python-based abstraction layer equipped with _step implementers_ that make your pipeline agnostic to underlying tools and services.
 
 Two APIs are offered:
 
