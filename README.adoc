@@ -1,6 +1,6 @@
 = Ploigos Software Factory Operator
 
-This operator powers OpenShift-based deployments of https://ploigos.github.io/ploigos-docs/[Ploigos] - a DevSecOps ecosystem modeled after the US DoD's https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)]. Pipeline steps are implemented using the https://github.com/ploigos/ploigos-step-runner[ploigos-step-runner], a python-based abstraction layer equipped with _step implementers_ that enable agnosticity with underlying tools and services.
+This operator powers OpenShift-based deployments of https://ploigos.github.io/ploigos-docs/[Ploigos] - a DevSecOps ecosystem modeled after the US DoD's https://dodcio.defense.gov/Portals/0/Documents/DoD%20Enterprise%20DevSecOps%20Reference%20Design%20v1.0_Public%20Release.pdf?ver=2019-09-26-115824-583[DoD Enterprise DevSecOps Reference Design(DEDSORD)]. Pipeline steps are implemented using the https://github.com/ploigos/ploigos-step-runner[ploigos-step-runner], a python-based abstraction layer equipped with _step implementers_ that make your pipeline agnostic to underlying tools and services.
 
 Two APIs are offered:
 
@@ -152,18 +152,7 @@ You can configure a select number of services in the `ploigosPlatform.services` 
 |===========================
 
 === TLS
-The default `PloigosPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your cluster uses self-signed certificates, you'll need to disable TLS verification on your `PloigosPlatform` CR like this:
-
-  apiVersion: redhatgov.io/v1alpha1
-  kind: PloigosPlatform
-  metadata:
-    name: ploigosplatform
-  spec:
-    ploigosPlatform:
-      tls:
-        verify: false
-
-If your certificates are signed using a private CA, you can instead provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
+The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your certificates are signed using a private CA instead, you can provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
 
   apiVersion: redhatgov.io/v1alpha1
   kind: PloigosPlatform
@@ -173,6 +162,17 @@ If your certificates are signed using a private CA, you can instead provide the 
     ploigosPlatform:
       tls:
         trustBundleConfigMap: trustedcabundle
+
+If you are using self-signed certs, but configuring your own private CA is for some reason not an option, you can instead disable TLS verification. This is not recommended because it is less secure. To disable TLS verification, update your `TsscPlatform` CR like this:
+
+  apiVersion: redhatgov.io/v1alpha1
+  kind: PloigosPlatform
+  metadata:
+    name: ploigosplatform
+  spec:
+    ploigosPlatform:
+      tls:
+        verify: false
 
 === Helm Repository
 
@@ -194,7 +194,11 @@ Before running the script make sure to update the location of the container imag
 
 == Developer Installation Steps
 
+<<<<<<< HEAD
 The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Operator in their projects and deploy PloigosPlatforms using the ploigosplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Ploigos operator can be installed from the OperatorHub interface of the console.
+=======
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Software Factory Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
+>>>>>>> 865d70101e4912e4cefd7b952717f50ecd220eb0
 
 Perform the following tasks as *cluster-admin*:
 
@@ -220,9 +224,15 @@ hack/operate.sh --deploy-cr
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
 
+<<<<<<< HEAD
 == Developer Uninstalling the Ploigos Operator
 
 In case you wish to uninstall the Ploigos Operator, simply delete the operator and its resources with:
+=======
+== Developer Uninstalling the Ploigos Software Factory Operator
+
+In case you wish to uninstall the Ploigos Software Factory Operator, simply delete the operator and its resources with:
+>>>>>>> 865d70101e4912e4cefd7b952717f50ecd220eb0
 
 [source,sh]
 ----
@@ -231,7 +241,7 @@ hack/operate.sh -r
 
 OLM uninstallation for OLM-based operators can be handled through the UI, or by deleting the `Subscription`.
 
-== Notes on disconnected installations
+== Notes on Disconnected Installations
 
 The Operator SDK makes heavy use of Kustomize for development and installation, but intends bundles to be generated for use in an operator catalog. This enables the Operator Lifecycle Manager, deployed onto your cluster, to install and configure operators with a simple `kind: Subscription` object, instead of a large collection of manifests.
 
