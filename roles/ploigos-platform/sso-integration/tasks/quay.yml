@@ -38,7 +38,7 @@
   k8s_info:
     api_version: v1
     kind: Pod
-    namespace: '{{ quay_project_name }}'
+    namespace: '{{ ploigos_namespace }}'
     label_selectors:
       - "quay-enterprise-component=app"
   register: quay_pod
@@ -48,7 +48,7 @@
   k8s_info:
     api_version: v1
     kind: Secret
-    namespace: '{{ quay_project_name }}'
+    namespace: '{{ ploigos_namespace }}'
     name: quay-enterprise-config-secret
   register: quay_config_secret
 
@@ -61,7 +61,7 @@
   blockinfile:
     marker: "# {mark} TISC RHSSO Config"
     backup: yes
-    block: "{{ lookup('template', './templates/quay-config-rhsso-block.yml.j2') }}"
+    block: "{{ lookup('template', 'quay-config-rhsso-block.yml.j2') }}"
     path: "{{ tmp_dir }}/quay-config.yml"
   register: rhsso_config_added
 
@@ -69,7 +69,7 @@
   k8s_json_patch:
     api_version: v1
     kind: Secret
-    namespace: '{{ quay_project_name }}'
+    namespace: '{{ ploigos_namespace }}'
     name: quay-enterprise-config-secret
     patch:
       - op: replace
@@ -83,7 +83,7 @@
       k8s:
         api_version: v1
         kind: Pod
-        namespace: '{{ quay_project_name }}'
+        namespace: '{{ ploigos_namespace }}'
         name: "{{ (quay_pod.resources|first).metadata.name }}"
         state: absent
 
@@ -91,7 +91,7 @@
       k8s_info:
         api_version: v1
         kind: Pod
-        namespace: '{{ quay_project_name }}'
+        namespace: '{{ ploigos_namespace }}'
         label_selectors:
           - "quay-enterprise-component=app"
       register: quay_pod

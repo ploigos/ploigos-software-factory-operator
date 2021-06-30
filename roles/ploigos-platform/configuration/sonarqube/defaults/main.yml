@@ -7,8 +7,3 @@ sonarqube_password: "{{ all_services_details.sonarqube.password }}"
 ploigos_service_account:
   username: ploigos
   password: password123
-
-rhsso_realm_name: openshift
-rhsso_project_name: rhsso
-rhsso_app_label: rhsso
-subdomain: '{{ full_cluster_name }}'

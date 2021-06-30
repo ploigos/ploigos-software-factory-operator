@@ -1,4 +1,9 @@
 ---
+- block:
+  - include_tasks: cleanup-ploigos-platform.yml
+  - meta: end_play 
+  when: cr_state == 'absent'
+
 - name: Add redhatgov catalog source
   k8s:
     definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
@@ -88,9 +93,18 @@
     label: operator_app
   when: cr_state == 'present'
 
+- name: Wire up SSO
+  include_role:
+    name: 'ploigos-platform/sso-integration'
+  when: "'rhsso' in managed_services"
+
 - name: Get secret template as base64
   set_fact:
     ploigos_platform_config_secrets: "{{ lookup('template', 'ploigos-platform-config-secrets.yml.j2') | b64encode }}"
+
+- set_fact:
+    platform_secrets: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-platform-config-secrets') }}"
+    platform_config: "{{ lookup('k8s', kind='ConfigMap', namespace=ploigos_namespace, resource_name='ploigos-platform-config') }}"
 
 - name: 'Set ploigos-platform-config-secrets Secret to {{ cr_state }}'
   k8s:
@@ -103,8 +117,9 @@
         namespace: '{{ ploigos_namespace }}'
       data:
         config-secrets.yml: '{{ ploigos_platform_config_secrets }}'
+  when: not platform_secrets
 
 - name: 'Set ploigos-platform-config ConfigMap to {{ cr_state }}'
   k8s:
     definition: '{{ lookup("template", "ploigos-platform-config.yml.j2") }}'
-    state: '{{ cr_state }}'
+  when: not platform_config or cr_state=='absent'

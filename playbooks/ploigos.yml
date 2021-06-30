@@ -39,9 +39,6 @@
         path: "{{ tmp_dir }}"
         state: directory
 
-    - include_tasks: cleanup-ploigos-platform.yml
-      when: cr_state == 'absent'
-
     - include_role:
         name: ploigos-platform/deployment
       when: cr_type == 'platform'

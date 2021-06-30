@@ -3,7 +3,7 @@
   block:
   - name: Create SonarQube SSO Client
     k8s:
-      definition: '{{ lookup("template", "../templates/rhsso-sonar4-client.yml.j2")|from_yaml }}'
+      definition: '{{ lookup("template", "rhsso-sonar4-client.yml.j2")|from_yaml }}'
 
   - name: Wait for SonarQube KeycloakClient to reconcile
     k8s_info:
@@ -22,7 +22,7 @@
       api_version: v1
       kind: Secret
       name: credential-rhsso
-      namespace: "{{ rhsso_project_name }}"
+      namespace: "{{ ploigos_namespace }}"
     register: rhsso_login_secret
 
   - set_fact:
@@ -30,6 +30,8 @@
       sso_admin_user: "{{ rhsso_login_secret | json_query('resources[0].data.ADMIN_USERNAME') | b64decode }}"
       keycloak_url: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}'
       sonarqube_url: 'https://sonarqube-{{ sonarqube_project_name }}.apps.{{ subdomain }}'
+      sonarqube_username: "{{ all_services_details.sonarqube.username }}"
+      sonarqube_password: "{{ all_services_details.sonarqube.password }}"
 
   - name: Wait for KeyCloak to respond to requests
     uri:
@@ -133,31 +135,11 @@
     set_fact:
       sonarqube_secret_data: "{{ lookup('k8s', kind='Secret', namespace=sonarqube_project_name, resource_name='sonarqube-admin-credentials') }}"
 
-  - name: Set sonarqube password fact from secret
-    set_fact:
-      sonarqube_password: "{{ sonarqube_secret_data.data.password | b64decode }}"
-    when:
-    - sonarqube_secret_data != []
-
-  - name: Create secret if missing
-    block:
-    - name: generate sonarqube credential facts
-      set_fact:
-        sonarqube_username: admin
-        sonarqube_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') }}"
-    - name: create secret
-      k8s:
-        namespace: '{{ sonarqube_project_name }}'
-        definition: "{{ lookup('template', 'sonarqube-secret.yml.j2') }}"
-    when:
-    - sonarqube_secret_data == []
-
   - name: Update sonarqube settings
     shell: >-
       devsecops-api sonarqube update-setting
       {{ sonarqube_url }}
-      --login-username admin --login-password admin
-      --new-login-password '{{ sonarqube_password }}'
+      --login-username {{ sonarqube_username }} --login-password {{ sonarqube_password }}
       --setting-name '{{ item.name }}'
       --setting-value '{{ item.value }}'
     # FIXME : not really sure how to deal with the changed_when deal

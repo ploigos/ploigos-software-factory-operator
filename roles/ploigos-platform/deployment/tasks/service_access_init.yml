@@ -6,6 +6,14 @@
   set_fact: 
     all_services_details: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service') | json_query('[].{key:keys(@)[0], value:values(@)[0]}') | items2dict }}"
 
+- name: Initialize managed RHSSO details
+  when: '"rhsso" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_rhsso_details) }}"
+  vars:
+    _rhsso_details:
+      rhsso: {}
+
 - name: Initialize managed Gitea details
   when: '"gitea" in managed_services'
   block:

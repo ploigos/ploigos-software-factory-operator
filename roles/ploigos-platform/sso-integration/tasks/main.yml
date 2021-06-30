@@ -1,0 +1,14 @@
+- set_fact:
+    sso_services: "{{ supported_services | intersect(managed_services) }}"
+  vars:
+    supported_services:
+    - gitea
+    - quay
+    - sonarqube
+    - argocd
+
+- name: Configure platform services
+  include_tasks: '{{ _sso_service }}.yml'
+  loop: "{{ sso_services }}"
+  loop_control:
+    loop_var: _sso_service

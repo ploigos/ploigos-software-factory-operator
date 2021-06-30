@@ -2,7 +2,7 @@
 - apiVersion: keycloak.org/v1alpha1
   kind: KeycloakClient
   metadata:
-    name: gitea-client
+    name: quay-client
     namespace: {{ rhsso_project_name }}
     labels:
       app: {{ rhsso_app_label }}
@@ -11,13 +11,13 @@
       matchLabels:
         app: {{ rhsso_app_label }}
     client:
-      clientId: {{ rhsso_gitea_client_id }}
-      name: {{ rhsso_gitea_client_id }}
+      clientId: {{ rhsso_quay_client_id }}
+      name: {{ rhsso_quay_client_id }}
       enabled: true
       clientAuthenticatorType: client-secret
       publicClient: false
       redirectUris:
-        - 'https://gitea-{{ gitea_project_name }}.apps.{{ subdomain }}/*'
-      rootUrl: 'https://gitea-{{ gitea_project_name }}.apps.{{ subdomain }}/'
+        - 'https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/oauth2/rhsso/callback'
+      rootUrl: 'https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/'
       protocol: openid-connect
       standardFlowEnabled: true

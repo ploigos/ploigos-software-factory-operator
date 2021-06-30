@@ -17,19 +17,12 @@ spec:
   server:
     route:
       enabled: true
-      tls:
-        insecureEdgeTerminationPolicy: Redirect
-        termination: reencrypt
   rbac:
     defaultPolicy: 'role:readonly'
     policy: |
       g, argocd-admins, role:admin
       p, {{ ploigos_service_account.username }}, *, *, *, allow
     scopes: '[groups]'
-  dex:
-    image: quay.io/redhat-cop/dex
-    openShiftOAuth: true
-    version: v2.22.0-openshift
   redis:
     image: redis
     version: sha256:b33e5a3c00e5794324fad2fab650eadba0f65e625cc915e4e57995590502c269

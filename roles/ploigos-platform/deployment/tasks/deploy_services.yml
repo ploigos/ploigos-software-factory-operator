@@ -6,7 +6,7 @@
     state: '{{ cr_state }}'
   when: ploigos_platform.services.continuous_integration.managed_service == 'jenkins'
 
-- name: Create run-as-user-1001 SCC for jenkins
+- name: Create ploigos-container-builder SCC for jenkins
   k8s:
     definition: "{{ lookup('template', 'jenkins-rbac.yml.j2') | from_yaml }}"
 
@@ -26,7 +26,7 @@
   k8s:
     definition: '{{ lookup("template", "operator-group.yml.j2") }}'
 
-- name: 'Create Subscription for {{ operator_app }}'
+- name: 'Create Subscriptions'
   k8s:
     definition: '{{ lookup("template", "subscriptions/" + operator_app + ".yml.j2") }}'
   loop: '{{ managed_services }}'
@@ -35,10 +35,9 @@
     label: operator_app
   when: lookup("template", "subscriptions/" + operator_app + ".yml.j2", errors='ignore')
 
-- name: 'Set CustomResource for {{ operator_app }} to {{ cr_state }}'
+- name: 'Apply CustomResources'
   k8s:
     definition: '{{ lookup("template", "custom-resources/" + operator_app + ".yml.j2") }}'
-    state: '{{ cr_state }}'
   register: deployment
   until: not deployment.failed
   retries: 5
