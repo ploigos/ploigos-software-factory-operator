@@ -108,17 +108,9 @@ data:
           argocd-api: argocd-server.{{ ploigos_namespace }}.svc.cluster.local
           argocd-username: {{ ploigos_service_account.username }}
           argocd-skip-tls: True
-          deployment-config-helm-chart-values-file-image-tag-yq-path: 'image.tag'
           git-username: {{ ploigos_service_account.username }}
           git-email: 'napsspo+ploigos@redhat.com'
           argocd-sync-timeout-seconds: 130
-          environment-config:
-            DEV:
-              deployment-config-helm-chart-environment-values-file: values-DEV.yaml
-            TEST:
-              deployment-config-helm-chart-environment-values-file: values-TEST.yaml
-            PROD:
-              deployment-config-helm-chart-environment-values-file: values-PROD.yaml
       validate-environment-configuration:
       - implementer: ConfiglintFromArgocd
       uat:
