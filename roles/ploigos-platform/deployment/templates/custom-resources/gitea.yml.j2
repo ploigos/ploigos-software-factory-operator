@@ -1,0 +1,18 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: Gitea
+metadata:
+  name: gitea
+  namespace: {{ ploigos_namespace }}
+spec:
+  gitea:
+    expose:
+      kind: Route
+      ssl: true
+      uri: gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}
+    volumeSize: 4Gi
+    resources:
+      memory:
+        limit: 2Gi
+  persistent: true
+  postgresql:
+    volumeSize: 10Gi

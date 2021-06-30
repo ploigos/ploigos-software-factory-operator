@@ -6,12 +6,12 @@ resources:
   # controller: true
   domain: io
   group: redhatgov
-  kind: TsscPlatform
+  kind: PloigosPlatform
   version: v1alpha1
 -
   # controller: true
   domain: io
   group: redhatgov
-  kind: TsscPipeline
+  kind: PloigosPipeline
   version: v1alpha1
 version: "3"

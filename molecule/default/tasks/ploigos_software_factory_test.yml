@@ -1,7 +1,7 @@
 ---
 - set_fact:
     custom_resources:
-    - TsscPlatform
+    - PloigosPlatform
 
 - name: Create CR
   k8s:

@@ -1,0 +1,14 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: PloigosPipeline
+metadata:
+  name: ploigospipeline-jenkins
+spec:
+  appName: ref-quarkus-mvn-jenkins-std
+  serviceName: fruit
+  appRepo:
+    sourceUrl: https://github.com/andykrohg/reference-quarkus-mvn.git
+    destinationRepoName: reference-quarkus-mvn
+  helmRepo:
+    sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything.git
+    destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
+  autoStartPipeline: true

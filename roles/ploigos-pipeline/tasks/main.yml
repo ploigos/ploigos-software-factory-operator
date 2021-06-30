@@ -1,0 +1,121 @@
+---
+- name: Ensure that a PloigosPlatform exists here
+  k8s_info:
+    api_version: redhatgov.io/v1alpha1
+    kind: PloigosPlatform
+    namespace: '{{ ploigos_namespace }}'
+  register: ploigos_platform_result
+  until:
+    - ploigos_platform_result.resources[0].status is defined
+    - ploigos_platform_result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
+  retries: 20
+  delay: 60
+
+- set_fact:
+    ploigos_platform: ploigos_platform_result.resources[0].spec.ploigosPlatform
+
+- name: Get services from PloigosPlatform
+  set_fact:
+    platform_continuous_integration: "{{ ploigos_platform.services.continuousIntegration.managedService  | default(omit) }}"
+    platform_container_registry: "{{ ploigos_platform.services.containerRegistry.managedService  | default(omit) }}"
+    platform_helm_repository: "{{ ploigos_platform.helmRepository | default('https://ploigos.github.io/ploigos-charts') }}"
+
+- name: Fetch ploigos-service-account secret
+  set_fact:
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-service-account-credentials') }}"
+
+- name: Set ploigos-service-account credential facts from secret
+  set_fact:
+    ploigos_service_account:
+      username:  "{{ secret_data.data.username | b64decode }}"
+      password: "{{ secret_data.data.password | b64decode }}"
+      email: "{{ secret_data.data.email | b64decode }}"
+      first_name: "{{ secret_data.data.first_name | b64decode }}"
+      last_name: "{{ secret_data.data.last_name | b64decode }}"
+
+- name: Create quay repository
+  shell: >-
+    devsecops-api quay add-repo https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}
+    --login-username '{{ ploigos_service_account.username }}' --login-password '{{ ploigos_service_account.password }}'
+    --organization platform --repo-name {{ app_name}}-{{ service_name }}
+  when: "'quay' == platform_container_registry"
+
+- name: Get gitea token secret
+  k8s_info:
+    kind: Secret
+    api_version: v1
+    namespace: '{{ ploigos_namespace }}'
+    name: gitea-access-token
+  register: gitea_token_secret
+
+- set_fact:
+    gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
+
+- name: Get platform org uid
+  uri:
+    url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/orgs/platform'
+    validate_certs: no
+    body_format: json
+    headers:
+      Authorization: 'token {{ gitea_token }}'
+  register: gitea_org_response
+
+- name: Migrate app and helm repos From Upstream into Gitea, in platform org
+  uri:
+    url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
+    validate_certs: no
+    body_format: json
+    method: POST
+    headers:
+      Authorization: 'token {{ gitea_token }}'
+    body: |
+      {
+        "clone_addr": "{{ repo.source_url }}",
+        "uid": {{ gitea_org_response.json.id }},
+        "repo_name": "{{ repo.destination_repo_name }}"
+      }
+    status_code: 201,409
+  register: gitea_repo_migration_task
+  changed_when: gitea_repo_migration_task.status == 201
+  loop:
+  - '{{ app_repo }}'
+  - '{{ helm_repo }}'
+  loop_control:
+    loop_var: repo
+    label: repo.name
+
+- name: Create pipeline in Jenkins
+  block:
+  - name: Get Service Account token
+    set_fact:
+      ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+
+  - name: Scan Gitea Org to create Jenkins job
+    uri:
+      url: 'https://jenkins-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
+      method: POST
+      validate_certs: false
+      headers:
+        Authorization: 'Bearer {{ ocp_token }}'
+      status_code: "302"
+  when: "'jenkins' == platform_continuous_integration"
+
+- name: Create pipeline in Tekton
+  block:
+  - name: Add ploigos chart repo
+    community.kubernetes.helm_repository:
+      name: ploigos_charts
+      repo_url: "{{ platform_helm_repository }}"
+
+  - name: Deploy cluster resources chart
+    community.kubernetes.helm:
+      name: ploigos-workflow-standard-tekton-pipeline
+      chart_ref: ploigos_charts/ploigos-workflow-standard-tekton-pipeline
+      values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
+      release_namespace: "{{ ploigos_namespace }}"
+
+  - name: Create PipelineRun, if autoStartPipeline is true
+    community.kubernetes.k8s:
+      definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
+    when: auto_start_pipeline
+  when: "'tekton' == platform_continuous_integration"

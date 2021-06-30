@@ -5,5 +5,5 @@ resources:
 - manager.yaml
 images:
 - name: controller
-  newName: quay.io/redhatgov/tssc-operator
+  newName: quay.io/redhatgov/ploigos-operator
   newTag: latest

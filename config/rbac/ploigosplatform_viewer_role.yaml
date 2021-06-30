@@ -1,0 +1,20 @@
+# permissions for end users to view ploigosplatforms.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ploigosplatforms-viewer-role
+rules:
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigosplatforms
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigosplatforms/status
+  verbs:
+  - get

@@ -1,0 +1,18 @@
+---
+- name: Clean up resources
+  shell: |
+    oc delete -n {{ ploigos_namespace }} KeycloakUser,KeycloakClient,KeycloakRealm --all || true
+    oc delete -n {{ ploigos_namespace }} all,configmap,pvc,serviceaccount,rolebinding -l app=jenkins-persistent || true
+    oc delete -n {{ ploigos_namespace }} secret gitea-access-token || true
+    oc delete -n {{ ploigos_namespace }} secret ploigos-platform-config-secrets || true
+    oc delete -n {{ ploigos_namespace }} cm ploigos-platform-config || true
+
+- name: Remove CustomResources
+  k8s:
+    definition: '{{ lookup("template", "custom-resources/" + operator_app + ".yml.j2") }}'
+    state: absent
+  loop: '{{ managed_services }}'
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
+  when: lookup("template", "custom-resources/" + operator_app + ".yml.j2", errors='ignore')

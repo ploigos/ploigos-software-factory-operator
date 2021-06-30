@@ -1,0 +1,37 @@
+- name: Create RHSSO Client definition for Gitea
+  k8s:
+    definition: '{{ lookup("template", "rhsso-argocd-client.yml.j2") }}'
+
+- name: Wait for ArgoCD KeycloakClient to reconcile
+  k8s_info:
+    api_version: keycloak.org/v1alpha1
+    kind: KeycloakClient
+    name: argocd-client
+    namespace: "{{ rhsso_project_name }}"
+  register: argocd_kc
+  until:
+    - argocd_kc.resources|length > 0
+    - argocd_kc.resources[0].status is defined
+    - argocd_kc.resources[0].status['ready']
+  delay: 10
+  retries: 6
+
+- name: Wait for client secret to be created
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: keycloak-client-secret-argocd
+    namespace: "{{ rhsso_project_name }}"
+  register: argocd_secret
+  until:
+    - "argocd_secret.resources[0].data['CLIENT_SECRET'] != ''"
+  retries: 12
+  delay: 5
+
+- name: Fetch ArgoCD secret for RHSSO
+  set_fact:
+    rhsso_argocd_secret: "{{ argocd_secret.resources[0].data['CLIENT_SECRET'] | b64decode }}"
+
+- name: Patch ArgoCD deployment with OpenID Connect info
+  k8s:
+    definition: "{{ lookup('template', 'argocd-rhsso-patch.yml.j2') }}"

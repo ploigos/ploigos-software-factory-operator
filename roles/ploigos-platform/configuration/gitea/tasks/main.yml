@@ -1,0 +1,87 @@
+- name: Wait for Gitea to respond to requests
+  uri:
+    url: '{{ gitea_url }}'
+    validate_certs: no
+  register: _gitea_endpoint
+  until: _gitea_endpoint.status == 200
+  retries: 30
+  delay: 5
+
+- name: Create Service Account for Gitea
+  uri:
+    url: '{{ gitea_url }}/api/v1/admin/users'
+    validate_certs: no
+    body_format: json
+    method: POST
+    headers:
+      Authorization: "Basic {{ (gitea_username + ':' + gitea_password) | b64encode }}"
+    body:
+      email: '{{ ploigos_service_account.email }}'
+      full_name: "{{ ploigos_service_account.first_name + ' ' + ploigos_service_account.last_name }}"
+      login_name: '{{ ploigos_service_account.username }}'
+      must_change_password: false
+      password: '{{ ploigos_service_account.password }}'
+      send_notify: false
+      source_id: 0
+      username: '{{ ploigos_service_account.username }}'
+    status_code: 201,422
+  register: response
+  changed_when: response.status == 201
+
+- name: Check Service Account token is present
+  uri:
+    url: '{{ gitea_url }}/api/v1/users/{{ ploigos_service_account.username }}/tokens'
+    validate_certs: no
+    method: GET
+    return_content: yes
+    body_format: json
+    headers:
+      Authorization: "Basic {{ (ploigos_service_account.username + ':' + ploigos_service_account.password) | b64encode }}"
+    status_code: 200
+  register: gitea_access_token_response
+
+- name: Create gitea access token if it doesn't exist
+  block:
+  - name: Create Application Token for Gitea
+    uri:
+      url: '{{ gitea_url }}/api/v1/users/{{ ploigos_service_account.username }}/tokens'
+      validate_certs: no
+      body_format: json
+      method: POST
+      headers:
+        Authorization: "Basic {{ (ploigos_service_account.username + ':' + ploigos_service_account.password) | b64encode }}"
+      body:
+        name: ploigos-platform-token
+      status_code: 201,422
+    register: token_creation_response
+    changed_when: token_creation_response.status == 201
+
+  - name: Grab token sha1 from response
+    set_fact:
+      gitea_access_token: '{{ token_creation_response.json.sha1 }}'
+
+  - name: Create Gitea token secret
+    k8s:
+      definition: "{{ lookup('template', 'gitea-token-secret.yml.j2') }}"
+    ignore_errors: true
+
+  - name: Create Organization for Service Account
+    uri:
+      url: '{{ gitea_url }}/api/v1/orgs'
+      validate_certs: no
+      body_format: json
+      method: POST
+      headers:
+        Authorization: "token {{ gitea_access_token }}"
+        Content-Type: "application/json"
+      body:
+        description: "Ploiogos Platform Organization"
+        full_name: "platform"
+        location: "Red Hat"
+        repo_admin_change_team_access: true
+        username: "platform"
+        visibility: "public"
+      status_code: 201,422
+    register: response
+    changed_when: response.status == 201
+  when: gitea_access_token_response.json == []

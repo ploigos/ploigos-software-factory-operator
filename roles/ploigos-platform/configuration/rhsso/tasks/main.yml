@@ -1,0 +1,7 @@
+---
+- include: rhsso-users.yml
+
+- name: 'Set Realm state to {{ cr_state }}'
+  k8s:
+    definition: '{{ lookup("template", "rhsso-ocp-realm.yml.j2")|from_yaml }}'
+    state: '{{ cr_state }}'

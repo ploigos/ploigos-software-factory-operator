@@ -1,0 +1,24 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: PloigosPlatform
+metadata:
+  name: ploigosplatform-jenkins-private
+spec:
+  ploigosPlatform:
+    services:
+      continuousIntegration:
+        managedService: jenkins
+      sourceControl:
+        managedService: gitea
+      artifactRepository:
+        managedService: nexus
+      staticCodeAnalysis:
+        managedService: sonarqube
+      continuousDeployment:
+        managedService: argocd
+      uat:
+        managedService: selenium
+      containerRegistry:
+        managedService: nexus
+    tls:
+      verify: false
+      trustBundleConfigMap: trustedcabundle

@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ platform_trust_bundle_config_map }}
-  namespace: {{ tssc_namespace }}
-  labels:
-    config.openshift.io/inject-trusted-cabundle: "true"

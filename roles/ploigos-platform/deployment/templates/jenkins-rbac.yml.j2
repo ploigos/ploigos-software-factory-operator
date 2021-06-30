@@ -1,0 +1,40 @@
+- kind: SecurityContextConstraints
+  apiVersion: security.openshift.io/v1
+  metadata:
+    annotations:
+      kubernetes.io/description: Jenkins Workers SCC
+    name: ploigos-container-builder
+  allowedCapabilities:
+  - SETUID
+  - SETGID
+  seLinuxContext:
+    type: MustRunAs
+  runAsUser:
+    type: MustRunAsRange
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: ploigos-container-builder
+    namespace: {{ ploigos_namespace }}
+  rules:
+  - apiGroups:
+    - security.openshift.io
+    resourceNames:
+    - ploigos-container-builder
+    resources:
+    - securitycontextconstraints
+    verbs:
+    - use
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: jenkins-ploigos-container-builder
+    namespace: {{ ploigos_namespace }}
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: ploigos-container-builder
+  subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: {{ ploigos_namespace }}

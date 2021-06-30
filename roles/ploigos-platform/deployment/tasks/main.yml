@@ -1,0 +1,125 @@
+---
+- block:
+  - include_tasks: cleanup-ploigos-platform.yml
+  - meta: end_play
+  when: cr_state == 'absent'
+
+- name: Add redhatgov catalog source
+  k8s:
+    definition: '{{ lookup("template", "catalog-source.yml.j2")|from_yaml }}'
+
+- name: Create Trusted CA Bundle ConfigMap
+  when: platform_trust_bundle_config_map is defined
+  block:
+  - name: Check to see if provided ConfigMap exists
+    k8s_info:
+      api_version: v1
+      kind: ConfigMap
+      namespace: '{{ ploigos_namespace }}'
+      name: '{{ platform_trust_bundle_config_map }}'
+    register: config_map_results
+
+  - name: Create ConfigMap, if it doesn't exist
+    k8s:
+      definition: "{{ lookup('template', 'trustedcabundle.yml.j2') }}"
+    when: not config_map_results.resources
+
+- name: Fetch ploigos-service-account secret
+  set_fact:
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name=ploigos_service_account_secret) }}"
+
+- name: Set ploigos-service-account credential facts from secret
+  set_fact:
+    ploigos_service_account:
+      username:  "{{ secret_data.data.username | b64decode }}"
+      password: "{{ secret_data.data.password | b64decode }}"
+      email: "{{ secret_data.data.email | b64decode }}"
+      first_name: "{{ secret_data.data.first_name | b64decode }}"
+      last_name: "{{ secret_data.data.last_name | b64decode }}"
+  when:
+    - secret_data != []
+
+- name: Create secret if missing
+  block:
+    - name: generate ploigos-service-account credential facts
+      set_fact:
+        ploigos_service_account:
+          username:  ploigos
+          password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits') }}"
+          email: ploigos-service-account@redhat.com
+          first_name: Ploigos
+          last_name: ServiceAccount
+    - name: create secret
+      k8s:
+        namespace: '{{ ploigos_namespace }}'
+        definition: "{{ lookup('template', 'ploigos-service-account-secret.yml.j2') }}"
+  when:
+    - secret_data == []
+
+- name: Generate GPG Key
+  import_tasks: generate_gpg_key.yml
+  when: cr_state == 'present'
+
+- name: Get registry pull secret
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ ploigos_platform.pull_secret.name | default('pull-secret') }}"
+    namespace: "{{ ploigos_platform.pull_secret.namespace | default('openshift-config') }}"
+  register: pull_secret
+
+- set_fact:
+    reg_rhio_pull_token: "{{ pull_secret.resources[0].data['.dockerconfigjson'] | b64decode | from_json }}"
+
+- set_fact:
+    rhio_auth: "{{ reg_rhio_pull_token.auths['registry.redhat.io'].auth | b64decode }}"
+
+- set_fact:
+    rhio_username: "{{ rhio_auth.split(':')[0] }}"
+    rhio_token: "{{ rhio_auth.split(':')[1] }}"
+
+- name: Deploy platform services
+  include_tasks: deploy_services.yml
+
+- name: Get URLs and credentials
+  include_tasks: service_access_init.yml
+
+- name: Configure platform services
+  include_role:
+    name: 'ploigos-platform/configuration/{{ operator_app }}'
+  loop: "{{ all_services_details | list }}"
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
+  when: cr_state == 'present'
+
+- name: Wire up SSO
+  include_role:
+    name: 'ploigos-platform/sso-integration'
+  when: "'rhsso' in managed_services"
+
+- name: Get secret template as base64
+  set_fact:
+    ploigos_platform_config_secrets: "{{ lookup('template', 'ploigos-platform-config-secrets.yml.j2') | b64encode }}"
+
+- set_fact:
+    platform_secrets: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-platform-config-secrets') }}"
+    platform_config: "{{ lookup('k8s', kind='ConfigMap', namespace=ploigos_namespace, resource_name='ploigos-platform-config') }}"
+
+- name: 'Set ploigos-platform-config-secrets Secret to {{ cr_state }}'
+  k8s:
+    state: '{{ cr_state }}'
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ploigos-platform-config-secrets
+        namespace: '{{ ploigos_namespace }}'
+      data:
+        config-secrets.yml: '{{ ploigos_platform_config_secrets }}'
+  when: not platform_secrets
+
+- name: 'Set ploigos-platform-config ConfigMap to {{ cr_state }}'
+  k8s:
+    definition: '{{ lookup("template", "ploigos-platform-config.yml.j2") }}'
+  when: not platform_config or cr_state=='absent'

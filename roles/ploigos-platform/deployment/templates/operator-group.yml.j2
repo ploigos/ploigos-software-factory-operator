@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: {{ operator_group_name | default(ploigos_namespace + '-operatorgroup') }}
+  namespace: {{ ploigos_namespace }}
+spec:
+  targetNamespaces:
+  - {{ ploigos_namespace }}
