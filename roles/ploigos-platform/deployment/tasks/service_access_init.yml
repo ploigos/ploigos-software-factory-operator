@@ -1,0 +1,107 @@
+- name: Collect external services
+  set_fact:
+    external_services: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service.keys(@)') | flatten }}"
+
+- name: Initialize access dictionary external services into a single dictionary
+  set_fact: 
+    all_services_details: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service') | json_query('[].{key:keys(@)[0], value:values(@)[0]}') | items2dict }}"
+
+- name: Initialize managed Gitea details
+  when: '"gitea" in managed_services'
+  block:
+  - set_fact:
+      gitea_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='gitea-admin-credentials') }}"
+    until: gitea_admin_secret
+    retries: 30
+    delay: 5
+
+  - set_fact:
+      all_services_details: "{{ all_services_details | combine(_gitea_details) }}"
+    vars:
+      _gitea_details:
+        gitea:
+          url: "https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+          username: "{{ gitea_admin_secret.data.username | b64decode }}"
+          password: "{{ gitea_admin_secret.data.password | b64decode }}"
+
+- name: Initialize managed Jenkins details
+  when: '"jenkins" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_jenkins_details) }}"
+  vars:
+    _jenkins_details:
+      jenkins:
+        url: 'https://jenkins-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}'
+        token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+
+- name: Initialize managed Tekton details
+  when: '"tekton" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_tekton_details) }}"
+  vars:
+    _tekton_details:
+      tekton:
+        k8s_api: https://kubernetes.default.svc.cluster.local:443
+        k8s_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+
+- name: Initialize managed Nexus details
+  when: '"nexus" in managed_services'
+  block:
+  - set_fact:
+      nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
+    until: nexus_admin_secret
+    retries: 30
+    delay: 5
+
+  - set_fact:
+      all_services_details: "{{ all_services_details | combine(_nexus_details) }}"
+    vars:
+      _nexus_details:
+        nexus:
+          url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
+          docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+          username: "{{ nexus_admin_secret.data.username | b64decode }}"
+          password: "{{ nexus_admin_secret.data.password | b64decode }}"
+
+- name: Initialize managed Sonarqube details
+  when: '"sonarqube" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_sonarqube_details) }}"
+  vars:
+    _sonarqube_details:
+      sonarqube:
+        url: "https://sonarqube-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+        username: admin
+        password: admin
+
+- name: Initialize managed Quay details
+  when: '"quay" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_quay_details) }}"
+  vars:
+    _quay_details:
+      quay:
+        url: "quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+        username: quay
+        password: password
+
+- name: Initialize managed ArgoCD details
+  when: '"argocd" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_argocd_details) }}"
+  vars:
+    _argocd_details:
+      argocd:
+        k8s_api: https://kubernetes.default.svc.cluster.local:443
+        k8s_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+        k8s_cr_name: argocd
+        k8s_namespace: "{{ ploigos_namespace }}"
+
+- name: Initialize managed Selenium Grid details
+  when: '"selenium" in managed_services'
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_selenium_details) }}"
+  vars:
+    _selenium_details:
+      selenium:
+        url: "http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444"

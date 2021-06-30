@@ -18,7 +18,7 @@ provisioner:
   inventory:
     group_vars:
       all:
-        namespace: ${TEST_OPERATOR_NAMESPACE:-tssc-operator-system}
+        namespace: ${TEST_OPERATOR_NAMESPACE:-ploigos-operator-system}
     host_vars:
       localhost:
         ansible_python_interpreter: '{{ ansible_playbook_python }}'

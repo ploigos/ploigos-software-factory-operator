@@ -1,0 +1,16 @@
+---
+quay_project_name: "{{ ploigos_namespace }}"
+quay_url: "{{ all_services_details.quay.url }}"
+quay_username: "{{ all_services_details.quay.username }}"
+quay_password: "{{ all_services_details.quay.url }}"
+enable_quay_repo_mirroring: false
+
+ploigos_service_account:
+  username: ploigos
+  password: password123
+
+rhsso_realm_name: openshift
+rhsso_project_name: rhsso
+rhsso_app_label: rhsso
+rhsso_quay_client_id: quay-enterprise
+subdomain: '{{ full_cluster_name }}'

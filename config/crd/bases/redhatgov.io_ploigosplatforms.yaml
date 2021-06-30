@@ -1,0 +1,418 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: ploigosplatforms.redhatgov.io
+spec:
+  conversion:
+    strategy: None
+  group: redhatgov.io
+  names:
+    kind: PloigosPlatform
+    listKind: PloigosPlatformList
+    plural: ploigosplatforms
+    singular: ploigosplatform
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PloigosPlatform is the Schema for the ploigosplatform API
+        properties:
+          apiVersion:
+            description: |
+              APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |
+              Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info:
+              https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the desired state of PloigosPlatform
+            properties:
+              ploigosPlatform:
+                description: Defines the desired state of the PloigosPlatform Deployment
+                properties:
+                  pullSecret:
+                    description: Pull secret used by the platform to pull images from registry.redhat.io
+                    type: object
+                    properties:
+                      name:
+                        description: The pull secret name
+                        type: string
+                        default: pull-secret
+                      namespace:
+                        description: The pull secret namespace
+                        type: string
+                        default: openshift-config
+                  helmRepository:
+                    description: |
+                      Location of helm charts for tekton deployments. This
+                      is only applicable if you're using OpenShift Pipelines (tekton)
+                      for continuous integration.
+                    type: string
+                    default: https://ploigos.github.io/ploigos-charts
+                  services:
+                    description: Describes the services supporting the Ploigos deployment
+                    type: object
+                    properties:
+                      sso:
+                        description: Describes the service used for single sign on.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - rhsso (default)
+                            type: string
+                            pattern: ^rhsso$
+                            default: rhsso
+                      continuousIntegration:
+                        description: Describes the CI service used for workflow orchestration.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - jenkins (default)
+                              - tekton
+                            type: string
+                            pattern: ^jenkins|tekton$
+                            default: jenkins
+                          externalService:
+                            description: Configuration for an existing CI service.
+                            type: object
+                            properties:
+                              jenkins:
+                                description: Configuration for an existing jenkins instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  token:
+                                    description: Oauth token to access Jenkins.
+                                    type: string
+                                required:
+                                - url
+                                - token
+                              tekton:
+                                description: Configuration for an existing Tekton deployment.
+                                type: object
+                                properties:
+                                  k8s_api:
+                                    description: Kubernetes API server address to access Tekton
+                                    type: string
+                                  k8s_token:
+                                    description: Kubernetes token to access Tekton
+                                    type: string
+                                required:
+                                - k8s_api
+                                - k8s_token
+                      sourceControl:
+                        description: Describes the service used for source control.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - gitea (default)
+                            type: string
+                            pattern: ^gitea$
+                            default: gitea
+                          externalService:
+                            description: Configuration for an existing source control service.
+                            type: object
+                            properties:
+                              gitea:
+                                description: Configuration for an existing Gitea instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  username:
+                                    description: Username to access this instance.
+                                    type: string
+                                  password:
+                                    description: Password to access this instance.
+                                    type: string
+                                required:
+                                - url
+                                - username
+                                - password
+                      artifactRepository:
+                        description: Describes the service used as an artifact repository.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - nexus (default)
+                            type: string
+                            pattern: ^nexus$
+                            default: nexus
+                          externalService:
+                            description: Configuration for an existing artifact repository service.
+                            type: object
+                            properties:
+                              nexus:
+                                description: Configuration for an existing Nexus instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  username:
+                                    description: Username to access this instance.
+                                    type: string
+                                  password:
+                                    description: Password to access this instance.
+                                    type: string
+                                required:
+                                - url
+                                - username
+                                - password
+                      staticCodeAnalysis:
+                        description: Describes the service used for static code analysis.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - sonarqube (default)
+                            type: string
+                            pattern: ^sonarqube$
+                            default: sonarqube
+                          externalService:
+                            description: Configuration for an existing static code analysis service.
+                            type: object
+                            properties:
+                              sonarqube:
+                                description: Configuration for an existing Sonarqube instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  username:
+                                    description: Username to access this instance.
+                                    type: string
+                                  password:
+                                    description: Password to access this instance.
+                                    type: string
+                                required:
+                                - url
+                                - username
+                                - password
+                      containerRegistry:
+                        description: Describes the service used as a container registry.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - nexus (default)
+                              - quay
+                            type: string
+                            pattern: ^nexus|quay$
+                            default: nexus
+                          externalService:
+                            description: Configuration for an existing container registry service.
+                            type: object
+                            properties:
+                              nexus:
+                                description: Configuration for an existing Nexus instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  username:
+                                    description: Username to access this instance.
+                                    type: string
+                                  password:
+                                    description: Password to access this instance.
+                                    type: string
+                                required:
+                                - url
+                                - username
+                                - password
+                              quay:
+                                description: Configuration for an existing Quay instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  username:
+                                    description: Username to access this instance.
+                                    type: string
+                                  password:
+                                    description: Password to access this instance.
+                                    type: string
+                                required:
+                                - url
+                                - username
+                                - password
+                      continuousDeployment:
+                        description: Describes the service used for continuous deployment.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - argocd (default)
+                            type: string
+                            pattern: ^argocd$
+                            default: argocd
+                          externalService:
+                            description: Configuration for an existing continuous deployment service.
+                            type: object
+                            properties:
+                              argocd:
+                                description: Configuration for an existing Argo CD deployment.
+                                type: object
+                                properties:
+                                  k8sApi:
+                                    description: Kubernetes API server address to access Tekton
+                                    type: string
+                                  k8sToken:
+                                    description: Kubernetes token to access Tekton
+                                    type: string
+                                  k8sCrName:
+                                    description: Name of the ArgoCD Custom Resource
+                                    type: string
+                                  k8sNamespace:
+                                    description: Name of the namespace in which ArgoCD is deployed
+                                    type: string
+                                required:
+                                - k8s_api
+                                - k8s_token
+                      uat:
+                        description: Describes the service used for User Acceptance Testing.
+                        type: object
+                        properties:
+                          managedService:
+                            description: |
+                              The name of a service to be fully-managed by the operator.
+                              Supported values:
+                              - selenium (default)
+                            type: string
+                            pattern: ^selenium$
+                            default: selenium
+                          externalService:
+                            description: Configuration for an existing UAT service.
+                            type: object
+                            properties:
+                              selenium:
+                                description: Configuration for an existing Selenium Grid instance.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                required:
+                                - url
+                    required:
+                    - continuousIntegration
+                    - sourceControl
+                    - artifactRepository
+                    - staticCodeAnalysis
+                    - containerRegistry
+                    - continuousDeployment
+                    - uat
+                  tls:
+                    description: Describes how TLS should be managed between platform components
+                    type: object
+                    properties:
+                      verify:
+                        description: Whether TLS Verification should be enabled
+                        type: boolean
+                        default: True
+                      trustBundleConfigMap:
+                        description: |
+                          The name of a ConfigMap of CA certificates to mount into pipeline pods. The ConfigMap
+                          should have a single key named ca-bundle.crt. This key has a collection of CA certificates
+                          as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be
+                          generated using a label of config.openshift.io/inject-trusted-cabundle=true and populated
+                          with the Cluster Network Operator.
+                        type: string
+                    required:
+                    - verify
+                required:
+                - services
+                - helmRepository
+                type: object
+            required:
+            - ploigosPlatform
+            type: object
+          status:
+            description: Status defines the observed state of PloigosPlatform
+            properties:
+              conditions:
+                description: The conditions reported by the Ansible operator
+                items:
+                  properties:
+                    ansibleResult:
+                      description: The result reported from the last playbook run
+                      properties:
+                        changed:
+                          description: The number of tasks that resulted in a change
+                          type: integer
+                        completion:
+                          description: The time of completion
+                          type: string
+                        failures:
+                          description: The number of tasks that failed
+                          type: integer
+                        ok:
+                          description: The number of tasks that completed without
+                            change
+                          type: integer
+                        skipped:
+                          description: The number of tasks that were skipped
+                          type: integer
+                      type: object
+                    lastTransitionTime:
+                      description: The last time the playbook was invoked following
+                        a watch
+                      format: date-time
+                      type: string
+                    message:
+                      description: The last message reported from the Ansible Operator
+                        SDK
+                      type: string
+                    reason:
+                      description: The reason the status was updated
+                      type: string
+                    status:
+                      description: The boolean return value of the playbook execution,
+                        as a string
+                      type: string
+                    type:
+                      description: The type of status change event
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,51 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Get cluster dns
+      k8s_info:
+        api_version: config.openshift.io/v1
+        kind: DNS
+        namespace: openshift-config
+        name: cluster
+      register: cluster_dns
+
+    - set_fact:
+        cluster_name: '{{ (cluster_dns.resources|first).spec.baseDomain.split(".")[0] }}'
+
+    - set_fact:
+        openshift_base_domain: "{{ (cluster_dns.resources|first).spec.baseDomain.replace(cluster_name + '.','') }}"
+        ploigos_namespace: "{{ ansible_operator_meta.namespace }}"
+
+    - name: Set project names
+      set_fact:
+        argocd_project_name: '{{ ploigos_namespace }}'
+        gitea_project_name: '{{ ploigos_namespace }}'
+        jenkins_project_name: '{{ ploigos_namespace }}'
+        nexus_project_name: '{{ ploigos_namespace }}'
+        quay_project_name: '{{ ploigos_namespace }}'
+        rhsso_project_name: '{{ ploigos_namespace }}'
+        selenium_grid_project_name: '{{ ploigos_namespace }}'
+        sonarqube_project_name: '{{ ploigos_namespace }}'
+
+    - name: Set ploigos service account secret
+      set_fact:
+        ploigos_service_account_secret: ploigos-service-account-credentials
+
+    - name: Look for default defined common variables
+      include_vars: ../vars/ploigos-platform/common.yml
+
+    - name: Ensure temporary directory exists
+      file:
+        path: "{{ tmp_dir }}"
+        state: directory
+
+    - include_tasks: cleanup-ploigos-platform.yml
+      when: cr_state == 'absent'
+
+    - include_role:
+        name: ploigos-platform/deployment
+      when: cr_type == 'platform'
+
+    - include_role:
+        name: ploigos-pipeline
+      when: cr_type == 'pipeline'

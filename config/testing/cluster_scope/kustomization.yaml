@@ -5,8 +5,8 @@ resources:
 - ../../rbac
 - ../../manager
 
-namespace: tssc-operator-system
-namePrefix: tssc-operator-
+namespace: ploigos-operator-system
+namePrefix: ploigos-operator-
 
 images:
 - name: testing

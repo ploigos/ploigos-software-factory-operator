@@ -1,21 +1,21 @@
 ---
 - version: v1alpha1
   group: redhatgov.io
-  kind: TsscPlatform
-  playbook: playbooks/tssc.yml
+  kind: PloigosPlatform
+  playbook: playbooks/ploigos.yml
   watchDependentResources: false
   vars:
     cr_state: present
     cr_type: platform
   finalizer:
-    name: finalizer.tsscplatform.redhatgov.io
+    name: finalizer.ploigosplatform.redhatgov.io
     vars:
       cr_state: absent
       cr_type: platform
 - version: v1alpha1
   group: redhatgov.io
-  kind: TsscPipeline
-  playbook: playbooks/tssc.yml
+  kind: PloigosPipeline
+  playbook: playbooks/ploigos.yml
   vars:
     cr_state: present
     cr_type: pipeline

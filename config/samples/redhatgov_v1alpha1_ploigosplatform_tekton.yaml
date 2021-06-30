@@ -1,0 +1,21 @@
+apiVersion: redhatgov.io/v1alpha1
+kind: PloigosPlatform
+metadata:
+  name: ploigosplatform-tekton
+spec:
+  ploigosPlatform:
+    services:
+      continuousIntegration:
+        name: tekton
+      sourceControl:
+        name: gitea
+      artifactRepository:
+        name: nexus
+      staticCodeAnalysis:
+        name: sonarqube
+      continuousDeployment:
+        name: argocd
+      uat:
+        name: selenium
+      containerRegistry:
+        name: nexus

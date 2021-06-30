@@ -1,0 +1,2 @@
+---
+selenium_grid_project_name: "{{ ploigos_namespace }}"

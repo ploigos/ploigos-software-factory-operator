@@ -1,0 +1,24 @@
+# permissions for end users to edit ploigospipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ploigospipeline-editor-role
+rules:
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigospipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigospipelines/status
+  verbs:
+  - get

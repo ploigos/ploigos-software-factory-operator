@@ -1,8 +1,0 @@
----
-sonarqube_project_name: devsecops
-sonarqube_project_display: DevSecOps Common Resources
-
-rhsso_realm_name: openshift
-rhsso_project_name: rhsso
-rhsso_app_label: rhsso
-subdomain: '{{ full_cluster_name }}'

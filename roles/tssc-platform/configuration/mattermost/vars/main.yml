@@ -1,6 +1,0 @@
----
-authentication:
-  keycloak:
-    # TODO: not my favorite way to set any URL
-    realmUrl: 'https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}/auth/realms/openshift'
-    secret: mattermost

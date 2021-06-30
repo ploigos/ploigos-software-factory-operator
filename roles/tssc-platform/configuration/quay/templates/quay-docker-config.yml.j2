@@ -1,5 +1,0 @@
-auths:
-  {{ quay_route }}:
-    username: platform+{{ tssc_service_account.username }}
-    password: {{ quay_robot_token }}
-    auth: {{ ('platform+' + tssc_service_account.username + ':' + quay_robot_token) | b64encode }}

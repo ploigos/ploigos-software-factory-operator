@@ -1,4 +1,0 @@
----
-jenkins_project_name: devsecops
-jenkins_project_display: DevSecOps Common Resources
-jenkins_repository_name: openshift-release-dev

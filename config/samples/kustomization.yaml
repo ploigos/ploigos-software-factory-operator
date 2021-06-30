@@ -2,10 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- redhatgov_v1alpha1_tsscplatform_molecule.yaml
-- redhatgov_v1alpha1_tsscplatform_jenkins.yaml
-- redhatgov_v1alpha1_tsscplatform_jenkins_private_ca.yaml
-- redhatgov_v1alpha1_tsscplatform_tekton.yaml
-- redhatgov_v1alpha1_tsscpipeline_molecule.yaml
-- redhatgov_v1alpha1_tsscpipeline_jenkins.yaml
-- redhatgov_v1alpha1_tsscpipeline_tekton.yaml
+- redhatgov_v1alpha1_ploigosplatform_molecule.yaml
+- redhatgov_v1alpha1_ploigosplatform_jenkins.yaml
+- redhatgov_v1alpha1_ploigosplatform_jenkins_private_ca.yaml
+- redhatgov_v1alpha1_ploigosplatform_tekton.yaml
+- redhatgov_v1alpha1_ploigospipeline_molecule.yaml
+- redhatgov_v1alpha1_ploigospipeline_jenkins.yaml
+- redhatgov_v1alpha1_ploigospipeline_tekton.yaml

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ platform_trust_bundle_config_map }}
+  namespace: {{ ploigos_namespace }}
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"

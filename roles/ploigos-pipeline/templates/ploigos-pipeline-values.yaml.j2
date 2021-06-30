@@ -1,0 +1,47 @@
+global:
+  verbose: false
+  serviceName: {{ service_name }}
+  applicationName: {{ app_name }}
+  eventListenerCreateRoute: true
+  eventListenerCreateIngress: false
+  eventListenerRouteHostOverride: el-{{ service_name }}-{{ app_name }}.apps.{{ full_cluster_name }}
+  cleanupPipelineRunsToKeep: 10
+  cleanupPipelineRunsSchedule: "*/15 * * * *"
+  cleanupPipelineSuccessfulJobHistoryLimit: 5
+  cleanupPipelineFailedJobHistoryLimit: 1
+  cleanupPipelineStartingDeadlineSeconds: 600
+  cleanupPipelineCronJobImage: quay.io/ploigos/ploigos-base:latest
+  stepRunnerPackageName: ploigos-step-runner
+  stepRunnerUpdateLibrary: false
+  stepRunnerLibIndexUrl: https://pypi.org/simple/
+  stepRunnerLibExtraIndexUrl: https://pypi.org/simple/
+  envNameDev: DEV
+  envNameTest: TEST
+  envNameProd: PROD
+  ciOnlyGitRefPatterns: "^$"
+  devGitRefPatterns: "^feature/.+$|^PR-.+$"
+  releaseGitRefPatterns: "^main$"
+  pgpKeysSecretNameOverride: ploigos-gpg-key
+  pgpKeys: {}
+  stepRunnerConfigDir: "/opt/platform-config/ /opt/platform-config-secrets/ cicd/ploigos-step-runner-config/"
+  workflowWorkerHomeDirPVCRequestSize: 20Gi
+  workflowWorkerAppDirPVCRequestSize: 1Gi
+  workflowWorkerRunAsUser: 1001
+  workflowWorkerRunAsUserRoleName: ploigos-run-as-user-1001
+  workflowWorkerImageDefault: quay.io/ploigos/ploigos-base:latest
+  workflowWorkerImageSourceClone: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.12.1'
+  workflowWorkerImageUnitTest: quay.io/ploigos/ploigos-tool-maven:latest
+  workflowWorkerImagePackage: quay.io/ploigos/ploigos-tool-maven:latest
+  workflowWorkerImageStaticCodeAnalysis: quay.io/ploigos/ploigos-tool-sonar:latest
+  workflowWorkerImagePushArtifacts: quay.io/ploigos/ploigos-tool-maven:latest
+  workflowWorkerImageContainerOperations: quay.io/ploigos/ploigos-tool-containers:latest
+  workflowWorkerImageContainerImageStaticComplianceScan: quay.io/ploigos/ploigos-tool-openscap:latest
+  workflowWorkerImageContainerImageStaticVulnerabilityScan: quay.io/ploigos/ploigos-tool-openscap:latest
+  workflowWorkerImageDeploy: quay.io/ploigos/ploigos-tool-argocd:latest
+  workflowWorkerImageValidateEnvironmentConfiguraiton: quay.io/ploigos/ploigos-tool-config-lint:latest
+  workflowWorkerImageUAT: quay.io/ploigos/ploigos-tool-maven:latest
+  tektonGitSSHKeys: {}
+  separatePlatformConfig: true
+
+ploigos-workflow-tekton-shared-resources:
+  nameOverride: ploigos-workflow-standard-tekton-pipeline

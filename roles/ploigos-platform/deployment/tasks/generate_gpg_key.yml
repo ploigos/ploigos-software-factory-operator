@@ -1,0 +1,51 @@
+- name: Fetch ploigos-gpg-key secret
+  set_fact:
+    secret_data: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-gpg-key') }}"
+
+- name: Set ploigos-service-account credential facts from secret
+  set_fact:
+    gpg_public_key:  "{{ secret_data.data.gpg_public_key | b64decode }}"
+    gpg_private_key: "{{ secret_data.data.gpg_private_key | b64decode }}"
+  when:
+    - secret_data != []
+
+- name: Generate key and create secret if missing
+  block:
+    - name: Generate PGP key
+      shell: |
+        gpg --generate-key --batch <<EOF
+        Key-Type: 1
+        Key-Length: 2048
+        Subkey-Type: 1
+        Subkey-Length: 2048
+        Name-Real: {{ ploigos_service_account.first_name + ' ' + ploigos_service_account.last_name }}
+        Name-Email: {{ ploigos_service_account.email }}
+        Expire-Date: 0
+        %no-ask-passphrase
+        %no-protection
+        EOF
+
+    - name: Get public key
+      shell: gpg --armor --export {{ ploigos_service_account.email }}
+      register: gpg_public_key_output
+
+    - name: Get private key
+      shell: gpg --armor --export-secret-key {{ ploigos_service_account.email }}
+      register: gpg_private_key_output
+
+    - set_fact:
+        gpg_public_key: '{{ gpg_public_key_output.stdout }}'
+        gpg_private_key: '{{ gpg_private_key_output.stdout }}'
+    - name: Create Secret
+      k8s:
+        definition: |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: ploigos-gpg-key
+            namespace: {{ ploigos_namespace }}
+          data:
+            gpg_public_key:  {{ gpg_public_key | b64encode }}
+            gpg_private_key: {{ gpg_private_key | b64encode }}
+  when:
+    - secret_data == []

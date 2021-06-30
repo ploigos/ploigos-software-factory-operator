@@ -1,0 +1,140 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ploigos-platform-config
+  namespace: {{ ploigos_namespace }}
+data:
+  config.yml: |
+    step-runner-config:
+      config-decryptors:
+      - implementer: SOPS
+      global-defaults:
+        organization: platform
+        tls-verify: {{ platform_tls_verify }}
+        maven-servers:
+          internal-mirror:
+            id: maven-public
+            username: {{ ploigos_service_account.username }}
+          maven-releases:
+            id: maven-releases
+            username: {{ ploigos_service_account.username }}
+        maven-repositories:
+          maven-releases:
+            id: maven-releases
+            url: {{ all_services_details.nexus.url }}/repository/maven-releases/
+            snapshots: false
+            releases: true
+        maven-mirrors:
+          internal-mirror:
+            id: maven-public
+            url: {{ all_services_details.nexus.url }}/repository/maven-public/
+            mirror-of: '*'
+        container-registries:
+{% if 'quay' in (all_services_details | list) %}
+          {{ all_services_details.quay.url }}:
+{% else %}
+          {{ all_services_details.nexus.docker_url }}:
+{% endif %}
+            username: "{{ ploigos_service_account.username }}"
+          registry.redhat.io:
+            username: "{{ rhio_username }}"
+      global-environment-defaults:
+        DEV:
+          kube-app-domain: dev.apps.{{ full_cluster_name }}
+        TEST:
+          kube-app-domain: test.apps.{{ full_cluster_name }}
+        PROD:
+          kube-app-domain: apps.{{ full_cluster_name }}
+      generate-metadata:
+      - implementer: Maven
+      - implementer: Git
+      - implementer: SemanticVersion
+      tag-source:
+      - implementer: Git
+        config:
+          git-username: {{ ploigos_service_account.username }}
+      unit-test:
+      - implementer: Maven
+        config: {
+        }
+      package:
+      - implementer: Maven
+        config: {
+        }
+      static-code-analysis:
+      - implementer: SonarQube
+        config:
+          url: {{ all_services_details.sonarqube.url }}/
+          username: {{ ploigos_service_account.username }}
+      push-artifacts:
+      - implementer: Maven
+        config:
+          maven-push-artifact-repo-id: maven-releases
+          maven-push-artifact-repo-url: {{ all_services_details.nexus.url }}/repository/maven-releases
+      create-container-image:
+      - implementer: Buildah
+
+      push-container-image:
+      - implementer: Skopeo
+        config:
+          source: docker-archive:backend.tar
+{% if 'quay' in (all_services_details | list) %}
+          destination-url: {{ all_services_details.quay.url }}
+{% else %}
+          destination-url: {{ all_services_details.nexus.docker_url }}
+{% endif %}
+      sign-container-image:
+      - implementer: PodmanSign
+        config:
+          container-image-signature-server-url: {{ all_services_details.nexus.url }}/repository/container-image-signatures
+          container-image-signature-server-username: ploigos
+      container-image-static-compliance-scan:
+      # sample scans using DataStream file (preferred)
+      - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
+      container-image-static-vulnerability-scan:
+      # sample vulnerability scan using XCCDF file (preferred)
+      - name: OpenSCAP - Vulnerability - DataStream
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
+      deploy:
+      - implementer: ArgoCD
+        config:
+          argocd-api: argocd-server.{{ ploigos_namespace }}.svc.cluster.local
+          argocd-username: {{ ploigos_service_account.username }}
+          argocd-skip-tls: True
+          deployment-config-helm-chart-values-file-image-tag-yq-path: 'image.tag'
+          git-username: {{ ploigos_service_account.username }}
+          git-email: 'napsspo+ploigos@redhat.com'
+          argocd-sync-timeout-seconds: 130
+          environment-config:
+            DEV:
+              deployment-config-helm-chart-environment-values-file: values-DEV.yaml
+            TEST:
+              deployment-config-helm-chart-environment-values-file: values-TEST.yaml
+            PROD:
+              deployment-config-helm-chart-environment-values-file: values-PROD.yaml
+      validate-environment-configuration:
+      - implementer: ConfiglintFromArgocd
+      uat:
+      - implementer: MavenSeleniumCucumber
+        config: {
+          selenium-hub-url: http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444
+        }
+      report:
+      - implementer: ResultArtifactsArchive
+        config:
+          results-archive-destination-url: {{ all_services_details.nexus.url }}/repository/result-artifacts-archive
+          results-archive-destination-username: ploigos
+
+      generate-evidence:
+      - implementer: GenerateEvidence
+        config:
+          evidence-destination-url: {{ all_services_details.nexus.url }}/repository/workflow-evidence
+          evidence-destination-username: ploigos
+

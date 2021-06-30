@@ -1,0 +1,8 @@
+---
+jenkins_project_name: "{{ ploigos_namespace }}"
+jenkins_url: "{{ all_services_details.jenkins.url }}"
+jenkins_token: "{{ all_services_details.jenkins.token }}"
+
+jenkins_gitea_token: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='gitea-access-token').data.token | b64decode }}"
+
+jenkins_gitea_url: "{{ all_services_details.gitea.url }}"

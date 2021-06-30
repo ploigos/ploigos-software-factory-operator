@@ -26,7 +26,7 @@ spec:
         - name: manager
           args:
             - "--enable-leader-election"
-            - "--leader-election-id=tssc-operator"
+            - "--leader-election-id=ploigos-operator"
             - "--inject-owner-ref=false"
           image: controller:latest
           env:
@@ -35,4 +35,4 @@ spec:
               fieldRef:
                 fieldPath: metadata.annotations['olm.targetNamespaces']
       terminationGracePeriodSeconds: 10
-      serviceAccountName: tssc-operator-sa
+      serviceAccountName: ploigos-operator-sa

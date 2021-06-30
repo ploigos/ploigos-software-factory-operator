@@ -1,3 +1,0 @@
----
-- include_tasks: setup_keycloak_for_mattermost.yml
-  when: authentication.keycloak.realmUrl is defined

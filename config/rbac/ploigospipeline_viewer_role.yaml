@@ -1,0 +1,20 @@
+# permissions for end users to view ploigospipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ploigospipelines-viewer-role
+rules:
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigospipelines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - redhatgov.io
+  resources:
+  - ploigospipelines/status
+  verbs:
+  - get

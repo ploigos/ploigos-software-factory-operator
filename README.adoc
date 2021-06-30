@@ -4,8 +4,8 @@ This operator powers OpenShift-based deployments of https://ploigos.github.io/pl
 
 Two APIs are offered:
 
-* *TsscPlatform*: an all-in-one resource for provisioning pre-wired infrastructure like a CI tool, static code analysis server, artifact repository, and other services that support a DevSecOps pipeline. 
-* *TsscPipeline*: a resource for creating an end-to-end pipeline for your application's source code.
+* *PloigosPlatform*: an all-in-one resource for provisioning pre-wired infrastructure like a CI tool, static code analysis server, artifact repository, and other services that support a DevSecOps pipeline.
+* *PloigosPipeline*: a resource for creating an end-to-end pipeline for your application's source code.
 
 == Quick Start
 
@@ -62,15 +62,15 @@ Two APIs are offered:
     sourceNamespace: openshift-marketplace
   EOF
 
-. Create a `TsscPlatform` to spin up your infrastructure:
+. Create a `PloigosPlatform` to spin up your infrastructure:
 
   oc apply -f - << EOF
   apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPlatform
+  kind: PloigosPlatform
   metadata:
-    name: tsscplatform
+    name: ploigosplatform
   spec:
-    tsscPlatform:
+    ploigosPlatform:
       helmRepository: 'https://ploigos.github.io/ploigos-charts'
       services:
         artifactRepository:
@@ -96,24 +96,24 @@ Two APIs are offered:
           name: selenium
   EOF
 
-. Then create a `TsscPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
+. Then create a `PloigosPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
 
   oc apply -f - << EOF
   apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPipeline
+  kind: PloigosPipeline
   metadata:
-    name: tsscpipeline-reference-app
+    name: ploigospipeline-reference-app
   spec:
     appName: ref-quarkus-mvn-jenkins-std
     appRepo:
-      destinationRepoName: reference-quarkus-mvn_jenkins_workflow-standard
+      destinationRepoName: reference-quarkus-mvn
       sourceUrl: >-
-        http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn_jenkins_workflow-standard.git
+        https://github.com/andykrohg/reference-quarkus-mvn.git
     autoStartPipeline: true
     helmRepo:
-      destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard
+      destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
       sourceUrl: >-
-        http://gitea.tssc.rht-set.com/akrohg/reference-quarkus-mvn-cloud-resources_jenkins_workflow-standard.git
+        https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything.git
     serviceName: fruit
   EOF
 
@@ -121,13 +121,13 @@ Two APIs are offered:
 
   oc get route jenkins --template "https://{{.spec.host}}"
 
-== Optional TsscPlatform Configuration
+== Optional PloigosPlatform Configuration
 
 === Services
 
-You can configure a select number of services in the `tsscPlatform.services` property of your `TsscPlatform` object. 
+You can configure a select number of services in the `ploigosPlatform.services` property of your `PloigosPlatform` object.
 
-* The `managed` attribute indicates whether the applicable service should be provisioned by this operator. If `false`, it is assumed to already exist so no action is taken. In the future, we may develop capability to configure existing tooling. 
+* The `managed` attribute indicates whether the applicable service should be provisioned by this operator. If `false`, it is assumed to already exist so no action is taken. In the future, we may develop capability to configure existing tooling.
 
 * The `name` attribute indicates the provider for each service. See below for supported services, with defaults appearing in *bold*.
 
@@ -149,56 +149,52 @@ You can configure a select number of services in the `tsscPlatform.services` pro
 * *argocd*
 |User Acceptance Testing|✅ a|
 * *selenium*
-|Chat Server| a|
-* *matttermost*
-|IDE| a|
-* *codeready*
 |===========================
 
 === TLS
-The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your cluster uses self-signed certificates, you'll need to disable TLS verification on your `TsscPlatform` CR like this:
+The default `PloigosPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your cluster uses self-signed certificates, you'll need to disable TLS verification on your `PloigosPlatform` CR like this:
 
   apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPlatform
+  kind: PloigosPlatform
   metadata:
-    name: tsscplatform
+    name: ploigosplatform
   spec:
-    tsscPlatform:
+    ploigosPlatform:
       tls:
         verify: false
 
 If your certificates are signed using a private CA, you can instead provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
 
   apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPlatform
+  kind: PloigosPlatform
   metadata:
-    name: tsscplatform
+    name: ploigosplatform
   spec:
-    tsscPlatform:
+    ploigosPlatform:
       tls:
         trustBundleConfigMap: trustedcabundle
 
 === Helm Repository
 
-When using `tekton` as a `continuousIntegration` service, cluster and `Pipeline` assets are deployed using helm charts served from the helm repository specified by `tsscPlatform.helmRepository`. This is particularly useful to override when operating in disconnected environments.
+When using `tekton` as a `continuousIntegration` service, cluster and `Pipeline` assets are deployed using helm charts served from the helm repository specified by `ploigosPlatform.helmRepository`. This is particularly useful to override when operating in disconnected environments.
 
   apiVersion: redhatgov.io/v1alpha1
-  kind: TsscPlatform
+  kind: PloigosPlatform
   metadata:
-    name: tsscplatform
+    name: ploigosplatform
   spec:
-    tsscPlatform:
+    ploigosPlatform:
       helmRepository: https://my.private.repo/charts
 
 == Building the Operator
 
-There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: TsscPlatform` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy a Tssc Platform to a cluster directly from this repo you could run `hack/operate.sh -d`.
+There is a script `hack/operate.sh` which will download the prerequisites (operator-sdk etc.), build the operator artifacts from operator-sdk defaults, package and push the operator container image, deploy the artifacts to a Kubernetes cluster, and create a `kind: PloigosPlatform` CR to deploy an instance. You should use the help page to look at what the various options do, but for the most part if you want to deploy a Ploigos Platform to a cluster directly from this repo you could run `hack/operate.sh -d`.
 
 Before running the script make sure to update the location of the container image to a repository you have access to. If you decide to build your own container image for the operator, make sure to update `hack/operate.conf` with an updated container image location and add the `-p` flag to `operate.sh`.
 
 == Developer Installation Steps
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Tssc Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Operator in their projects and deploy PloigosPlatforms using the ploigosplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Ploigos operator can be installed from the OperatorHub interface of the console.
 
 Perform the following tasks as *cluster-admin*:
 
@@ -209,8 +205,8 @@ Perform the following tasks as *cluster-admin*:
 hack/operate.sh
 ----
 
-. Once the Operator pod is running the Operator is ready to start creating Tssc Platforms.
-. To deploy the above, and also one of the `config/samples/redhatgov_v1alpha1_tsscplatform*.yaml` example CustomResources:
+. Once the Operator pod is running the Operator is ready to start creating Ploigos Platforms.
+. To deploy the above, and also one of the `config/samples/redhatgov_v1alpha1_ploigosplatform*.yaml` example CustomResources:
 +
 [source,sh]
 ----
@@ -224,9 +220,9 @@ hack/operate.sh --deploy-cr
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
 
-== Developer Uninstalling the Tssc Operator
+== Developer Uninstalling the Ploigos Operator
 
-In case you wish to uninstall the Tssc Operator, simply delete the operator and its resources with:
+In case you wish to uninstall the Ploigos Operator, simply delete the operator and its resources with:
 
 [source,sh]
 ----
@@ -243,11 +239,11 @@ If you are using a `registries.conf` change and/or ImageContentSourcePolicy mirr
 
 To change the image sources for all necessary images to deploy the operator without such a policy, you need to have the following images hosted in a container repository on your disconnected network:
 
-* quay.io/redhatgov/tssc-operator:latest
+* quay.io/redhatgov/ploigos-operator:latest
 
 If you intend on using `hack/operate.sh` it expects you to be in a development environment. Operator installation from this script therefore expects access to the internet. This comes with one extra concern: If `kustomize` isn't in your path, it tries to download it from the internet and save it locally into a `.gitignore`d folder. If you intend on using `hack/operate.sh` to install the operator, you should also bring `kustomize` and place it in the `$PATH` of the user who will be running the script. Additionally, in order to install the operator with `hack/operate.sh` you'll need to make the following change:
 
-* `hack/operate.conf`: IMG should point to the tssc-operator image in your environment
+* `hack/operate.conf`: IMG should point to the ploigos-operator image in your environment
 
 == Contributing
 Please see the link:CONTRIBUTING.adoc[Contributing Documentation].

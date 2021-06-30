@@ -24,14 +24,14 @@
 == Development Workflow
 
 . `$ oc login` <- as cluster admin
-. `$ hack/operate.sh` <- install the operator. It will be deployed into the tssc-operator-system namespace by default.
-. Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform_jenkins.yaml -n tssc-operator-system`. This will provision a TsscPlatform in the tssc-operator-system namespace.
-. If you make some Ansible changes and need to test them, you need to rebuild the operator image. 
-.. Carefully cleanup the tssc-operator-system project (so as not to orphan resources and leave the project stuck in Terminating) by deleting the TsscPlatform (e.g. `oc delete tsscplatform --all`), and then removing the operator installation by running `hack/operate.sh -r`
-.. Override the default operator image in a shell variable: `OPERATOR_IMAGE=quay.io/<your quay username>/tssc-operator`
+. `$ hack/operate.sh` <- install the operator. It will be deployed into the ploigos-operator-system namespace by default.
+. Create a CR for whatever you're testing. You can check the config/samples directory. For example: `oc apply -f config/samples/redhatgov_v1alpha1_ploigosplatform_jenkins.yaml -n ploigos-operator-system`. This will provision a PloigosPlatform in the ploigos-operator-system namespace.
+. If you make some Ansible changes and need to test them, you need to rebuild the operator image.
+.. Carefully cleanup the ploigos-operator-system project (so as not to orphan resources and leave the project stuck in Terminating) by deleting the PloigosPlatform (e.g. `oc delete ploigosplatform --all`), and then removing the operator installation by running `hack/operate.sh -r`
+.. Override the default operator image in a shell variable: `OPERATOR_IMAGE=quay.io/<your quay username>/ploigos-operator`
 .. Build and push the image (requires a container runtime on your local): `./hack/operate.sh --image=$OPERATOR_IMAGE --version=latest --push-only`. If this is the first time you're doing this, you'll need to login to quay.io and change your repo from Private to Public so OCP can pull it
 .. Deploy the operator from your new image: `hack/operate.sh --image=$OPERATOR_IMAGE --version=latest`
-.. Recreate the CR: `oc apply -f config/samples/redhatgov_v1alpha1_tsscplatform_jenkins.yaml -n tssc-operator-system`
+.. Recreate the CR: `oc apply -f config/samples/redhatgov_v1alpha1_ploigosplatform_jenkins.yaml -n ploigos-operator-system`
 
 === Testing
 
@@ -43,7 +43,7 @@ export OCP_USERNAME=replace
 export OCP_PASSWORD='replace'
 export QUAY_USERNAME=replace
 export QUAY_PASSWORD='replace'
-export OPERATOR_IMAGE=quay.io/replace/tssc-operator:test
+export OPERATOR_IMAGE=quay.io/replace/ploigos-operator:test
 ```
 
 Make sure the repo provided is public for the env var OPERATOR_IMAGE

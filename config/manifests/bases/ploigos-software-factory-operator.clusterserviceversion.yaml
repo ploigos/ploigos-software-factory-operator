@@ -1177,7 +1177,7 @@ spec:
     type: AllNamespaces
   keywords:
   - redhatgov
-  - tssc
+  - ploigos
   - ploigos
   - devsecops
   links:

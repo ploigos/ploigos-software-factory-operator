@@ -21,7 +21,7 @@ provisioner:
   inventory:
     group_vars:
       all:
-        namespace: ${TEST_OPERATOR_NAMESPACE:-tssc-operator-system}
+        namespace: ${TEST_OPERATOR_NAMESPACE:-ploigos-operator-system}
     host_vars:
       localhost:
         ansible_python_interpreter: '{{ ansible_playbook_python }}'
@@ -30,7 +30,7 @@ provisioner:
         project_dir: ${MOLECULE_PROJECT_DIRECTORY}
         quay_username: "{{ lookup('env', 'QUAY_USERNAME') }}"
         quay_password: "{{ lookup('env', 'QUAY_PASSWORD') }}"
-        operator_image: ${OPERATOR_IMAGE:-"quay.io/redhatgov/tssc-operator:test"}
+        operator_image: ${OPERATOR_IMAGE:-"quay.io/redhatgov/ploigos-operator:test"}
         operator_pull_policy: "Always"
         kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
         kustomize: ${KUSTOMIZE:-kustomize}
