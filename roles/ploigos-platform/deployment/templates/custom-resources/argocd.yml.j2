@@ -21,7 +21,7 @@ spec:
     defaultPolicy: 'role:readonly'
     policy: |
       g, argocd-admins, role:admin
-      p, {{ ploigos_service_account.username }}, *, *, *, allow
+      p, {{ ploigos_service_account.username | default('ploigos') }}, *, *, *, allow
     scopes: '[groups]'
   redis:
     image: redis
