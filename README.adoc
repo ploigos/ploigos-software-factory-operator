@@ -220,15 +220,9 @@ hack/operate.sh --deploy-cr
 hack/operate.sh --overlay=namespaced --namespace=mynamespace
 ----
 
-<<<<<<< HEAD
-== Developer Uninstalling the Ploigos Operator
-
-In case you wish to uninstall the Ploigos Operator, simply delete the operator and its resources with:
-=======
 == Developer Uninstalling the Ploigos Software Factory Operator
 
 In case you wish to uninstall the Ploigos Software Factory Operator, simply delete the operator and its resources with:
->>>>>>> 865d70101e4912e4cefd7b952717f50ecd220eb0
 
 [source,sh]
 ----
