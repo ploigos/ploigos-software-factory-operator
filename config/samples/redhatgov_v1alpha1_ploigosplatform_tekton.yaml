@@ -6,7 +6,7 @@ spec:
   ploigosPlatform:
     services:
       continuousIntegration:
-        managedService: jenkins
+        managedService: tekton
       sourceControl:
         managedService: gitea
       artifactRepository:
