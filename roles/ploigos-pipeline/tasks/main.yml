@@ -12,7 +12,7 @@
   delay: 60
 
 - set_fact:
-    ploigos_platform: ploigos_platform_result.resources[0].spec.ploigosPlatform
+    ploigos_platform: "{{ ploigos_platform_result.resources[0].spec.ploigosPlatform }}"
 
 - name: Get services from PloigosPlatform
   set_fact:

@@ -1,11 +1,6 @@
-name: Run Operator SDK tests, release new operator images if tests succeed
+name: Run Operator SDK tests
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.adoc'
   pull_request:
     branches:
       - main
