@@ -194,11 +194,7 @@ Before running the script make sure to update the location of the container imag
 
 == Developer Installation Steps
 
-<<<<<<< HEAD
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Operator in their projects and deploy PloigosPlatforms using the ploigosplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Ploigos operator can be installed from the OperatorHub interface of the console.
-=======
 The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Software Factory Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
->>>>>>> 865d70101e4912e4cefd7b952717f50ecd220eb0
 
 Perform the following tasks as *cluster-admin*:
 
