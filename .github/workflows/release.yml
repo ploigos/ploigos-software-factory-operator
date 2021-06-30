@@ -1,4 +1,4 @@
-name: Run Operator SDK tests, release new operator images if tests succeed
+name: Build/Release Images
 
 on:
   push:
@@ -6,33 +6,9 @@ on:
       - main
     paths-ignore:
       - '**.adoc'
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.adoc'
 
 jobs:
-  test-cluster:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Prereq setup
-        run: hack/ci-setup.sh
-      - name: Test
-        run: |
-          python -m molecule test -s ocp-cluster
-        env:
-          OCP_USERNAME: ${{ secrets.OCP_USERNAME }}
-          OCP_PASSWORD: ${{ secrets.OCP_PASSWORD }}
-          OCP_SERVER: ${{ secrets.OCP_SERVER }}
-          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
   release:
-    needs: [test-cluster]
     if: >
       github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

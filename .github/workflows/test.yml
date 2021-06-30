@@ -1,0 +1,49 @@
+name: Run Operator SDK tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.adoc'
+
+jobs:
+  test-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Prereq setup
+        run: hack/ci-setup.sh
+      - name: Test
+        run: |
+          python -m molecule test -s ocp-cluster
+        env:
+          OCP_USERNAME: ${{ secrets.OCP_USERNAME }}
+          OCP_PASSWORD: ${{ secrets.OCP_PASSWORD }}
+          OCP_SERVER: ${{ secrets.OCP_SERVER }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+  release:
+    needs: [test-cluster]
+    if: >
+      github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Login to Quay
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - name: Build, bundle, and push
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          pip3 install --user --upgrade setuptools wheel pip
+          hack/operate.sh --push-images --bundle --extra-tag=latest --verbose --formatter
