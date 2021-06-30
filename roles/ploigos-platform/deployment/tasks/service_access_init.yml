@@ -3,7 +3,7 @@
     external_services: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service.keys(@)') | flatten }}"
 
 - name: Initialize access dictionary external services into a single dictionary
-  set_fact: 
+  set_fact:
     all_services_details: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service') | json_query('[].{key:keys(@)[0], value:values(@)[0]}') | items2dict }}"
 
 - name: Initialize managed RHSSO details

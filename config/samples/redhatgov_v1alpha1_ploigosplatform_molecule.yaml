@@ -6,16 +6,18 @@ spec:
   ploigosPlatform:
     services:
       continuousIntegration:
-        name: jenkins
+        managedService: jenkins
       sourceControl:
-        name: gitea
+        managedService: gitea
       artifactRepository:
-        name: nexus
+        managedService: nexus
       staticCodeAnalysis:
-        name: sonarqube
+        managedService: sonarqube
       continuousDeployment:
-        name: argocd
+        managedService: argocd
       uat:
-        name: selenium
+        managedService: selenium
       containerRegistry:
-        name: nexus
+        managedService: nexus
+      sso:
+        managedService: rhsso

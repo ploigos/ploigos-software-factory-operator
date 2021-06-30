@@ -7,6 +7,6 @@ spec:
   oidcConfig: |
     name: Red Hat SSO
     issuer: https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}/auth/realms/openshift
-    clientID: argocd 
+    clientID: argocd
     clientSecret: {{ rhsso_argocd_secret }}
-    requestedScopes: ["openid", "profile", "email", "groups"] 
+    requestedScopes: ["openid", "profile", "email", "groups"]
