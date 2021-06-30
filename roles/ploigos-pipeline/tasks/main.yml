@@ -38,7 +38,7 @@
     devsecops-api quay add-repo https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ ploigos_service_account.username }}' --login-password '{{ ploigos_service_account.password }}'
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
-  when: 'quay' == platform_container_registry
+  when: "'quay' == platform_container_registry"
 
 - name: Get gitea token secret
   k8s_info:
@@ -98,7 +98,7 @@
       headers:
         Authorization: 'Bearer {{ ocp_token }}'
       status_code: "302"
-  when:  'jenkins' == platform_continuous_integration
+  when: "'jenkins' == platform_continuous_integration"
 
 - name: Create pipeline in Tekton
   block:
@@ -118,4 +118,4 @@
     community.kubernetes.k8s:
       definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
     when: auto_start_pipeline
-  when: 'tekton' == platform_continuous_integration
+  when: "'tekton' == platform_continuous_integration"
