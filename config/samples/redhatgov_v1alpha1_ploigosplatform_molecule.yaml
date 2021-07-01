@@ -6,18 +6,26 @@ spec:
   ploigosPlatform:
     services:
       continuousIntegration:
-        managedService: jenkins
+        jenkins:
+          enabled: true
       sourceControl:
-        managedService: gitea
+        gitea:
+          enabled: true
       artifactRepository:
-        managedService: nexus
+        nexusArtifacts:
+          enabled: true
       staticCodeAnalysis:
-        managedService: sonarqube
+        sonarqube:
+          enabled: true
       continuousDeployment:
-        managedService: argocd
+        argocd:
+          enabled: true
       uat:
-        managedService: selenium
+        selenium:
+          enabled: true
       containerRegistry:
-        managedService: nexus
+        nexusContainers:
+          enabled: true
       sso:
-        managedService: rhsso
+        rhsso:
+          enabled: true

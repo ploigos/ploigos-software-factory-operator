@@ -1,10 +1,9 @@
-- name: Collect external services
-  set_fact:
-    external_services: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service.keys(@)') | flatten }}"
-
 - name: Initialize access dictionary external services into a single dictionary
   set_fact:
-    all_services_details: "{{ ploigos_platform.services.values() | list | json_query('[?external_service].external_service') | json_query('[].{key:keys(@)[0], value:values(@)[0]}') | items2dict }}"
+    all_services_details: >-
+      {{ ploigos_platform.services.values() | list |
+      json_query('[?(' + ( all_services | join('||') ) + ').enabled
+      && *.external_properties].{key:keys(@)[0], value:values(@)[0].external_properties}') | items2dict }}
 
 - name: Initialize managed RHSSO details
   when: '"rhsso" in managed_services'
@@ -52,8 +51,8 @@
         k8s_api: https://kubernetes.default.svc.cluster.local:443
         k8s_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
 
-- name: Initialize managed Nexus details
-  when: '"nexus" in managed_services'
+- name: Initialize managed Nexus details (Artifact Repository)
+  when: '"nexus_artifacts" in managed_services'
   block:
   - set_fact:
       nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
@@ -62,12 +61,30 @@
     delay: 5
 
   - set_fact:
-      all_services_details: "{{ all_services_details | combine(_nexus_details) }}"
+      all_services_details: "{{ all_services_details | combine(_nexus_artifacts_details) }}"
     vars:
-      _nexus_details:
-        nexus:
+      _nexus_artifacts_details:
+        nexus_artifacts:
           url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
-          docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+          username: "{{ nexus_admin_secret.data.username | b64decode }}"
+          password: "{{ nexus_admin_secret.data.password | b64decode }}"
+
+- name: Initialize managed Nexus details (Container Registry)
+  when: '"nexus_containers" in managed_services'
+  block:
+  - set_fact:
+      nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
+    until: nexus_admin_secret
+    retries: 30
+    delay: 5
+
+  - set_fact:
+      all_services_details: "{{ all_services_details | combine(_nexus_containers_details) }}"
+    vars:
+      _nexus_containers_details:
+        nexus_containers:
+          server_url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
+          docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name}}"
           username: "{{ nexus_admin_secret.data.username | b64decode }}"
           password: "{{ nexus_admin_secret.data.password | b64decode }}"
 
@@ -100,10 +117,10 @@
   vars:
     _argocd_details:
       argocd:
-        k8s_api: https://kubernetes.default.svc.cluster.local:443
-        k8s_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
-        k8s_cr_name: argocd
-        k8s_namespace: "{{ ploigos_namespace }}"
+        kubernetes_api: https://kubernetes.default.svc.cluster.local:443
+        kubernetes_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+        kubernetes_cr_name: argocd
+        kubernetes_namespace: "{{ ploigos_namespace }}"
 
 - name: Initialize managed Selenium Grid details
   when: '"selenium" in managed_services'

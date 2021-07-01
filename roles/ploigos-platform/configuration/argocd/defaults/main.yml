@@ -1,8 +1,8 @@
 ---
-argocd_project_name: "{{ ploigos_namespace }}"
-argocd_cr_name: "{{ all_services_details.argocd.k8s_cr_name }}"
-argocd_k8s_api: "{{ all_services_details.argocd.k8s_api }}"
-argocd_k8s_token: "{{ all_services_details.argocd.k8s_token }}"
+argocd_project_name: "{{ all_services_details.argocd.kubernetes_namespace }}"
+argocd_cr_name: "{{ all_services_details.argocd.kubernetes_cr_name }}"
+argocd_k8s_api: "{{ all_services_details.argocd.kubernetes_api }}"
+argocd_k8s_token: "{{ all_services_details.argocd.kubernetes_token }}"
 
 ploigos_service_account:
   username: ploigos
