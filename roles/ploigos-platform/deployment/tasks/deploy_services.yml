@@ -4,7 +4,7 @@
     namespace: '{{ ploigos_namespace }}'
     definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
     state: '{{ cr_state }}'
-  when: ploigos_platform.services.continuous_integration.managed_service == 'jenkins'
+  when: "'jenkins' in managed_services"
 
 - name: Create ploigos-container-builder SCC for jenkins
   k8s:

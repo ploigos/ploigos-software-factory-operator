@@ -21,19 +21,19 @@ data:
         maven-repositories:
           maven-releases:
             id: maven-releases
-            url: {{ all_services_details.nexus.url }}/repository/maven-releases/
+            url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-releases/
             snapshots: false
             releases: true
         maven-mirrors:
           internal-mirror:
             id: maven-public
-            url: {{ all_services_details.nexus.url }}/repository/maven-public/
+            url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-public/
             mirror-of: '*'
         container-registries:
 {% if 'quay' in (all_services_details | list) %}
           {{ all_services_details.quay.url }}:
 {% else %}
-          {{ all_services_details.nexus.docker_url }}:
+          {{ all_services_details.nexus_containers.docker_url }}:
 {% endif %}
             username: "{{ ploigos_service_account.username }}"
           registry.redhat.io:
@@ -70,7 +70,7 @@ data:
       - implementer: Maven
         config:
           maven-push-artifact-repo-id: maven-releases
-          maven-push-artifact-repo-url: {{ all_services_details.nexus.url }}/repository/maven-releases
+          maven-push-artifact-repo-url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-releases
       create-container-image:
       - implementer: Buildah
 
@@ -81,12 +81,12 @@ data:
 {% if 'quay' in (all_services_details | list) %}
           destination-url: {{ all_services_details.quay.url }}
 {% else %}
-          destination-url: {{ all_services_details.nexus.docker_url }}
+          destination-url: {{ all_services_details.nexus_containers.docker_url }}
 {% endif %}
       sign-container-image:
       - implementer: PodmanSign
         config:
-          container-image-signature-server-url: {{ all_services_details.nexus.url }}/repository/container-image-signatures
+          container-image-signature-server-url: {{ all_services_details.nexus_artifacts.url }}/repository/container-image-signatures
           container-image-signature-server-username: ploigos
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
@@ -121,12 +121,12 @@ data:
       report:
       - implementer: ResultArtifactsArchive
         config:
-          results-archive-destination-url: {{ all_services_details.nexus.url }}/repository/result-artifacts-archive
+          results-archive-destination-url: {{ all_services_details.nexus_artifacts.url }}/repository/result-artifacts-archive
           results-archive-destination-username: ploigos
 
       generate-evidence:
       - implementer: GenerateEvidence
         config:
-          evidence-destination-url: {{ all_services_details.nexus.url }}/repository/workflow-evidence
+          evidence-destination-url: {{ all_services_details.nexus_artifacts.url }}/repository/workflow-evidence
           evidence-destination-username: ploigos
 

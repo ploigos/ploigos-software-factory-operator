@@ -1,0 +1,27 @@
+- name: Wait for Nexus to respond to requests
+  uri:
+    url: '{{ nexus_server_url }}/repository/maven-releases/'
+    validate_certs: no
+    status_code: [200,401]
+  register: _nexus_endpoint
+  until: _nexus_endpoint.status in [200,401]
+  retries: 30
+  delay: 5
+
+- name: Create ploigos Service Account
+  shell: >
+    devsecops-api nexus add-user
+    {{ nexus_server_url }}
+    --login-username {{ nexus_username }} --login-password {{ nexus_password }}
+    --usernames "{{ ploigos_service_account.username }}"
+    --passwords "{{ ploigos_service_account.password }}"
+
+- name: Create docker repository if using nexus as container registry
+  shell: >-
+    devsecops-api nexus add-docker-repository
+    {{ nexus_server_url }}
+    --login-username '{{ nexus_username }}' --login-password '{{ nexus_password }}'
+    --repository-names docker-hosted
+  register: docker_repo
+  changed_when: docker_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: docker_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or docker_repo.rc != 0

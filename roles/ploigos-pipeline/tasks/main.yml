@@ -14,12 +14,6 @@
 - set_fact:
     ploigos_platform: "{{ ploigos_platform_result.resources[0].spec.ploigosPlatform }}"
 
-- name: Get services from PloigosPlatform
-  set_fact:
-    platform_continuous_integration: "{{ ploigos_platform.services.continuousIntegration.managedService  | default(omit) }}"
-    platform_container_registry: "{{ ploigos_platform.services.containerRegistry.managedService  | default(omit) }}"
-    platform_helm_repository: "{{ ploigos_platform.helmRepository | default('https://ploigos.github.io/ploigos-charts') }}"
-
 - name: Fetch ploigos-service-account secret
   set_fact:
     secret_data: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-service-account-credentials') }}"
@@ -38,7 +32,7 @@
     devsecops-api quay add-repo https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ ploigos_service_account.username }}' --login-password '{{ ploigos_service_account.password }}'
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
-  when: "'quay' == platform_container_registry"
+  when: ploigos_platform.services.continuousIntegration.quay.enabled | default(false)
 
 - name: Get gitea token secret
   k8s_info:
@@ -98,7 +92,7 @@
       headers:
         Authorization: 'Bearer {{ ocp_token }}'
       status_code: "302"
-  when: "'jenkins' == platform_continuous_integration"
+  when: ploigos_platform.services.continuousIntegration.jenkins.enabled | default(false)
 
 - name: Create pipeline in Tekton
   block:
@@ -118,4 +112,4 @@
     community.kubernetes.k8s:
       definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
     when: auto_start_pipeline
-  when: "'tekton' == platform_continuous_integration"
+  when: ploigos_platform.services.continuousIntegration.tekton.enabled | default(false)

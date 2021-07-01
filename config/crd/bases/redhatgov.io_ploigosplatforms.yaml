@@ -65,36 +65,35 @@ spec:
                     type: object
                     properties:
                       sso:
-                        description: Describes the service used for single sign on.
+                        description: |
+                          Describes the service used for single sign on.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - rhsso (default)
-                            type: string
-                            pattern: ^rhsso$
-                            default: rhsso
+                          rhsso:
+                            description: Specification for a Red Hat Single Sign-On instance.
+                            type: object
+                            properties:
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
                       continuousIntegration:
                         description: Describes the CI service used for workflow orchestration.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - jenkins (default)
-                              - tekton
-                            type: string
-                            pattern: ^jenkins|tekton$
-                            default: jenkins
-                          externalService:
-                            description: Configuration for an existing CI service.
+                          jenkins:
+                            description: Configuration for a jenkins instance.
                             type: object
                             properties:
-                              jenkins:
-                                description: Configuration for an existing jenkins instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
@@ -106,37 +105,47 @@ spec:
                                 required:
                                 - url
                                 - token
-                              tekton:
-                                description: Configuration for an existing Tekton deployment.
+                          tekton:
+                            description: Configuration for a Tekton instance.
+                            type: object
+                            properties:
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
-                                  k8s_api:
+                                  kubernetesApi:
                                     description: Kubernetes API server address to access Tekton
                                     type: string
-                                  k8s_token:
+                                  kubernetesToken:
                                     description: Kubernetes token to access Tekton
                                     type: string
                                 required:
-                                - k8s_api
-                                - k8s_token
+                                - kubernetesApi
+                                - kubernetesToken
                       sourceControl:
                         description: Describes the service used for source control.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - gitea (default)
-                            type: string
-                            pattern: ^gitea$
-                            default: gitea
-                          externalService:
-                            description: Configuration for an existing source control service.
+                          gitea:
+                            description: Configuration for a Gitea instance.
                             type: object
                             properties:
-                              gitea:
-                                description: Configuration for an existing Gitea instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
@@ -156,20 +165,19 @@ spec:
                         description: Describes the service used as an artifact repository.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - nexus (default)
-                            type: string
-                            pattern: ^nexus$
-                            default: nexus
-                          externalService:
-                            description: Configuration for an existing artifact repository service.
+                          nexusArtifacts:
+                            description: Configuration for a Nexus instance.
                             type: object
                             properties:
-                              nexus:
-                                description: Configuration for an existing Nexus instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
@@ -189,20 +197,19 @@ spec:
                         description: Describes the service used for static code analysis.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - sonarqube (default)
-                            type: string
-                            pattern: ^sonarqube$
-                            default: sonarqube
-                          externalService:
-                            description: Configuration for an existing static code analysis service.
+                          sonarqube:
+                            description: Configuration for a Sonarqube instance.
                             type: object
                             properties:
-                              sonarqube:
-                                description: Configuration for an existing Sonarqube instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
@@ -219,28 +226,31 @@ spec:
                                 - username
                                 - password
                       containerRegistry:
-                        description: Describes the service used as a container registry.
+                        description: |
+                          Describes the service used as a container registry. For best performance, only
+                          one of the below options should be used.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - nexus (default)
-                              - quay
-                            type: string
-                            pattern: ^nexus|quay$
-                            default: nexus
-                          externalService:
-                            description: Configuration for an existing container registry service.
+                          nexusContainers:
+                            description: Configuration for a Nexus instance.
                             type: object
                             properties:
-                              nexus:
-                                description: Configuration for an existing Nexus instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
-                                  url:
-                                    description: URL to access this instance.
+                                  serverUrl:
+                                    description: URL to access this Nexus.
+                                    type: string
+                                  dockerUrl:
+                                    description: URL to access containers in this instance.
                                     type: string
                                   username:
                                     description: Username to access this instance.
@@ -249,11 +259,23 @@ spec:
                                     description: Password to access this instance.
                                     type: string
                                 required:
-                                - url
+                                - serverUrl
+                                - dockerUrl
                                 - username
                                 - password
-                              quay:
-                                description: Configuration for an existing Quay instance.
+                          quay:
+                            description: Configuration for a Quay instance.
+                            type: object
+                            properties:
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
@@ -273,55 +295,55 @@ spec:
                         description: Describes the service used for continuous deployment.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - argocd (default)
-                            type: string
-                            pattern: ^argocd$
-                            default: argocd
-                          externalService:
-                            description: Configuration for an existing continuous deployment service.
+                          argocd:
+                            description: Configuration for an ArgoCD instance.
                             type: object
                             properties:
-                              argocd:
-                                description: Configuration for an existing Argo CD deployment.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
-                                  k8sApi:
+                                  kubernetesApi:
                                     description: Kubernetes API server address to access Tekton
                                     type: string
-                                  k8sToken:
+                                  kubernetesToken:
                                     description: Kubernetes token to access Tekton
                                     type: string
-                                  k8sCrName:
+                                  kubernetesCrName:
                                     description: Name of the ArgoCD Custom Resource
                                     type: string
-                                  k8sNamespace:
+                                  kubernetesNamespace:
                                     description: Name of the namespace in which ArgoCD is deployed
                                     type: string
                                 required:
-                                - k8s_api
-                                - k8s_token
+                                - kubernetesApi
+                                - kubernetesToken
+                                - kubernetesCrName
+                                - kubernetesNamespace
                       uat:
                         description: Describes the service used for User Acceptance Testing.
                         type: object
                         properties:
-                          managedService:
-                            description: |
-                              The name of a service to be fully-managed by the operator.
-                              Supported values:
-                              - selenium (default)
-                            type: string
-                            pattern: ^selenium$
-                            default: selenium
-                          externalService:
-                            description: Configuration for an existing UAT service.
+                          selenium:
+                            description: Configuration for a Selenium Grid instance.
                             type: object
                             properties:
-                              selenium:
-                                description: Configuration for an existing Selenium Grid instance.
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: true
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
                                 type: object
                                 properties:
                                   url:
