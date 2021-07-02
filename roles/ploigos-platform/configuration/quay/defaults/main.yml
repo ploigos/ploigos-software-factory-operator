@@ -2,7 +2,7 @@
 quay_project_name: "{{ ploigos_namespace }}"
 quay_url: "{{ all_services_details.quay.url }}"
 quay_username: "{{ all_services_details.quay.username }}"
-quay_password: "{{ all_services_details.quay.url }}"
+quay_password: "{{ all_services_details.quay.password }}"
 enable_quay_repo_mirroring: false
 
 ploigos_service_account:
