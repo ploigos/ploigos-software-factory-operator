@@ -183,7 +183,7 @@ See below for a list of supported implementations for each service along with ap
 * *dockerUrl* - the URL to access containers in Nexus. (e.g. quay.apps.example.com)
 * *username* - the username of an existing Nexus user
 * *password* - the password of an existing Nexus user
-|*quay*|
+|*quay* a|
 * *url* - the URL to access Quay (e.g. quay.apps.example.com)
 * *username* - the username of an existing Quay user
 * *password* - the password of an existing Quay user
