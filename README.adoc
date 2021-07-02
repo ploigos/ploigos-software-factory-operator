@@ -194,8 +194,8 @@ See below for a list of supported implementations for each service along with ap
 * *kubernetesCrName* - the name of the ArgoCD Custom Resource
 * *kubernetesNamespace* - the namespace in which ArgoCD is deployed
 |User Acceptance Testing|✅
-|*selenium*|
-(None)
+|*selenium* a|
+* *url* - the URL to access Selenium Grid
 |===========================
 
 === TLS
