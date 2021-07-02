@@ -71,29 +71,28 @@ Two APIs are offered:
     name: ploigosplatform
   spec:
     ploigosPlatform:
-      helmRepository: 'https://ploigos.github.io/ploigos-charts'
       services:
-        artifactRepository:
-          managed: true
-          name: nexus
-        containerRegistry:
-          managed: true
-          name: nexus
-        continuousDeployment:
-          managed: true
-          name: argocd
         continuousIntegration:
-          managed: true
-          name: jenkins
+          jenkins:
+            enabled: true
         sourceControl:
-          managed: true
-          name: gitea
+          gitea:
+            enabled: true
+        artifactRepository:
+          nexusArtifacts:
+            enabled: true
         staticCodeAnalysis:
-          managed: true
-          name: sonarqube
+          sonarqube:
+            enabled: true
+        continuousDeployment:
+          argocd:
+            enabled: true
         uat:
-          managed: true
-          name: selenium
+          selenium:
+            enabled: true
+        containerRegistry:
+          nexusContainers:
+            enabled: true
   EOF
 
 . Then create a `PloigosPipeline` instance for our reference application. If you want to use your _own_ application here, take a look at the https://github.com/andykrohg/ploigos-onboarding-demo[ploigos-onboarding-demo] to see how to wire it up.
@@ -125,30 +124,78 @@ Two APIs are offered:
 
 === Services
 
-You can configure a select number of services in the `ploigosPlatform.services` property of your `PloigosPlatform` object.
+You can specify a select number of services in the `ploigosPlatform.services` property of your `PloigosPlatform` object, leveraging either *Fully Managed* or *External Services*.
 
-* The `managed` attribute indicates whether the applicable service should be provisioned by this operator. If `false`, it is assumed to already exist so no action is taken. In the future, we may develop capability to configure existing tooling.
+==== Fully Managed Services
+Fully Managed Services are deployed and configured by the Ploigos Software Factory Operator. To use a fully managed implementation for a given workflow function, add it to your `PloigosPlatform` `CustomResource` like this:
 
-* The `name` attribute indicates the provider for each service. See below for supported services, with defaults appearing in *bold*.
+  ploigosPlatform:
+    services:
+      continuousIntegration:
+        jenkins:
+          enabled: true
+
+==== External Services
+To use a service which already exists, you must supply connection properties so the operator can configure it. This can be done by adding the required options in the `externalProperties` sub-object. For example:
+
+  ploigosPlatform:
+    services:
+      continuousIntegration:
+        jenkins:
+          enabled: true
+          externalProperties:
+            url: http://jenkins.example.com
+            token: 12345678
+
+Note that applicable `externalProperties` differ depending on the service you're configuring.
+
+==== Service Specification
+See below for a list of supported implementations for each service along with applicable External Properties:
 
 |===========================
-|Service|Required?|Options
-|Continuous Integration|✅ a|
-* *jenkins*
-* tekton
-|Source Control|✅ a|
-* *gitea*
-|Artifact Repository|✅ a|
-* *nexus*
-|Static Code Analysis|✅ a|
-* *sonarqube*
-|Container Registry|✅ a|
-* *nexus*
-* quay
-|Continuous Deployment|✅ a|
-* *argocd*
-|User Acceptance Testing|✅ a|
-* *selenium*
+|Service|Required?|Supported Implementations|External Properties
+|Single Sign-On (SSO)|| *rhsso* (Red Hat Single Sign-On)|(Not Supported)
+.2+|Continuous Integration .2+|✅
+|*jenkins* a|
+* *url* - the URL to access Jenkins
+* *token* - an Oauth token to access the Jenkins API
+|*tekton* a|
+* *kubernetesApi* - the Kuberenetes API Server where Tekton is hosted
+* *kubernetesToken* - a token to access the Kubernetes API where Tekton is hosted
+|Source Control|✅
+|*gitea* a|
+* *url* - the URL to access Gitea
+* *username* - the username of an existing Gitea user
+* *password* - the password of an existing Gitea user
+|Artifact Repository|✅
+|*nexusArtifacts* a|
+* *url* - the URL to access Nexus
+* *username* - the username of an existing Nexus user
+* *password* - the password of an existing Nexus user
+|Static Code Analysis|✅
+|*sonarqube* a|
+* *url* - the URL to access Sonarqube
+* *username* - the username of an existing Sonarqube user
+* *password* - the password of an existing Sonarqube user
+.2+|Container Registry .2+|✅
+|*nexusContainers* a|
+* *serverUrl* - the URL to access the Nexus Server
+* *dockerUrl* - the URL to access containers in Nexus. (e.g. quay.apps.example.com)
+* *username* - the username of an existing Nexus user
+* *password* - the password of an existing Nexus user
+|*quay*|
+* *url* - the URL to access Quay (e.g. quay.apps.example.com)
+* *username* - the username of an existing Quay user
+* *password* - the password of an existing Quay user
+|Continuous Deployment|✅
+|*argocd* a|
+* *kubernetesApi* - the Kuberenetes API Server where ArgoCD is hosted
+* *kubernetesToken* - a token to access the Kubernetes API where ArgoCD is hosted
+* *kubernetesCrName* - the name of the ArgoCD Custom Resource
+* *kubernetesNamespace* - the namespace in which ArgoCD is deployed
+|User Acceptance Testing|✅
+|*selenium*|
+(None)
 |===========================
 
 === TLS
