@@ -32,7 +32,7 @@
     devsecops-api quay add-repo https://quay-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}
     --login-username '{{ ploigos_service_account.username }}' --login-password '{{ ploigos_service_account.password }}'
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
-  when: ploigos_platform.services.continuousIntegration.quay.enabled | default(false)
+  when: ploigos_platform.services.containerRegistry.quay.enabled | default(false)
 
 - name: Get gitea token secret
   k8s_info:
