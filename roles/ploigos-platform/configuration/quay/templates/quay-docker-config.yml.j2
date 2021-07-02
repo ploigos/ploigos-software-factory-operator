@@ -1,5 +1,0 @@
-auths:
-  {{ quay_url }}:
-    username: platform+{{ ploigos_service_account.username }}
-    password: {{ quay_robot_token }}
-    auth: {{ ('platform+' + ploigos_service_account.username + ':' + quay_robot_token) | b64encode }}

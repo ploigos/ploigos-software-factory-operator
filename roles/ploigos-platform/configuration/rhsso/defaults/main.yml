@@ -1,8 +1,0 @@
----
-rhsso_project_name: devsecops
-rhsso_project_display: DevSecOps Common Resources
-rhsso_app_name: rhsso
-rhsso_app_label: rhsso
-rhsso_realm_name: openshift
-rhsso_realm_display: RH-SSO OpenShift Realm
-subdomain: '{{ full_cluster_name }}'

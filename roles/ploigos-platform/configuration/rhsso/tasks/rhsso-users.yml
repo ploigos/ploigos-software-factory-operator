@@ -1,6 +1,0 @@
----
-- name: 'Set Users to {{ cr_state }}'
-  k8s:
-    definition: '{{ lookup("template", "rhsso-users.yml.j2")|from_yaml }}'
-    state: '{{ cr_state }}'
-  loop: "{{ rhsso_users }}"
