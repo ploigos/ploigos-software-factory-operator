@@ -26,6 +26,3 @@ spec:
       containerRegistry:
         nexusContainers:
           enabled: true
-      sso:
-        rhsso:
-          enabled: true

@@ -1,4 +1,0 @@
-tekton_k8s_api: "{{ all_services_details.tekton.kubernetes_api }}"
-tekton_k8s_token: "{{ all_services_details.tekton.kubernetes_token }}"
-tekton_chart_state: present
-tekton_namespace: "{{ ploigos_namespace }}"

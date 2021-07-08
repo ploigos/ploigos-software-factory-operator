@@ -86,7 +86,7 @@
 
 - name: Configure platform services
   include_role:
-    name: 'ploigos-platform/configuration/{{ operator_app }}'
+    name: 'ploigos.service_configs.{{ operator_app }}'
   loop: "{{ all_services_details | list }}"
   loop_control:
     loop_var: operator_app

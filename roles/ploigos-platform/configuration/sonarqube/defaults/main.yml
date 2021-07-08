@@ -1,9 +1,0 @@
----
-sonarqube_project_name: "{{ ploigos_namespace }}"
-sonarqube_url: "{{ all_services_details.sonarqube.url }}"
-sonarqube_username: "{{ all_services_details.sonarqube.username }}"
-sonarqube_password: "{{ all_services_details.sonarqube.password }}"
-
-ploigos_service_account:
-  username: ploigos
-  password: password123

@@ -1,9 +1,0 @@
----
-nexus_project_name: "{{ ploigos_namespace }}"
-nexus_url: "{{ all_services_details.nexus_artifacts.url }}"
-nexus_username: "{{ all_services_details.nexus_artifacts.username }}"
-nexus_password: "{{ all_services_details.nexus_artifacts.password }}"
-
-ploigos_service_account:
-  username: ploigos
-  password: password123
