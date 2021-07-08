@@ -147,7 +147,7 @@ To use a service which already exists, you must supply connection properties so 
             url: http://jenkins.example.com
             token: 12345678
 
-Note that applicable `externalProperties` differ depending on the service you're configuring.
+Note that applicable `externalProperties` differ depending on the service you're configuring. External Services can also be configured without the use of this operator by using the https://galaxy.ansible.com/ploigos/service_configs[Ploigos Service Configs Collection] directly.
 
 ==== Service Specification
 See below for a list of supported implementations for each service along with applicable External Properties:
@@ -199,7 +199,7 @@ See below for a list of supported implementations for each service along with ap
 |===========================
 
 === TLS
-The default `TsscPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your certificates are signed using a private CA instead, you can provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
+The default `PloigosPlatform` deployment assumes that your OpenShift Router is equipped with a certificate signed by a well-known certificate authority. If your certificates are signed using a private CA instead, you can provide the name of a `ConfigMap` which holds your trusted CA Bundle. The ConfigMap should have a single key named ca-bundle.crt. This key has a collection of CA certificates as its value. If the provided ConfigMap exists, it will be used as-is. Otherwise, it will be generated using a label of `config.openshift.io/inject-trusted-cabundle=true` and populated with the *Cluster Network Operator*. For example:
 
   apiVersion: redhatgov.io/v1alpha1
   kind: PloigosPlatform
@@ -210,7 +210,7 @@ The default `TsscPlatform` deployment assumes that your OpenShift Router is equi
       tls:
         trustBundleConfigMap: trustedcabundle
 
-If you are using self-signed certs, but configuring your own private CA is for some reason not an option, you can instead disable TLS verification. This is not recommended because it is less secure. To disable TLS verification, update your `TsscPlatform` CR like this:
+If you are using self-signed certs, but configuring your own private CA is for some reason not an option, you can instead disable TLS verification. This is not recommended because it is less secure. To disable TLS verification, update your `PloigosPlatform` CR like this:
 
   apiVersion: redhatgov.io/v1alpha1
   kind: PloigosPlatform
@@ -241,7 +241,7 @@ Before running the script make sure to update the location of the container imag
 
 == Developer Installation Steps
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Software Factory Operator in their projects and deploy TsscPlatforms using the tsscplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Tssc operator can be installed from the OperatorHub interface of the console.
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Ploigos Software Factory Operator in their projects and deploy PloigosPlatforms using the ploigosplatform.redhatgov.io Custom Resource. If you've installed the operator from the https://github.com/RedHatGov/operator-catalog[RedHatGov Operator Catalog Index] on an OLM-enabled cluster, the Ploigos Software Factory Operator can be installed from the OperatorHub interface of the console.
 
 Perform the following tasks as *cluster-admin*:
 
