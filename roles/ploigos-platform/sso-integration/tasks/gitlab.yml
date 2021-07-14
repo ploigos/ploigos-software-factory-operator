@@ -1,0 +1,98 @@
+---
+- name: Get GitLab Pod
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: '{{ ploigos_namespace }}'
+    label_selectors:
+    - app=gitlab
+  register: gitlab_pod
+
+- name: Create RHSSO Client definition for GitLab
+  k8s:
+    definition: '{{ lookup("template", "rhsso-gitlab-client.yml.j2")|from_yaml }}'
+  register: rhsso_client
+
+- name: Wait for GitLab KeycloakClient to reconcile
+  k8s_info:
+    api_version: keycloak.org/v1alpha1
+    kind: KeycloakClient
+    name: gitlab-client
+    namespace: "{{ rhsso_project_name }}"
+  register: gitlab_kc
+  until:
+    - gitlab_kc.resources|length > 0
+    - gitlab_kc.resources[0].status is defined
+    - gitlab_kc.resources[0].status['ready']
+  delay: 10
+  retries: 6
+
+- name: Wait for client secret to be created
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: keycloak-client-secret-gitlab
+    namespace: "{{ rhsso_project_name }}"
+  register: gitlab_secret
+  until:
+    - "gitlab_secret.resources[0].data['CLIENT_SECRET'] != ''"
+  retries: 12
+  delay: 5
+
+- name: Fetch GitLab secret for RHSSO
+  set_fact:
+    rhsso_gitlab_secret: "{{ gitlab_secret.resources[0].data['CLIENT_SECRET'] | b64decode }}"
+
+# TODO: this should all be part of the GitLab operator
+# unfortunately, when we move to Secret-based client secrets we cannot
+# easily know when the Secret has changed, so updating an existing client secret
+# is difficult. Plus, GitLab CLI doesn't provide a means to check that no
+# changes were made to OAuth config - all update commands will cause an UPDATE
+# query regardless.
+- name: Configure RHSSO as an OAuth2 provider for GitLab
+  shell: |
+    oc='{{ oc_cli }}'
+    pod=$($oc get pods -n {{ gitlab_project_name }} -l {{ gitlab_pod_label }} -o jsonpath='{.items[0].metadata.name}')
+    gitlab="$oc exec $pod -n {{ gitlab_project_name }} -- /home/gitlab/gitlab --config=/home/gitlab/conf/app.ini"
+    $gitlab admin auth list |& grep -F rhsso
+    if [ $? -gt 0 ]; then
+      output=$($gitlab admin auth add-oauth --name=rhsso --provider openidConnect --key {{ rhsso_gitlab_client_id }} --secret {{ rhsso_gitlab_secret }} --auto-discover-url  https://keycloak-{{ rhsso_project_name }}.apps.{{ subdomain }}/auth/realms/{{ rhsso_realm_name }}/.well-known/openid-configuration 2>&1)
+      if echo "$output" | grep -qF 'login source already exists'; then
+          echo ok
+      elif echo "$output" | grep -qF 'Failed to run app'; then
+          echo failed
+      elif echo "$output" | grep -qE 'INSERT INTO "login_source"'; then
+          echo changed
+      else
+          echo failed
+      fi
+    else
+      echo ok
+    fi
+  register: gitlab_rhsso_oauth
+  changed_when: '"changed" in gitlab_rhsso_oauth.stdout_lines'
+  failed_when: '"failed" in gitlab_rhsso_oauth.stdout_lines'
+
+- name: Restart gitlab if the RHSSO changes were applied
+  block:
+  - name: Kill gitlab pod for auth changes to take into effect
+    k8s:
+      api_version: v1
+      kind: Pod
+      namespace: '{{ gitlab_project_name }}'
+      name: "{{ (gitlab_pod.resources|first).metadata.name }}"
+      state: absent
+      wait: true
+
+  - name: Wait **again** for GitLab to finish being created with RHSSO settings
+    k8s_info:
+      api_version: v1
+      kind: Pod
+      namespace: '{{ gitlab_project_name }}'
+      label_selectors:
+      - "{{ gitlab_pod_label }}"
+    register: gitlab_pod
+    until: gitlab_pod.resources|length > 0 and (gitlab_pod.resources|first).status.phase == "Running"
+    retries: 10
+    delay: 30
+  when: gitlab_rhsso_oauth.changed
