@@ -3,6 +3,7 @@
   vars:
     supported_services:
     - gitea
+    - gitlab
     - quay
     - sonarqube
     - argocd
