@@ -1,9 +1,10 @@
 gitea_pod_label: app=gitea
+gitlab_pod_label: app=gitlab
 rhsso_realm_name: openshift
 rhsso_project_name: '{{ ploigos_namespace }}'
 rhsso_app_label: rhsso
-
 rhsso_gitea_client_id: gitea
+rhsso_gitlab_client_id: gitlab
 rhsso_quay_client_id: quay-enterprise
 
 subdomain: '{{ full_cluster_name }}'
