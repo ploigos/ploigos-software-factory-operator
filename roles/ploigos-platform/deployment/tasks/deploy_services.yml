@@ -1,14 +1,19 @@
-# Jenkins
-- name: Create a Jenkins instance
+- name: Create ploigos-container-builder SCC and role
   k8s:
-    namespace: '{{ ploigos_namespace }}'
-    definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
-    state: '{{ cr_state }}'
-  when: "'jenkins' in managed_services"
+    definition: "{{ lookup('template', 'container-builder.yml.j2') | from_yaml }}"
 
-- name: Create ploigos-container-builder SCC for jenkins
-  k8s:
-    definition: "{{ lookup('template', 'jenkins-rbac.yml.j2') | from_yaml }}"
+- name: Complete Jenkins tasks, if enabled
+  block:
+  - name: Create a Jenkins instance
+    k8s:
+      namespace: '{{ ploigos_namespace }}'
+      definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
+      state: '{{ cr_state }}'
+
+  - name: Create RoleBinding for use by jenkins
+    k8s:
+      definition: "{{ lookup('template', 'jenkins-rolebinding.yml.j2') | from_yaml }}"
+  when: "'jenkins' in managed_services"
 
 # Operator-backed services
 - name: Get a list of operator groups

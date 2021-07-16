@@ -78,10 +78,6 @@ spec:
   pipelineRef:
     name: {{ app_name }}-{{ service_name }}
   serviceAccountName: ploigos-workflow-{{ app_name }}-{{ service_name }}
-  podTemplate:
-    securityContext:
-      runAsUser: 1001
-      fsGroup: 1001
   timeout: 1h0m0s
   workspaces:
     - name: home
