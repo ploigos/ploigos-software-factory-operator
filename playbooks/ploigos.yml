@@ -19,6 +19,7 @@
     - name: Set project names
       set_fact:
         argocd_project_name: '{{ ploigos_namespace }}'
+        gitlab_project_name: '{{ ploigos_namespace }}'
         gitea_project_name: '{{ ploigos_namespace }}'
         jenkins_project_name: '{{ ploigos_namespace }}'
         nexus_project_name: '{{ ploigos_namespace }}'
