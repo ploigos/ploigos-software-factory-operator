@@ -7,6 +7,10 @@
     - sonarqube
     - argocd
 
+- name: Deploy OpenShift Realm
+  k8s:
+    definition: "{{ lookup('template', 'realm.yml.j2') }}"
+
 - name: Configure platform services
   include_tasks: '{{ _sso_service }}.yml'
   loop: "{{ sso_services }}"

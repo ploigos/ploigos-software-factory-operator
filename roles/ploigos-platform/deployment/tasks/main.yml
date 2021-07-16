@@ -91,7 +91,7 @@
   loop_control:
     loop_var: operator_app
     label: operator_app
-  when: cr_state == 'present'
+  when: "cr_state == 'present' and operator_app != 'rhsso'"
 
 - name: Wire up SSO
   include_role:

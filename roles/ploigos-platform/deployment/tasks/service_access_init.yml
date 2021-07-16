@@ -47,9 +47,7 @@
     all_services_details: "{{ all_services_details | combine(_tekton_details) }}"
   vars:
     _tekton_details:
-      tekton:
-        k8s_api: https://kubernetes.default.svc.cluster.local:443
-        k8s_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+      tekton: {}
 
 - name: Initialize managed Nexus details (Artifact Repository)
   when: '"nexus_artifacts" in managed_services'

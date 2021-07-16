@@ -99,12 +99,12 @@
   - name: Add ploigos chart repo
     community.kubernetes.helm_repository:
       name: ploigos_charts
-      repo_url: "{{ platform_helm_repository }}"
+      repo_url: "{{ ploigos_platform.helmRepository }}"
 
-  - name: Deploy cluster resources chart
+  - name: Deploy pipeline resources chart
     community.kubernetes.helm:
-      name: ploigos-workflow-standard-tekton-pipeline
-      chart_ref: ploigos_charts/ploigos-workflow-standard-tekton-pipeline
+      name: ploigos-workflow-everything-tekton-pipeline
+      chart_ref: ploigos_charts/ploigos-workflow-tekton-pipeline-everything
       values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
       release_namespace: "{{ ploigos_namespace }}"
 

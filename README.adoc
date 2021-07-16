@@ -159,9 +159,7 @@ See below for a list of supported implementations for each service along with ap
 |*jenkins* a|
 * *url* - the URL to access Jenkins
 * *token* - an Oauth token to access the Jenkins API
-|*tekton* a|
-* *kubernetesApi* - the Kuberenetes API Server where Tekton is hosted
-* *kubernetesToken* - a token to access the Kubernetes API where Tekton is hosted
+|*tekton*|(Not Supported)
 |Source Control|✅
 |*gitea* a|
 * *url* - the URL to access Gitea

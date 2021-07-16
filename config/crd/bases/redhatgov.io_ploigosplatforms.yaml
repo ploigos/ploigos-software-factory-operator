@@ -113,22 +113,6 @@ spec:
                                 description: Whether this service should be enabled.
                                 type: boolean
                                 default: true
-                              externalProperties:
-                                description: |
-                                  Properties for accessing an external instance of this service.
-                                  Omit this object to leverage an instance that is fully-managed
-                                  by this operator.
-                                type: object
-                                properties:
-                                  kubernetesApi:
-                                    description: Kubernetes API server address to access Tekton
-                                    type: string
-                                  kubernetesToken:
-                                    description: Kubernetes token to access Tekton
-                                    type: string
-                                required:
-                                - kubernetesApi
-                                - kubernetesToken
                       sourceControl:
                         description: Describes the service used for source control.
                         type: object

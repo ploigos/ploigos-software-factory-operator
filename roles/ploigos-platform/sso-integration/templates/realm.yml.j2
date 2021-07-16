@@ -1,0 +1,16 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakRealm
+metadata:
+  name: openshift
+  namespace: {{ ploigos_namespace }}
+labels:
+  app: rhsso
+spec:
+  realm:
+    id: openshift
+    realm: openshift
+    enabled: True
+    displayName: Ploigos OpenShift Realm
+  instanceSelector:
+    matchLabels:
+    app: rhsso
