@@ -157,10 +157,18 @@ spec:
                                   password:
                                     description: Password to access this instance.
                                     type: string
+                                  domain:
+                                    description: Domain host for this instance.
+                                    type: string
+                                  email:
+                                    description: Admin email address for this instance.
+                                    type: string
                                 required:
                                   - url
                                   - username
                                   - password
+                                  - domain
+                                  - email
                           gitea:
                             description: Configuration for a Gitea instance.
                             type: object
