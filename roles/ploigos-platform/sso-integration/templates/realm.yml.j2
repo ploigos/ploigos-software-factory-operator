@@ -3,8 +3,8 @@ kind: KeycloakRealm
 metadata:
   name: openshift
   namespace: {{ ploigos_namespace }}
-labels:
-  app: rhsso
+  labels:
+    app: {{ rhsso_app_label }}
 spec:
   realm:
     id: openshift
@@ -13,4 +13,4 @@ spec:
     displayName: Ploigos OpenShift Realm
   instanceSelector:
     matchLabels:
-    app: rhsso
+      app: {{ rhsso_app_label }}
