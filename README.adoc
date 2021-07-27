@@ -107,12 +107,12 @@ Two APIs are offered:
     appRepo:
       destinationRepoName: reference-quarkus-mvn
       sourceUrl: >-
-        https://github.com/andykrohg/reference-quarkus-mvn.git
+        https://github.com/ploigos-reference-apps/reference-quarkus-mvn.git
     autoStartPipeline: true
     helmRepo:
       destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
       sourceUrl: >-
-        https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything.git
+        https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
     serviceName: fruit
   EOF
 
