@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- 1-jenkins-platform.yaml
+- 2-tekton-platform.yaml
+- 3-private-platform.yaml
+- 1-typical-pipeline.yaml

@@ -19,7 +19,7 @@
         api_version: v1alpha1
         kind: '{{ item }}'
         state: absent
-        name: '{{ item | lower }}-testing'
+        name: '{{ item | lower }}-typical'
         namespace: '{{ namespace }}'
       ignore_errors: true
       loop: '{{ custom_resources }}'
@@ -28,7 +28,7 @@
       k8s_info:
         api_version: v1alpha1
         kind: '{{ item }}'
-        name: '{{ item | lower }}-testing'
+        name: '{{ item | lower }}-typical'
         namespace: '{{ namespace }}'
       register: result
       until: result.resources | length == 0

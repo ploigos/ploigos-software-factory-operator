@@ -18,7 +18,7 @@
     api_version: v1alpha1
     kind: '{{ item }}'
     namespace: '{{ namespace }}'
-    name: '{{ item | lower}}-testing'
+    name: '{{ item | lower}}-typical'
   register: result
   until: result.resources[0].status | json_query("conditions[?(@.reason=='Successful')]")
   retries: 30

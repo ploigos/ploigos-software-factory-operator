@@ -1,0 +1,50 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleYAMLSample
+metadata:
+  name: 3-private-platform
+spec:
+  description: >
+    The default PloigosPlatform deployment assumes that your OpenShift Router
+    is equipped with a certificate signed by a well-known certificate authority.
+    If your certificates are signed using a private CA instead, you can provide the
+    name of a ConfigMap which holds your trusted CA Bundle. The ConfigMap should
+    have a single key named ca-bundle.crt. This key has a collection of CA certificates
+    as its value. If the provided ConfigMap exists, it will be used as-is.
+    Otherwise, it will be generated using a label of config.openshift.io/inject-trusted-cabundle=true
+    and populated with the Cluster Network Operator.
+  targetResource:
+    apiVersion: redhatgov.io/v1alpha1
+    kind: PloigosPlatform
+  title: PloigosPlatform with Privately Signed Certificates
+  yaml: |
+    apiVersion: redhatgov.io/v1alpha1
+    kind: PloigosPlatform
+    metadata:
+      name: ploigosplatform-jenkins-private
+    spec:
+      ploigosPlatform:
+        services:
+          continuousIntegration:
+            jenkins:
+              enabled: true
+          sourceControl:
+            gitea:
+              enabled: true
+          artifactRepository:
+            nexusArtifacts:
+              enabled: true
+          staticCodeAnalysis:
+            sonarqube:
+              enabled: true
+          continuousDeployment:
+            argocd:
+              enabled: true
+          uat:
+            selenium:
+              enabled: true
+          containerRegistry:
+            nexusContainers:
+              enabled: true
+        tls:
+          verify: false
+          trustBundleConfigMap: trustedcabundle

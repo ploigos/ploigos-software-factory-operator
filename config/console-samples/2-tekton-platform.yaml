@@ -1,0 +1,41 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleYAMLSample
+metadata:
+  name: 2-tekton-platform
+spec:
+  description: >
+    PloigosPlatform deployment with Tekton for Continuous Integration,
+    Nexus for a Container Registry, and SSO disabled
+  targetResource:
+    apiVersion: redhatgov.io/v1alpha1
+    kind: PloigosPlatform
+  title: PloigosPlatform - Tekton
+  yaml: |
+    apiVersion: redhatgov.io/v1alpha1
+    kind: PloigosPlatform
+    metadata:
+      name: ploigosplatform-sample
+    spec:
+      ploigosPlatform:
+        services:
+          continuousIntegration:
+            tekton:
+              enabled: true
+          sourceControl:
+            gitea:
+              enabled: true
+          artifactRepository:
+            nexusArtifacts:
+              enabled: true
+          staticCodeAnalysis:
+            sonarqube:
+              enabled: true
+          continuousDeployment:
+            argocd:
+              enabled: true
+          uat:
+            selenium:
+              enabled: true
+          containerRegistry:
+            nexusContainers:
+              enabled: true

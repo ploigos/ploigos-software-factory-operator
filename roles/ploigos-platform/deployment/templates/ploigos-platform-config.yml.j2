@@ -88,20 +88,15 @@ data:
         config:
           container-image-signature-server-url: {{ all_services_details.nexus_artifacts.url }}/repository/container-image-signatures
           container-image-signature-server-username: ploigos
-      container-image-static-compliance-scan:
-      # sample scans using DataStream file (preferred)
-      - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
-        implementer: OpenSCAP
-        config:
-          oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
-          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml
-          oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
+
       container-image-static-vulnerability-scan:
-      # sample vulnerability scan using XCCDF file (preferred)
       - name: OpenSCAP - Vulnerability - DataStream
         implementer: OpenSCAP
         config:
           oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
+          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos-reference-apps/ploigos-example-oscap-content/main/xccdf_com.ploigos_profile_default_cve_ploigos_reference_apps-tailoring.xml
+          oscap-profile: xccdf_com.ploigos_profile_default_cve_ploigos_reference_quarkus_mvn
+
       deploy:
       - implementer: ArgoCD
         config:
@@ -111,22 +106,17 @@ data:
           git-username: {{ ploigos_service_account.username }}
           git-email: 'napsspo+ploigos@redhat.com'
           argocd-sync-timeout-seconds: 130
+
       validate-environment-configuration:
       - implementer: ConfiglintFromArgocd
+
       uat:
       - implementer: MavenSeleniumCucumber
-        config: {
+        config:
           selenium-hub-url: http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444
-        }
+
       report:
       - implementer: ResultArtifactsArchive
         config:
           results-archive-destination-url: {{ all_services_details.nexus_artifacts.url }}/repository/result-artifacts-archive
           results-archive-destination-username: ploigos
-
-      generate-evidence:
-      - implementer: GenerateEvidence
-        config:
-          evidence-destination-url: {{ all_services_details.nexus_artifacts.url }}/repository/workflow-evidence
-          evidence-destination-username: ploigos
-

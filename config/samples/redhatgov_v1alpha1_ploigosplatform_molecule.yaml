@@ -1,7 +1,7 @@
 apiVersion: redhatgov.io/v1alpha1
 kind: PloigosPlatform
 metadata:
-  name: ploigosplatform-testing
+  name: ploigosplatform-typical
 spec:
   ploigosPlatform:
     services:
