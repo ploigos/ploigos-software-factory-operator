@@ -434,8 +434,8 @@ function publish_bundle() {
     error_run "Adding namespaced RoleBinding to kustomization" 'kustomize edit add resource namespaced/role_binding.yaml' || return 1
     popd &>/dev/null
     error_run "Building bundle manifests" 'kustomize build --load-restrictor LoadRestrictionsNone config/manifests | operator-sdk generate bundle --overwrite --version $VERSION --channels "$CHANNELS"' || return 1
-    error_run "Adding ConsoleYAMLSamples to bundle" 'cp config/console-samples/manifests/* bundle/manifests/' || return 1
     error_run "Validating bundle" operator-sdk bundle validate ./bundle || return 1
+    error_run "Adding ConsoleYAMLSamples to bundle" 'cp config/console-samples/manifests/* bundle/manifests/' || return 1
     error_run "Building bundle image" docker build -f bundle.Dockerfile -t "$IMG-bundle:$VERSION" . || return 1
     if [ -z "$DEVELOP" ]; then
         error_run "Pushing image $IMG-bundle:$VERSION" docker push "$IMG-bundle:$VERSION" || return 1
