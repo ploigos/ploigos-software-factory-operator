@@ -76,7 +76,7 @@ spec:
                               enabled:
                                 description: Whether this service should be enabled.
                                 type: boolean
-                                default: true
+                                default: false
                       continuousIntegration:
                         description: Describes the CI service used for workflow orchestration.
                         type: object
@@ -112,7 +112,7 @@ spec:
                               enabled:
                                 description: Whether this service should be enabled.
                                 type: boolean
-                                default: true
+                                default: false
                       sourceControl:
                         description: Describes the service used for source control.
                         type: object
@@ -254,7 +254,7 @@ spec:
                               enabled:
                                 description: Whether this service should be enabled.
                                 type: boolean
-                                default: true
+                                default: false
                               externalProperties:
                                 description: |
                                   Properties for accessing an external instance of this service.

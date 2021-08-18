@@ -3,9 +3,4 @@ kind: Kustomization
 
 resources:
 - redhatgov_v1alpha1_ploigosplatform_molecule.yaml
-- redhatgov_v1alpha1_ploigosplatform_jenkins.yaml
-- redhatgov_v1alpha1_ploigosplatform_jenkins_private_ca.yaml
-- redhatgov_v1alpha1_ploigosplatform_tekton.yaml
 - redhatgov_v1alpha1_ploigospipeline_molecule.yaml
-- redhatgov_v1alpha1_ploigospipeline_jenkins.yaml
-- redhatgov_v1alpha1_ploigospipeline_tekton.yaml
