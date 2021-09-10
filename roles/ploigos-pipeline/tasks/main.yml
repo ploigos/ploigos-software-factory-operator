@@ -103,8 +103,8 @@
 
   - name: Deploy pipeline resources chart
     community.kubernetes.helm:
-      name: ploigos-workflow-everything-tekton-pipeline
-      chart_ref: ploigos_charts/ploigos-workflow-tekton-pipeline-everything
+      name: ploigos-workflow-typical-tekton-pipeline
+      chart_ref: ploigos_charts/ploigos-workflow-tekton-pipeline-typical
       values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
       release_namespace: "{{ ploigos_namespace }}"
 
