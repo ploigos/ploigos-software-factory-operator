@@ -19,6 +19,7 @@ Changes to this operator should be accompanied by a version increment in link:ha
 . Delete the `PloigosPlatform`, operator objects, and associated namespace.
 
 In future, it would be great to expand this to do things like:
+
 * Create a `PloigosPipeline`, and verify that the pipeline completes successfully
 * Test an SSO-enabled environment
 * Test alternative tool chains (using Quay or Tekton) in different combinations
