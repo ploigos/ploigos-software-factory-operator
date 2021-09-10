@@ -1,0 +1,34 @@
+= Lifecycle of this Operator
+
+== Configuration
+CI uses the following link:https://github.com/ploigos/ploigos-software-factory-operator/settings/secrets/actions[Actions Secrets] in this repository:
+
+* `OCP_SERVER`
+* `OCP_USERNAME`
+* `OCP_PASSWORD`
+* `QUAY_USERNAME`
+* `QUAY_PASSWORD`
+
+== Testing
+Changes to this operator should be accompanied by a version increment in link:hack/operate.conf[]. To request a change, open a PR against the `main` branch. This will trigger a unit test (GH Actions) that performs the following:
+
+. Ansible Lint
+. Build the operator image from link:Dockerfile[this Dockerfile], and push it to quay.io with the tag `quay.io/redhatgov/ploigos-operator:test`.
+. Deploy CRDs, RBAC, and operator deployment from the link:config[config] directory into the cluster in the `ploigos-operator-system` namespace using `kustomize`.
+. Create a link:config/samples/redhatgov_v1alpha1_ploigosplatform_molecule.yaml[PloigosPlatform] with default configuration (Jenkins for Continuous Integration, Nexus for a Container Registry, and SSO disabled), and ensure that the object reconciles successfully.
+. Delete the `PloigosPlatform`, operator objects, and associated namespace.
+
+In future, it would be great to expand this to do things like:
+* Create a `PloigosPipeline`, and verify that the pipeline completes successfully
+* Test an SSO-enabled environment
+* Test alternative tool chains (using Quay or Tekton) in different combinations
+* Test link:README.adoc#external-services[external services]
+
+== Release
+Once PRs are merged into `main`, the link:.github/workflows/release.yml[release workflow] is initiated, which does the following:
+
+. Build the operator image with the name and tag indicated by `hack/operate.conf` (e.g. `quay.io/redhatgov/ploigos-operator:0.21.0`), and push it to quay
+. Construct the operator bundle image (`quay.io/redhatgov/ploigos-operator-bundle:0.21.0`), and push it to quay
+
+== Packaging
+Once the release workflow has completed, open a PR against the link:https://github.com/redhatgov/operator-catalog[RedHatGov Operator Catalog] so that the release bundle can be installed through OLM as indicated in the link:README.adoc#quick-start[Quick Start Guide].

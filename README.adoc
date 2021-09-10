@@ -292,3 +292,6 @@ If you intend on using `hack/operate.sh` it expects you to be in a development e
 
 == Contributing
 Please see the link:CONTRIBUTING.adoc[Contributing Documentation].
+
+== Lifecycle
+Please see the link:LIFECYCLE.adoc[Lifecycle Documentation].
