@@ -8,8 +8,8 @@ data:
     step-runner-config:
       config-decryptors:
       - implementer: SOPS
+
       global-defaults:
-        organization: platform
         tls-verify: {{ platform_tls_verify }}
         maven-servers:
           internal-mirror:
@@ -45,29 +45,30 @@ data:
           kube-app-domain: test.apps.{{ full_cluster_name }}
         PROD:
           kube-app-domain: apps.{{ full_cluster_name }}
+
       generate-metadata:
       - implementer: Maven
       - implementer: Git
       - implementer: SemanticVersion
+
       tag-source:
       - implementer: Git
         config:
           git-username: {{ ploigos_service_account.username }}
+
       unit-test:
-      - implementer: Maven
-        config: {
-        }
+      - implementer: MavenTest
+
       package:
-      - implementer: Maven
-        config: {
-        }
+      - implementer: MavenPackage
+
       static-code-analysis:
       - implementer: SonarQube
         config:
           url: {{ all_services_details.sonarqube.url }}/
           username: {{ ploigos_service_account.username }}
       push-artifacts:
-      - implementer: Maven
+      - implementer: MavenDeploy
         config:
           maven-push-artifact-repo-id: maven-releases
           maven-push-artifact-repo-url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-releases
@@ -77,7 +78,6 @@ data:
       push-container-image:
       - implementer: Skopeo
         config:
-          source: docker-archive:backend.tar
 {% if 'quay' in (all_services_details | list) %}
           destination-url: {{ all_services_details.quay.url }}
 {% else %}
@@ -88,14 +88,6 @@ data:
         config:
           container-image-signature-server-url: {{ all_services_details.nexus_artifacts.url }}/repository/container-image-signatures
           container-image-signature-server-username: ploigos
-
-      container-image-static-vulnerability-scan:
-      - name: OpenSCAP - Vulnerability - DataStream
-        implementer: OpenSCAP
-        config:
-          oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
-          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos-reference-apps/ploigos-example-oscap-content/main/xccdf_com.ploigos_profile_default_cve_ploigos_reference_apps-tailoring.xml
-          oscap-profile: xccdf_com.ploigos_profile_default_cve_ploigos_reference_quarkus_mvn
 
       deploy:
       - implementer: ArgoCD
@@ -111,9 +103,11 @@ data:
       - implementer: ConfiglintFromArgocd
 
       uat:
-      - implementer: MavenSeleniumCucumber
+      - implementer: MavenIntegrationTest
         config:
-          selenium-hub-url: http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444
+          target-host-url-maven-argument-name: 'target.base.url'
+          maven-additional-arguments:
+          - -Dselenium.hub.url=http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444
 
       report:
       - implementer: ResultArtifactsArchive
