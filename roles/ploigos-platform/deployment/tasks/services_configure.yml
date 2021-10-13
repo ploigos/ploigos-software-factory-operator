@@ -1,0 +1,96 @@
+- name: Initialize access dictionary for service values into a single dictionary
+  set_fact:
+    service_values: >-
+      {{ ploigos_platform.services.values() | list |
+      json_query('[?(' + ( all_services | join('||') ) + ').enabled
+      && *.values].{key:keys(@)[0], value:values(@)[0].values}') | items2dict }}
+
+- name: Initialize custom resource RHSSO details
+  when: '"rhsso" in managed_services'
+  set_fact:
+    service_values: "{{ _rhsso_values | combine(service_values, recursive=true) }}"
+  vars:
+    _rhsso_values:
+      rhsso: {}
+
+- name: Initialize custom resource Gitea details
+  when: '"gitea" in managed_services'
+  set_fact:
+    service_values: "{{ _gitea_values | combine(service_values, recursive=true)) }}"
+    vars:
+      _gitea_values:
+        gitea: {}
+
+- name: Initialize custom resource GitLab details
+  when: '"gitlab" in managed_services'
+  set_fact:
+    service_values: "{{ _gitlab_values | combine(service_values, recursive=true) }}"
+  vars:
+    _gitlab_values:
+      gitlab:
+        chart_version: "5.3.0"
+        email: "email@redhat.com"
+
+- name: Initialize custom resource Jenkins details
+  when: '"jenkins" in managed_services'
+  set_fact:
+    service_values: "{{ _jenkins_values | combine(service_values, recursive=true) }}"
+  vars:
+    _jenkins_values:
+      jenkins: {}
+
+- name: Initialize custom resource Tekton details
+  when: '"tekton" in managed_services'
+  set_fact:
+    service_values: "{{ _tekton_values | combine(service_values, recursive=true) }}"
+  vars:
+    _tekton_values:
+      tekton: {}
+
+- name: Initialize custom resource Nexus details (Artifact Repository)
+  when: '"nexus_artifacts" in managed_services'
+  set_fact:
+    service_values: "{{ _nexus_artifacts_values | combine(service_values, recursive=true) }}"
+  vars:
+    _nexus_artifacts_values:
+      nexus_artifacts: {}
+
+- name: Initialize custom resource Nexus details (Container Registry)
+  when: '"nexus_containers" in managed_services'
+  set_fact:
+    service_values: "{{ _nexus_containers_values | combine(service_values, recursive=true) }}"
+  vars:
+    _nexus_containers_values:
+      nexus_containers: {}
+
+- name: Initialize custom resource Sonarqube details
+  when: '"sonarqube" in managed_services'
+  set_fact:
+    service_values: "{{ _sonarqube_values | combine(service_values, recursive=true) }}"
+  vars:
+    _sonarqube_values:
+      sonarqube: {}
+
+- name: Initialize custom resource Quay details
+  when: '"quay" in managed_services'
+  set_fact:
+    service_values: "{{ _quay_values| combine(service_values, recursive=true) }}"
+  vars:
+    _quay_values:
+      quay: {}
+
+- name: Initialize custom resource ArgoCD details
+  when: '"argocd" in managed_services'
+  set_fact:
+    service_values: "{{ _argocd_values | combine(service_values, recursive=true) }}"
+  vars:
+    _argocd_values:
+      argocd: {}
+
+- name: Initialize custom resource Selenium Grid details
+  when: '"selenium" in managed_services'
+  set_fact:
+    service_values: "{{ _selenium_values | combine(service_values, recursive=true) }}"
+  vars:
+    _selenium_values:
+      selenium: {}

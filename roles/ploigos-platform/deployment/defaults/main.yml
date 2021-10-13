@@ -17,3 +17,5 @@ transformed_services: |-
         values: {{ service[service_name]|to_json }}
       {% endfor %}
 managed_services: '{{ transformed_services|from_yaml|json_query("[?values.enabled].name") }}'
+
+target_namespaces: ['{{ ploigos_namespace }}']

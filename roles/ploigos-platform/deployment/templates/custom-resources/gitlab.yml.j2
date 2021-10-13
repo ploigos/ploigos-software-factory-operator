@@ -1,0 +1,19 @@
+apiVersion: apps.gitlab.com/v1beta1
+kind: GitLab
+metadata:
+  name: gitlab
+  namespace: gitlab-system
+spec:
+  chart:
+    version: {{ service_values.gitlab.chart_version }}
+    values:
+      global:
+        hosts:
+          domain: apps.{{ full_cluster_name }}
+        ingress:
+          configureCertmanager: true
+          class: openshift-default
+      certmanager-issuer:
+        email: {{ service_values.gitlab.email }}
+      nginx-ingress:
+        enabled: false

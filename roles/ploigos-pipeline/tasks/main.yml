@@ -21,7 +21,7 @@
 - name: Set ploigos-service-account credential facts from secret
   set_fact:
     ploigos_service_account:
-      username:  "{{ secret_data.data.username | b64decode }}"
+      username: "{{ secret_data.data.username | b64decode }}"
       password: "{{ secret_data.data.password | b64decode }}"
       email: "{{ secret_data.data.email | b64decode }}"
       first_name: "{{ secret_data.data.first_name | b64decode }}"
@@ -34,82 +34,206 @@
     --organization platform --repo-name {{ app_name}}-{{ service_name }}
   when: ploigos_platform.services.containerRegistry.quay.enabled | default(false)
 
-- name: Get gitea token secret
-  k8s_info:
-    kind: Secret
-    api_version: v1
-    namespace: '{{ ploigos_namespace }}'
-    name: gitea-access-token
-  register: gitea_token_secret
+- name: Setup Gitea
+  block:
+    - name: Get gitea token secret
+      k8s_info:
+        kind: Secret
+        api_version: v1
+        namespace: '{{ ploigos_namespace }}'
+        name: gitea-access-token
+      register: gitea_token_secret
 
-- set_fact:
-    gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
+    - name: Get gitea token from secret
+      set_fact:
+        gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
 
-- name: Get platform org uid
-  uri:
-    url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/orgs/platform'
-    validate_certs: no
-    body_format: json
-    headers:
-      Authorization: 'token {{ gitea_token }}'
-  register: gitea_org_response
+    - name: Get platform org uid
+      uri:
+        url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/orgs/platform'
+        validate_certs: false
+        body_format: json
+        headers:
+          Authorization: 'token {{ gitea_token }}'
+      register: gitea_org_response
 
-- name: Migrate app and helm repos From Upstream into Gitea, in platform org
-  uri:
-    url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
-    validate_certs: no
-    body_format: json
-    method: POST
-    headers:
-      Authorization: 'token {{ gitea_token }}'
-    body: |
-      {
-        "clone_addr": "{{ repo.source_url }}",
-        "uid": {{ gitea_org_response.json.id }},
-        "repo_name": "{{ repo.destination_repo_name }}"
-      }
-    status_code: 201,409
-  register: gitea_repo_migration_task
-  changed_when: gitea_repo_migration_task.status == 201
-  loop:
-  - '{{ app_repo }}'
-  - '{{ helm_repo }}'
-  loop_control:
-    loop_var: repo
-    label: repo.name
+    - name: Migrate app and helm repos From Upstream into Gitea, in platform org
+      uri:
+        url: 'https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate'
+        validate_certs: false
+        body_format: json
+        method: POST
+        headers:
+          Authorization: 'token {{ gitea_token }}'
+        body: |
+          {
+            "clone_addr": "{{ repo.source_url }}",
+            "uid": {{ gitea_org_response.json.id }},
+            "repo_name": "{{ repo.destination_repo_name }}"
+          }
+        status_code: 201,409
+      register: gitea_repo_migration_task
+      changed_when: gitea_repo_migration_task.status == 201
+      loop:
+        - '{{ app_repo }}'
+        - '{{ helm_repo }}'
+      loop_control:
+        loop_var: repo
+        label: repo.name
+  when: ploigos_platform.services.sourceControl.gitea.enabled | default(false)
+
+- name: Setup GitLab
+  block:
+    - name: Get gitlab token secret
+      k8s_info:
+        kind: Secret
+        api_version: v1
+        namespace: '{{ ploigos_namespace }}'
+        name: gitlab-access-token
+      register: gitlab_token_secret
+
+    - name: Get gitlab token from secret
+      set_fact:
+        gitlab_token: "{{ gitlab_token_secret.resources[0].data.token | b64decode }}"
+
+    - name: Get GitLab namespace UID
+      uri:
+        url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/namespaces?search=platform'
+        validate_certs: false
+        method: GET
+        body_format: json
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_token }}"
+        status_code: 200
+      register: gitlab_ns_response
+
+    - name: Check for existing projects
+      uri:
+        url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/projects?search={{ app_repo.destination_repo_name }}'
+        validate_certs: false
+        method: GET
+        return_content: true
+        body_format: json
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_token }}"
+        status_code: 200
+      register: gitlab_project_check_response
+
+    - name: Set GitLab Project ID
+      set_fact:
+        gitlab_project_id: "{{ gitlab_project_check_response.json[0].id }}"
+      when: gitlab_project_check_response.json != []
+
+    - name: Migrate app repo From Upstream into GitLab, in platform group
+      block:
+        - name: Create new project
+          uri:
+            url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/projects'
+            validate_certs: false
+            method: POST
+            body_format: json
+            headers:
+              PRIVATE-TOKEN: "{{ gitlab_token }}"
+            body:
+              name: "{{ app_repo.destination_repo_name }}"
+              import_url: "{{ app_repo.source_url }}"
+              namespace_id: "{{ gitlab_ns_response.json[0].id }}"
+              ci_config_path: "{{ app_repo.ci_config_path }}"
+              visibility: "public"
+            status_code: 201,409
+          register: gitlab_repo_migration_task
+          changed_when: gitlab_repo_migration_task.status == 201
+
+        - name: Get project id
+          set_fact:
+            gitlab_project_id: "{{ gitlab_repo_migration_task.json.id }}"
+
+        - name: Migrate helm repo From Upstream into GitLab, in platform group
+          uri:
+            url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/projects'
+            validate_certs: false
+            method: POST
+            body_format: json
+            headers:
+              PRIVATE-TOKEN: "{{ gitlab_token }}"
+            body:
+              name: "{{ helm_repo.destination_repo_name }}"
+              import_url: "{{ helm_repo.source_url }}"
+              namespace_id: "{{ gitlab_ns_response.json[0].id }}"
+              ci_config_path: "{{ helm_repo.ci_config_path }}"
+              visibility: "public"
+            status_code: 201,409
+          register: gitlab_repo_migration_task
+          changed_when: gitlab_repo_migration_task.status == 201
+      when: gitlab_project_check_response.json == []
+
+  when: ploigos_platform.services.sourceControl.gitlab.enabled | default(false)
 
 - name: Create pipeline in Jenkins
   block:
-  - name: Get Service Account token
-    set_fact:
-      ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
+    - name: Get Service Account token
+      set_fact:
+        ocp_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
 
-  - name: Scan Gitea Org to create Jenkins job
-    uri:
-      url: 'https://jenkins-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
-      method: POST
-      validate_certs: false
-      headers:
-        Authorization: 'Bearer {{ ocp_token }}'
-      status_code: "302"
+    - name: Scan Gitea Org to create Jenkins job
+      uri:
+        url: 'https://jenkins-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}/job/platform/build?delay=0'
+        method: POST
+        validate_certs: false
+        headers:
+          Authorization: 'Bearer {{ ocp_token }}'
+        status_code: "302"
   when: ploigos_platform.services.continuousIntegration.jenkins.enabled | default(false)
 
 - name: Create pipeline in Tekton
   block:
-  - name: Add ploigos chart repo
-    community.kubernetes.helm_repository:
-      name: ploigos_charts
-      repo_url: "{{ ploigos_platform.helmRepository }}"
+    - name: Add ploigos chart repo
+      community.kubernetes.helm_repository:
+        name: ploigos_charts
+        repo_url: "{{ ploigos_platform.helmRepository }}"
 
-  - name: Deploy pipeline resources chart
-    community.kubernetes.helm:
-      name: ploigos-workflow-everything-tekton-pipeline
-      chart_ref: ploigos_charts/ploigos-workflow-tekton-pipeline-everything
-      values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
-      release_namespace: "{{ ploigos_namespace }}"
+    - name: Deploy pipeline resources chart
+      community.kubernetes.helm:
+        name: ploigos-workflow-everything-tekton-pipeline
+        chart_ref: ploigos_charts/ploigos-workflow-tekton-pipeline-everything
+        values: "{{ lookup('template', 'ploigos-pipeline-values.yaml.j2') | from_yaml }}"
+        release_namespace: "{{ ploigos_namespace }}"
 
-  - name: Create PipelineRun, if autoStartPipeline is true
-    community.kubernetes.k8s:
-      definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
-    when: auto_start_pipeline
+    - name: Create PipelineRun, if autoStartPipeline is true
+      community.kubernetes.k8s:
+        definition: "{{ lookup('template', 'pipeline-run.yml.j2') }}"
+      when: auto_start_pipeline
   when: ploigos_platform.services.continuousIntegration.tekton.enabled | default(false)
+
+- name: Create pipeline in GitLab CI
+  block:
+    - name: Create a pipeline trigger
+      uri:
+        url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/projects/{{ gitlab_project_id }}/triggers'
+        validate_certs: false
+        body_format: json
+        method: POST
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_token }}"
+        body:
+          description: "Ploigos trigger"
+          id: "{{ gitlab_project_id }}"
+        status_code: 201,409
+      register: gitlab_trigger_task
+      changed_when: gitlab_trigger_task.status == 201
+
+    - name: Trigger GitLab CI pipeline
+      uri:
+        url: 'https://gitlab.apps.{{ full_cluster_name }}/api/v4/projects/{{ gitlab_project_id }}/trigger/pipeline'
+        validate_certs: false
+        method: POST
+        body_format: json
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_token }}"
+        body:
+          ref: main
+          token: "{{ gitlab_trigger_task.json.token }}"
+        status_code: 201,409
+      register: gitlab_trigger_ci_task
+      changed_when: gitlab_trigger_ci_task.status == 201
+  when: ploigos_platform.services.continuousIntegration.gitlabCi.enabled | default(false)

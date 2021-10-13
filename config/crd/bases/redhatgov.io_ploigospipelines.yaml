@@ -37,7 +37,7 @@ spec:
             type: object
           spec:
             description: Spec defines the desired state of PloigosPipeline
-            properties:
+            properties:  
               appName:
                 description: Name of the application the artifact built and deployed by this workflow is part of.
                 type: string
@@ -58,6 +58,10 @@ spec:
                     description: Name given to the newly-created repository migration in platform-managed source control
                     type: string
                     default: reference-quarkus-mvn
+                  ciConfigPath:
+                    description: Path of the CI for GitLab CI, optional
+                    type: string
+                    default: cicd/ploigos-software-factory-operator/gitlab/.gitlab-ci.yml
                 required:
                 - sourceUrl
                 - destinationRepoName
@@ -73,6 +77,10 @@ spec:
                     description: Name given to the newly-created repository migration in platform-managed source control.
                     type: string
                     default: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
+                  ciConfigPath:
+                    description: Path of the CI for GitLab CI, optional
+                    type: string
+                    default: .gitlab-ci.yaml
                 required:
                 - sourceUrl
                 - destinationRepoName

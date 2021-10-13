@@ -1,0 +1,19 @@
+- name: Get a list of operator groups
+  k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: '{{ item }}'
+  register: operator_groups
+
+- name: Set operator group name
+  set_fact:
+    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
+  when: operator_groups.resources
+
+- name: Set operator group namespace
+  set_fact:
+    og_namespace: '{{ item }}'
+
+- name: Ensure OperatorGroup exists
+  k8s:
+    definition: '{{ lookup("template", "operator-group.yml.j2") }}'

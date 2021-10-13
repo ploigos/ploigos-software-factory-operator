@@ -1,0 +1,123 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gitlab-runner-toml
+  namespace: {{ ploigos_namespace }}
+data:
+  config.toml: >
+    ## TODO: The following file is copied from EXAMPLES
+    (https://docs.gitlab.com/runner/executors/kubernetes.html)
+
+    ## TODO: Need to modify to be Ploigos-specific, and load into the GitLab
+    Runner pod on OpenShift
+
+
+    ## TODO: Cannot have concurrency right now, given the hard-coded volume
+    names!!
+
+    concurrent = 1
+
+
+    [[runners]]
+      executor = "kubernetes"
+
+      [runners.custom_build_dir]
+        enabled = true
+
+      [runners.kubernetes]
+        pull_policy = "if-not-present"
+
+        # Optional. Kubernetes host URL. If not specified, the runner attempts to auto-discovery it.
+        #host = "https://<IP>:<PORT>"
+
+        # Optional. Kubernetes auth certificate.
+        #cert_file = "/etc/ssl/kubernetes/api.crt"
+
+        # Optional. Kubernetes auth private key.
+        #key_file = "/etc/ssl/kubernetes/api.key"
+
+        # Optional. Kubernetes auth ca certificate.
+        #ca_file = "/etc/ssl/kubernetes/ca.crt"
+
+        # Namespace to run Kubernetes jobs in.
+        namespace = "gitlab-runner"
+
+        #namespace_overwrite_allowed = "ci-.*"
+
+        #bearer_token_overwrite_allowed = true
+
+        # Run all containers with the privileged flag enabled.
+        #privileged = true
+
+        # Default Docker image to use for jobs when none is specified.
+        image = "ploigos/ploigos-base:latest"
+
+        # Optional. Runs all containers with the allowPrivilegeEscalation flag enabled.
+        #allow_privilege_escalation = true
+
+        # A list of secrets that are used to authenticate Docker image pulling.
+        #image_pull_secrets = ["docker-registry-credentials"]
+
+        [runners.kubernetes.pod_security_context]
+          run_as_non_root = true
+          run_as_user = 1001
+          fs_group = 0
+
+        #[runners.kubernetes.node_selector]
+        #  gitlab = "true"
+
+        #cpu_limit = "1"
+        #memory_limit = "1Gi"
+        #service_cpu_limit = "1"
+        #service_memory_limit = "1Gi"
+        #helper_cpu_limit = "500m"
+        #helper_memory_limit = "100Mi"
+        poll_interval = 5
+        poll_timeout = 3600
+        #dns_policy = "cluster-first"
+
+        ## Node Scheduling ##
+
+        #[runners.kubernetes.node_selector]
+        #  gitlab = "true"
+
+        #[runners.kubernetes.node_tolerations]
+        #  "node-role.kubernetes.io/master" = "NoSchedule"
+        #  "custom.toleration=value" = "NoSchedule"
+        #  "empty.value=" = "PreferNoSchedule"
+        #  "onlyKey" = ""
+
+        ## Volumes ##
+
+        [[runners.kubernetes.volumes.pvc]]
+          name = "gitlab-ci-pvc"
+          mount_path = "/home/ploigos"
+        
+        [[runners.kubernetes.volumes.secret]]
+          name = "ploigos-gpg-key"
+          mount_path = "/var/pgp-private-keys"
+
+        [[runners.kubernetes.volumes.config_map]]
+          name = "ploigos-platform-config"
+          mount_path = "/opt/platform-config/config.yml"
+          sub_path = "config.yml"
+
+        [[runners.kubernetes.volumes.secret]]
+          name = "ploigos-platform-config-secrets"
+          mount_path = "/opt/platform-config/config-secrets.yml"
+          sub_path = "config-secrets.yml"
+
+        {% if (platform_trust_bundle_config_map is defined) and (platform_trust_bundle_config_map |length != 0) %}
+        [[runners.kubernetes.volumes.config_map]]
+          name = "{{ platform_trust_bundle_config_map }}"
+          mount_path = "/etc/pki/ca-trust/source/anchors"
+          read_only = true
+          [runners.kubernetes.volumes.config_map.items]
+            "ca-bundle.crt" = "tls-ca-bundle.pem"
+        {% endif %} 
+
+        #[[runners.kubernetes.volumes.pvc]]
+        #  name = "gitlab-ci-build-pvc"
+        #  mount_path = "/builds"
+
+     

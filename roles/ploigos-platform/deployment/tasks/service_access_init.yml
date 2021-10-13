@@ -16,20 +16,66 @@
 - name: Initialize managed Gitea details
   when: '"gitea" in managed_services'
   block:
-  - set_fact:
-      gitea_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='gitea-admin-credentials') }}"
-    until: gitea_admin_secret
-    retries: 30
-    delay: 5
+    - name: Get Gitea secret
+      set_fact:
+        gitea_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='gitea-admin-credentials') }}"
+      until: gitea_admin_secret
+      retries: 30
+      delay: 5
 
-  - set_fact:
-      all_services_details: "{{ all_services_details | combine(_gitea_details) }}"
-    vars:
-      _gitea_details:
-        gitea:
-          url: "https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
-          username: "{{ gitea_admin_secret.data.username | b64decode }}"
-          password: "{{ gitea_admin_secret.data.password | b64decode }}"
+    - name: Set Gitea service details
+      set_fact:
+        all_services_details: "{{ all_services_details | combine(_gitea_details) }}"
+      vars:
+        _gitea_details:
+          gitea:
+            url: "https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+            username: "{{ gitea_admin_secret.data.username | b64decode }}"
+            password: "{{ gitea_admin_secret.data.password | b64decode }}"
+
+- name: Initialize managed GitLab details
+  when: '"gitlab" in managed_services'
+  block:
+    - name: Create GitLab token
+      set_fact:
+        gitlab_root_token: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+
+    - name: Set api creation command
+      set_fact:
+        gitlab_console_command: >-
+          "token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api, :read_api, :sudo, :read_user],name: 'Automation token');
+          token.set_token('{{ gitlab_root_token }}'); token.save!"
+
+    - name: Create access token for GitLab root user
+      shell: |
+        oc='{{ oc_cli }}'
+        set -eo pipefail
+        pod=$($oc get pods -n gitlab-system -l app=task-runner -o jsonpath='{.items[0].metadata.name}')
+        output=$($oc exec $pod -n gitlab-system -c task-runner -- gitlab-rails runner {{ gitlab_console_command }} 2>&1)
+        if [ ! -z "$output" ]; then
+          if echo "$output" | grep -q 'already exist'; then
+              echo ok
+          else
+              echo failed
+          fi
+        else
+          echo changed
+        fi
+        echo $output
+      register: gitlab_token
+      args:
+        executable: /bin/bash
+      failed_when: '"failed" in gitlab_token.stdout_lines'
+      changed_when: '"changed" in gitlab_token.stdout_lines'
+
+    - name: Set GitLab service details
+      set_fact:
+        all_services_details: "{{ all_services_details | combine(_gitlab_details) }}"
+      vars:
+        _gitlab_details:
+          gitlab:
+            url: "https://gitlab.apps.{{ full_cluster_name }}"
+            api-token: "{{ gitlab_root_token }}"
 
 - name: Initialize managed Jenkins details
   when: '"jenkins" in managed_services'
@@ -52,39 +98,43 @@
 - name: Initialize managed Nexus details (Artifact Repository)
   when: '"nexus_artifacts" in managed_services'
   block:
-  - set_fact:
-      nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
-    until: nexus_admin_secret
-    retries: 30
-    delay: 5
+    - name: Get Nexus artifacts secret
+      set_fact:
+        nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
+      until: nexus_admin_secret
+      retries: 30
+      delay: 5
 
-  - set_fact:
-      all_services_details: "{{ all_services_details | combine(_nexus_artifacts_details) }}"
-    vars:
-      _nexus_artifacts_details:
-        nexus_artifacts:
-          url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
-          username: "{{ nexus_admin_secret.data.username | b64decode }}"
-          password: "{{ nexus_admin_secret.data.password | b64decode }}"
+    - name: Set Nexus artifacts service details
+      set_fact:
+        all_services_details: "{{ all_services_details | combine(_nexus_artifacts_details) }}"
+      vars:
+        _nexus_artifacts_details:
+          nexus_artifacts:
+            url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
+            username: "{{ nexus_admin_secret.data.username | b64decode }}"
+            password: "{{ nexus_admin_secret.data.password | b64decode }}"
 
 - name: Initialize managed Nexus details (Container Registry)
   when: '"nexus_containers" in managed_services'
   block:
-  - set_fact:
-      nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
-    until: nexus_admin_secret
-    retries: 30
-    delay: 5
+    - name: Get Nexis containers secret
+      set_fact:
+        nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
+      until: nexus_admin_secret
+      retries: 30
+      delay: 5
 
-  - set_fact:
-      all_services_details: "{{ all_services_details | combine(_nexus_containers_details) }}"
-    vars:
-      _nexus_containers_details:
-        nexus_containers:
-          server_url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
-          docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name}}"
-          username: "{{ nexus_admin_secret.data.username | b64decode }}"
-          password: "{{ nexus_admin_secret.data.password | b64decode }}"
+    - name: Set Nexus containers service details
+      set_fact:
+        all_services_details: "{{ all_services_details | combine(_nexus_containers_details) }}"
+      vars:
+        _nexus_containers_details:
+          nexus_containers:
+            server_url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
+            docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+            username: "{{ nexus_admin_secret.data.username | b64decode }}"
+            password: "{{ nexus_admin_secret.data.password | b64decode }}"
 
 - name: Initialize managed Sonarqube details
   when: '"sonarqube" in managed_services'
