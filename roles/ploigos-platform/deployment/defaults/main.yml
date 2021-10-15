@@ -9,6 +9,7 @@ jenkins_repository_name: openshift-release-dev
 platform_tls_verify: "{{ ploigos_platform.tls.verify | default(true) }}"
 platform_trust_bundle_config_map: "{{ ploigos_platform.tls.trust_bundle_config_map | default(omit) }}"
 
+
 all_services: "{{ ploigos_platform.services.values() | list | json_query('[].keys(@)[]') }}"
 transformed_services: |-
       {% for service in ploigos_platform.services.values()|list %}
@@ -17,3 +18,10 @@ transformed_services: |-
         values: {{ service[service_name]|to_json }}
       {% endfor %}
 managed_services: '{{ transformed_services|from_yaml|json_query("[?values.enabled].name") }}'
+
+target_namespaces: ['{{ ploigos_namespace }}']
+
+## GitLab Variables
+gitlab_chart_version: "5.3.0"
+gitlab_url: "https://gitlab.apps{{ full_cluster_name }}"
+gitlab_ci_trustca_secret: "{{ ploigos_platform.services.continuous_integration.gitlab_ci.ca_secret | default(None) }}"

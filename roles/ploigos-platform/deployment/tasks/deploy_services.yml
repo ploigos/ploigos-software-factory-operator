@@ -4,32 +4,66 @@
 
 - name: Complete Jenkins tasks, if enabled
   block:
-  - name: Create a Jenkins instance
-    k8s:
-      namespace: '{{ ploigos_namespace }}'
-      definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
-      state: '{{ cr_state }}'
+    - name: Create a Jenkins instance
+      k8s:
+        namespace: '{{ ploigos_namespace }}'
+        definition: '{{ lookup("template", "jenkins.yml.j2")|from_yaml }}'
+        state: '{{ cr_state }}'
 
-  - name: Create RoleBinding for use by jenkins
-    k8s:
-      definition: "{{ lookup('template', 'jenkins-rolebinding.yml.j2') | from_yaml }}"
+    - name: Create RoleBinding for use by jenkins
+      k8s:
+        definition: "{{ lookup('template', 'jenkins-rolebinding.yml.j2') | from_yaml }}"
   when: "'jenkins' in managed_services"
 
+## GitLab specifc tasks
+- name: Complete GitLab tasks, if enabled
+  block:
+    - name: Create GitLab system namespace
+      k8s:
+        definition: '{{ lookup("file", "gitlab-system.yml") | from_yaml }}'
+
+    - name: Create Cert Manager Subscription
+      k8s:
+        definition: '{{ lookup("template", "subscriptions/cert_manager.yml.j2") | from_yaml }}'
+
+    - name: Apply Cert Manager Custom Resource
+      k8s:
+        definition: '{{ lookup("template", "gitlab-resources/cert_manager.yml.j2") | from_yaml }}'
+      register: deployment
+      until: not deployment.failed
+      retries: 5
+      delay: 10
+
+    - name: Deploy GitLab Operator
+      k8s:
+        src: "{{ role_path }}/files/gitlab.yml"
+      register: deployment
+      until: not deployment.failed
+      retries: 5
+      delay: 10
+
+    - name: Add GitLab to target namespaces
+      set_fact:
+        target_namespaces: "{{ target_namespaces + [item] }}"
+      with_items:
+        - gitlab-system
+
+    - name: Apply GitLab Routes
+      k8s:
+        definition: '{{ lookup("template", "gitlab-resources/" + route + ".yml.j2") }}'
+      loop:
+        - gitlab_route
+      loop_control:
+        loop_var: route
+        label: route
+      when: lookup("template", "gitlab-resources/" + route + ".yml.j2", errors='ignore')
+  when: '"gitlab" in managed_services'
+## End of GitLab specfic tasks
+
 # Operator-backed services
-- name: Get a list of operator groups
-  k8s_info:
-    api_version: operators.coreos.com/v1
-    kind: OperatorGroup
-    namespace: '{{ ploigos_namespace }}'
-  register: operator_groups
-
-- set_fact:
-    operator_group_name: '{{ operator_groups.resources[0].metadata.name }}'
-  when: operator_groups.resources
-
-- name: Ensure OperatorGroup exists
-  k8s:
-    definition: '{{ lookup("template", "operator-group.yml.j2") }}'
+- name: Install Operator Group
+  include_tasks: install_operatorgroup.yml
+  loop: '{{ target_namespaces }}'
 
 - name: 'Create Subscriptions'
   k8s:

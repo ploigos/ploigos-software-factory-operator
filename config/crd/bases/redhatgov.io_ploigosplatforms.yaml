@@ -113,6 +113,25 @@ spec:
                                 description: Whether this service should be enabled.
                                 type: boolean
                                 default: false
+                          gitlabCi:
+                            description: Configuration for a GitLab Runner instance.
+                            type: object
+                            properties:
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: false
+                              tokenSecret:
+                                description: Runner registation token secret
+                                type: string
+                                default: gitlab-group-runner-secret
+                              buildImage:
+                                description: Build image for GitLab Runner
+                                type: string
+                                default: quay.io/ploigos/ploigos-tool-maven:v0.18.0
+                              caSecret:
+                                 description: Runner registation token secret
+                                 type: string
                       sourceControl:
                         description: Describes the service used for source control.
                         type: object
@@ -145,6 +164,30 @@ spec:
                                 - url
                                 - username
                                 - password
+                          gitlab:
+                            description: Configuration for a GitLab instance.
+                            type: object
+                            properties:
+                              enabled:
+                                description: Whether this service should be enabled.
+                                type: boolean
+                                default: false
+                              externalProperties:
+                                description: |
+                                  Properties for accessing an external instance of this service.
+                                  Omit this object to leverage an instance that is fully-managed
+                                  by this operator.
+                                type: object
+                                properties:
+                                  url:
+                                    description: URL to access this instance.
+                                    type: string
+                                  apiToken:
+                                    description: API token to access this instance
+                                    type: string
+                                required:
+                                - url
+                                - apiToken
                       artifactRepository:
                         description: Describes the service used as an artifact repository.
                         type: object

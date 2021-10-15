@@ -26,6 +26,7 @@
         rhsso_project_name: '{{ ploigos_namespace }}'
         selenium_grid_project_name: '{{ ploigos_namespace }}'
         sonarqube_project_name: '{{ ploigos_namespace }}'
+        gitlab_project_name: '{{ploigos_namespace}}'
 
     - name: Set ploigos service account secret
       set_fact:

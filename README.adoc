@@ -155,16 +155,23 @@ See below for a list of supported implementations for each service along with ap
 |===========================
 |Service|Required?|Supported Implementations|External Properties
 |Single Sign-On (SSO)|| *rhsso* (Red Hat Single Sign-On)|(Not Supported)
-.2+|Continuous Integration .2+|✅
+.3+|Continuous Integration .3+|✅
 |*jenkins* a|
 * *url* - the URL to access Jenkins
 * *token* - an Oauth token to access the Jenkins API
+|*gitlab ci* a|
+* *tokenSecret* - Name of the secret containing the token secret for registration, optionl (a secret is created by default)
+* *buildImage* - build image name for GitLab Runner
+* *caSecret* - Name of TLS secret containing custom CA certs
 |*tekton*|(Not Supported)
-|Source Control|✅
+.2+|Source Control .2+|✅
 |*gitea* a|
 * *url* - the URL to access Gitea
 * *username* - the username of an existing Gitea user
 * *password* - the password of an existing Gitea user
+|*gitlab* a|
+* *url* - the URL to access GitLab
+* *apiToken* - a token to access GitLab API
 |Artifact Repository|✅
 |*nexusArtifacts* a|
 * *url* - the URL to access Nexus

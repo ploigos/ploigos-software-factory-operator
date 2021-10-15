@@ -93,6 +93,10 @@
     label: operator_app
   when: "cr_state == 'present' and operator_app != 'rhsso'"
 
+- name: Configure and deploy GitLab CI, if enabled
+  include_tasks: gitlab_ci.yaml
+  when: "'gitlab_ci' in managed_services"
+
 - name: Wire up SSO
   include_role:
     name: 'ploigos-platform/sso-integration'
@@ -123,3 +127,14 @@
   k8s:
     definition: '{{ lookup("template", "ploigos-platform-config.yml.j2") }}'
   when: not platform_config or cr_state=='absent'
+
+- name: Complete GitLab cleanup tasks, if enabled
+  block:
+    - name: Revoke access token for GitLab root user
+      shell: |
+        oc='{{ oc_cli }}'
+        pod=$($oc get pods -n gitlab-system -l app=task-runner -o jsonpath='{.items[0].metadata.name}')
+        $oc exec $pod -n gitlab-system -c task-runner -- gitlab-rails runner "token = PersonalAccessToken.find_by_token('{{ gitlab_root_token }}');token.revoke!"
+      register: gitlab_revoke_token
+      changed_when: gitlab_revoke_token.stdout_lines == []
+  when: '"gitlab" in managed_services'

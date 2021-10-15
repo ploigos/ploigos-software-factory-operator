@@ -1,0 +1,13 @@
+apiVersion: apps.gitlab.com/v1beta2
+kind: Runner
+metadata:
+  name: gitlab-runner
+  namespace: {{ ploigos_namespace }}
+spec:
+  gitlabUrl: {{ gitlab_url }}
+  config: gitlab-runner-toml
+  buildImage: {{ ploigos_platform.services.continuous_integration.gitlab_ci.build_image }}
+  serviceaccount: gitlab-runner-sa
+  token: {{ ploigos_platform.services.continuous_integration.gitlab_ci.token_secret }}
+  tags: ploigos
+  ca: {{ gitlab_ci_trustca_secret }}

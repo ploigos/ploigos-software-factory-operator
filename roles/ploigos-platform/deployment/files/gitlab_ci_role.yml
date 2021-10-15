@@ -1,0 +1,74 @@
+allowHostPorts: false
+priority: null
+requiredDropCapabilities:
+  - KILL
+  - MKNOD
+allowPrivilegedContainer: false
+runAsUser:
+  type: MustRunAsNonRoot
+users: []
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+seLinuxContext:
+  type: MustRunAs
+readOnlyRootFilesystem: false
+metadata:
+  name: ploigos-workflow-runner-gitlab
+fsGroup:
+  type: RunAsAny
+groups:
+  - 'system:authenticated'
+kind: SecurityContextConstraints
+defaultAddCapabilities: null
+supplementalGroups:
+  type: RunAsAny
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+allowHostPID: false
+allowHostNetwork: false
+allowPrivilegeEscalation: true
+apiVersion: security.openshift.io/v1
+allowedCapabilities:
+  - SETUID
+  - SETGID
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ploigos-workflow-runner-gitlab
+rules:
+  - verbs:
+      - use
+    apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    resourceNames:
+      - ploigos-workflow-runner-gitlab
+  - verbs:
+      - create
+      - update
+      - patch
+      - get
+      - delete
+    apiGroups:
+      - ''
+    resources:
+      - secrets
+      - configmaps
+      - pods
+      - pods/attach
+      - pods/exec
+      - pods/portforward
+      - pods/proxy
+  - verbs:
+      - get
+    apiGroups:
+      - ''
+    resources:
+      - pvc
