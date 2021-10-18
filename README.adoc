@@ -159,8 +159,8 @@ See below for a list of supported implementations for each service along with ap
 |*jenkins* a|
 * *url* - the URL to access Jenkins
 * *token* - an Oauth token to access the Jenkins API
-|*gitlab ci* a|
-* *tokenSecret* - Name of the secret containing the token secret for registration, optionl (a secret is created by default)
+|*gitlabCi* a|
+* *tokenSecret* - Name of the secret containing the token secret for registration, optional (a secret is created by default)
 * *buildImage* - build image name for GitLab Runner
 * *caSecret* - Name of TLS secret containing custom CA certs
 |*tekton*|(Not Supported)
