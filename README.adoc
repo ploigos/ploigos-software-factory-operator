@@ -172,6 +172,7 @@ See below for a list of supported implementations for each service along with ap
 |*gitlab* a|
 * *url* - the URL to access GitLab
 * *apiToken* - a token to access GitLab API
+* *installCertManager* - Whether to install cert-manager or use existing
 |Artifact Repository|✅
 |*nexusArtifacts* a|
 * *url* - the URL to access Nexus

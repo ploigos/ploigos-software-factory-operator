@@ -25,6 +25,7 @@
     - name: Create Cert Manager Subscription
       k8s:
         definition: '{{ lookup("template", "subscriptions/cert_manager.yml.j2") | from_yaml }}'
+      when: cert_manager
 
     - name: Apply Cert Manager Custom Resource
       k8s:
@@ -33,6 +34,7 @@
       until: not deployment.failed
       retries: 5
       delay: 10
+      when: cert_manager
 
     - name: Deploy GitLab Operator
       k8s:

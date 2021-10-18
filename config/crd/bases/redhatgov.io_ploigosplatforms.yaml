@@ -172,6 +172,10 @@ spec:
                                 description: Whether this service should be enabled.
                                 type: boolean
                                 default: false
+                              installCertManager:
+                                description: Whetehr to install CertManager
+                                type: boolean
+                                default: true
                               externalProperties:
                                 description: |
                                   Properties for accessing an external instance of this service.
