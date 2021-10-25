@@ -1,0 +1,30 @@
+---
+- name: Initialize custom resource GitLab CI details
+  set_fact:
+    gitlab_url: "{{ all_services_details.gitlab.url }}"
+
+- name: Apply GitLab CI ClusterRole and Role Binding
+  k8s:
+    src: "{{ role_path }}/files/gitlab_ci_role.yml"
+  register: deployment
+  until: not deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Apply GitLab resources
+  k8s:
+    definition: '{{ lookup("template", "gitlab-resources/" + operator_app + ".yml.j2") }}'
+  register: deployment
+  until: not deployment.failed
+  retries: 5
+  delay: 10
+  loop:
+    - gitlab_ci
+    - gitlab_ci_configmap
+    - gitlab_ci_serviceaccount
+    - gitlab_ci_binding
+    - gitlab_ci_pvc
+  loop_control:
+    loop_var: operator_app
+    label: operator_app
+  when: lookup("template", "gitlab-resources/" + operator_app + ".yml.j2", errors='ignore')

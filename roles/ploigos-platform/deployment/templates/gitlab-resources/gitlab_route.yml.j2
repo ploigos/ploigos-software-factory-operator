@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: gitlab
+  namespace: gitlab-system
+spec:
+  spec:
+  host: gitlab.apps.{{ full_cluster_name }}
+  path: /
+  port:
+    targetPort: http-workhorse
+  to:
+    kind: Service
+    name: gitlab-webservice-default
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

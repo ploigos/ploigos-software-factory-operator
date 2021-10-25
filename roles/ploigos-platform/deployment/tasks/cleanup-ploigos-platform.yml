@@ -16,3 +16,40 @@
     loop_var: operator_app
     label: operator_app
   when: lookup("template", "custom-resources/" + operator_app + ".yml.j2", errors='ignore')
+
+## GitLab specifc task
+- name: Tasks for GitLab removal
+  block:
+    - name: Remove GitLab Operator
+      k8s:
+        src: "{{ role_path }}/files/gitlab.yml"
+        state: absent
+
+    - name: Delete Gitlab Custom Resources
+      k8s:
+        definition: '{{ lookup("template", "gitlab-resources/" + operator_app + ".yml.j2") }}'
+        state: absent
+      loop:
+        - gitlab_ci
+        - gitlab_ci_configmap
+        - gitlab_ci_serviceaccount
+        - gitlab_ci_binding
+        - gitlab_ci_pvc
+        - gitlab_route
+      loop_control:
+        loop_var: operator_app
+        label: operator_app
+      when: lookup("template", "gitlab-resources/" + operator_app + ".yml.j2", errors='ignore')
+
+    - name: Remove GitLab CI Role
+      k8s:
+        src: "{{ role_path }}/files/gitlab_ci_role.yml"
+        state: absent
+
+    - name: Delete Cert Manager Custom Resource
+      k8s:
+        definition: '{{ lookup("template", "gitlab-resources/cert_manager.yml.j2") | from_yaml }}'
+        state: absent
+      when: cert_manager
+
+  when: '"gitlab" in managed_services'

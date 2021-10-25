@@ -1,0 +1,16 @@
+apiVersion: apps.gitlab.com/v1beta1
+kind: GitLab
+metadata:
+  name: gitlab
+  namespace: gitlab-system
+spec:
+  chart:
+    version: {{ gitlab_chart_version }}
+    values: 
+      global:
+        hosts:
+          domain: apps.{{ full_cluster_name }}
+        ingress:
+          enabled: false
+      nginx-ingress:
+        enabled: false
