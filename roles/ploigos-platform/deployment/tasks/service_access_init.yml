@@ -97,44 +97,26 @@
 
 - name: Initialize managed Nexus details (Artifact Repository)
   when: '"nexus_artifacts" in managed_services'
-  block:
-    - name: Get Nexus artifacts secret
-      set_fact:
-        nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
-      until: nexus_admin_secret
-      retries: 30
-      delay: 5
-
-    - name: Set Nexus artifacts service details
-      set_fact:
-        all_services_details: "{{ all_services_details | combine(_nexus_artifacts_details) }}"
-      vars:
-        _nexus_artifacts_details:
-          nexus_artifacts:
-            url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
-            username: "{{ nexus_admin_secret.data.username | b64decode }}"
-            password: "{{ nexus_admin_secret.data.password | b64decode }}"
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_nexus_artifacts_details) }}"
+  vars:
+    _nexus_artifacts_details:
+      nexus_artifacts:
+        url: "http://nexus-sonatype-nexus-service.{{ ploigos_namespace }}.svc.cluster.local:8081"
+        username: admin
+        password: admin123
 
 - name: Initialize managed Nexus details (Container Registry)
   when: '"nexus_containers" in managed_services'
-  block:
-    - name: Get Nexis containers secret
-      set_fact:
-        nexus_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='nexus-admin-credentials') }}"
-      until: nexus_admin_secret
-      retries: 30
-      delay: 5
-
-    - name: Set Nexus containers service details
-      set_fact:
-        all_services_details: "{{ all_services_details | combine(_nexus_containers_details) }}"
-      vars:
-        _nexus_containers_details:
-          nexus_containers:
-            server_url: "http://nexus.{{ ploigos_namespace }}.svc.cluster.local:8081"
-            docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
-            username: "{{ nexus_admin_secret.data.username | b64decode }}"
-            password: "{{ nexus_admin_secret.data.password | b64decode }}"
+  set_fact:
+    all_services_details: "{{ all_services_details | combine(_nexus_containers_details) }}"
+  vars:
+    _nexus_containers_details:
+      nexus_containers:
+        server_url: "http://nexus-sonatype-nexus-service.{{ ploigos_namespace }}.svc.cluster.local:8081"
+        docker_url: "nexus-docker.{{ ploigos_namespace }}.svc.cluster.local:8082"
+        username: admin
+        password: admin123
 
 - name: Initialize managed Sonarqube details
   when: '"sonarqube" in managed_services'

@@ -22,6 +22,6 @@ spec:
         sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn.git
         destinationRepoName: reference-quarkus-mvn
       helmRepo:
-        sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_jenkins_workflow-typical.git
+        sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
         destinationRepoName: reference-quarkus-mvn-cloud-resources_workflow-typical
       autoStartPipeline: true

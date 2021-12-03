@@ -1,21 +1,74 @@
-apiVersion: redhatgov.io/v1alpha1
-kind: Nexus
+apiVersion: sonatype.com/v1alpha1
+kind: NexusRepo
 metadata:
   name: nexus
   namespace: {{ ploigos_namespace }}
 spec:
-  persistent: true
-  nexus:
-    allowAnonymousAccess: true
-    oauth:
+  config:
+    enabled: false
+    mountPath: /sonatype-nexus-conf
+  deployment:
+    terminationGracePeriodSeconds: 120
+  route:
+    enabled: false
+  secret:
+    enabled: false
+    mountPath: /etc/secret-volume
+    readOnly: true
+  ingress:
+    annotations: {}
+    enabled: false
+    path: /
+    tls:
       enabled: true
-      bypassAuthFor:
-      - '/repository'
-    expose:
-      ssl: true
-      kind: Route
-    image:
-      src: registry.connect.redhat.com/sonatype/nexus-repository-manager
-      tag: latest
-      pullPolicy: IfNotPresent
-    volumeSize: 10Gi
+      secretName: nexus-tls
+  service:
+    annotations: {}
+    enabled: true
+    labels: {}
+    name: nexus-docker
+    ports:
+      - name: nexus-docker
+        port: 8082
+        targetPort: 8082
+  statefulset:
+    enabled: false
+  replicaCount: 1
+  deploymentStrategy: {}
+  nexusProxyRoute:
+    enabled: false
+  tolerations: []
+  persistence:
+    accessMode: ReadWriteOnce
+    enabled: true
+    storageSize: 8Gi
+  nexus:
+    nexusPort: 8081
+    dockerPort: 8082
+    resources: {}
+    imageName: >-
+      registry.connect.redhat.com/sonatype/nexus-repository-manager@sha256:9dafcabb682b0f361a7368dcce6d1589a7229c1558fc884fbd2f45113b7db18e
+    readinessProbe:
+      failureThreshold: 6
+      initialDelaySeconds: 30
+      path: /
+      periodSeconds: 30
+    livenessProbe:
+      failureThreshold: 6
+      initialDelaySeconds: 30
+      path: /
+      periodSeconds: 30
+    env:
+      - name: install4jAddVmParams
+        value: >-
+          -Xms1200M -Xmx1200M -XX:MaxDirectMemorySize=2G
+          -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+      - name: NEXUS_SECURITY_RANDOMPASSWORD
+        value: 'false'
+    securityContext: {}
+    imagePullSecret: ''
+    imagePullPolicy: IfNotPresent
+    service:
+      type: NodePort
+    hostAliases: []
+    podAnnotations: {}
