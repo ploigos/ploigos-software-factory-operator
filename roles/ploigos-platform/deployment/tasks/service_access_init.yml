@@ -114,7 +114,7 @@
     _nexus_containers_details:
       nexus_containers:
         server_url: "http://nexus-sonatype-nexus-service.{{ ploigos_namespace }}.svc.cluster.local:8081"
-        docker_url: "nexus-docker.{{ ploigos_namespace }}.svc.cluster.local:8082"
+        docker_url: "nexus-docker-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
         username: admin
         password: admin123
 

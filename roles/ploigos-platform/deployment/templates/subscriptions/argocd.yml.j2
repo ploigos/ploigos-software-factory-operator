@@ -2,10 +2,14 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: argocd
-  namespace: {{ ploigos_namespace }}
+  namespace: openshift-operators
 spec:
-  channel: alpha
+  channel: stable
   installPlanApproval: Automatic
-  name: argocd-operator
-  source: community-operators
+  name: openshift-gitops-operator
+  source: redhat-operators
   sourceNamespace: openshift-marketplace
+  config:
+    env:
+    - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
+      value: {{ ploigos_namespace }}

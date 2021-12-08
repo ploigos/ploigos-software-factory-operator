@@ -72,3 +72,35 @@ spec:
       type: NodePort
     hostAliases: []
     podAnnotations: {}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: nexus-docker
+  namespace: {{ ploigos_namespace }}
+spec:
+  to:
+    kind: Service
+    name: nexus-docker
+    weight: 100
+  port:
+    targetPort: nexus-docker
+  tls:
+    termination: edge
+  wildcardPolicy: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: nexus
+  namespace: {{ ploigos_namespace }}
+spec:
+  to:
+    kind: Service
+    name: nexus-sonatype-nexus-service
+    weight: 100
+  port:
+    targetPort: application
+  tls:
+    termination: edge
+  wildcardPolicy: None
