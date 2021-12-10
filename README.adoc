@@ -103,14 +103,14 @@ Two APIs are offered:
   metadata:
     name: ploigospipeline-reference-app
   spec:
-    appName: ref-quarkus-mvn-jenkins-std
+    appName: ref-quarkus-mvn
     appRepo:
       destinationRepoName: reference-quarkus-mvn
       sourceUrl: >-
         https://github.com/ploigos-reference-apps/reference-quarkus-mvn.git
     autoStartPipeline: true
     helmRepo:
-      destinationRepoName: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
+      destinationRepoName: reference-quarkus-mvn-cloud-resources_workflow-typical
       sourceUrl: >-
         https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
     serviceName: fruit

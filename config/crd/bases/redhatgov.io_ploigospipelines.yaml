@@ -53,7 +53,7 @@ spec:
                   sourceUrl:
                     description: Upstream repository for migration into platform-managed source control.
                     type: string
-                    default: https://github.com/andykrohg/reference-quarkus-mvn.git
+                    default: https://github.com/ploigos-reference-apps/reference-quarkus-mvn.git
                   destinationRepoName:
                     description: Name given to the newly-created repository migration in platform-managed source control
                     type: string
@@ -72,11 +72,11 @@ spec:
                   sourceUrl:
                     description: Upstream repository for migration into platform-managed source control.
                     type: string
-                    default: http://gitea.ploigos.rht-set.com/ploigos-reference-applications/reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything.git
+                    default: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
                   destinationRepoName:
                     description: Name given to the newly-created repository migration in platform-managed source control.
                     type: string
-                    default: reference-quarkus-mvn-cloud-resources_jenkins_workflow-everything
+                    default: reference-quarkus-mvn-cloud-resources_workflow-typical
                   ciConfigPath:
                     description: Path of the CI for GitLab CI, optional
                     type: string

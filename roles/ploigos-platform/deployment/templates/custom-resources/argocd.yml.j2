@@ -13,5 +13,8 @@ spec:
       g, argocd-admins, role:admin
       p, {{ ploigos_service_account.username | default('ploigos') }}, *, *, *, allow
     scopes: '[groups]'
+  repo:
+    image: argoproj/argocd
+    version: v2.1.3
   image: argoproj/argocd
   version: v2.1.3
