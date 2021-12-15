@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+  - k8s_info:
+      kind: Secret
+      api_version: v1
+      namespace: ploigos-operator-system
+      name: gitea-admin-credentials
+    register: gitea_secret_result
+    until: gitea_secret_result.resources
+    retries: 30
+    delay: 10
+
+  - set_fact:
+      gitea_admin_password: '{{ gitea_secret_result.resources[0].data.password | b64decode }}'

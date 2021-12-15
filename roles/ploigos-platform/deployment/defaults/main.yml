@@ -9,15 +9,21 @@ jenkins_repository_name: openshift-release-dev
 platform_tls_verify: "{{ ploigos_platform.tls.verify | default(true) }}"
 platform_trust_bundle_config_map: "{{ ploigos_platform.tls.trust_bundle_config_map | default(omit) }}"
 
-
 all_services: "{{ ploigos_platform.services.values() | list | json_query('[].keys(@)[]') }}"
+
 transformed_services: |-
       {% for service in ploigos_platform.services.values()|list %}
-      {% set service_name = service.keys()|list|first %}
+      {% for service_name in service.keys()|list %}
       - name: "{{ service_name }}"
         values: {{ service[service_name]|to_json }}
       {% endfor %}
-managed_services: '{{ transformed_services|from_yaml|json_query("[?values.enabled].name") }}'
+      {% endfor %}
+
+enabled_services: '{{ transformed_services|from_yaml|json_query("[?values.enabled].name") }}'
+
+external_services: '{{ transformed_services|from_yaml|json_query("[?values.external_properties].name") | intersect(enabled_services) }}'
+
+managed_services: '{{ enabled_services | difference(external_services) }}'
 
 target_namespaces: ['{{ ploigos_namespace }}']
 

@@ -16,12 +16,15 @@
 - name: Initialize managed Gitea details
   when: '"gitea" in managed_services'
   block:
-    - name: Get Gitea secret
-      set_fact:
-        gitea_admin_secret: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='gitea-admin-credentials') }}"
-      until: gitea_admin_secret
+    - k8s_info:
+        kind: Secret
+        api_version: v1
+        namespace: ploigos-operator-system
+        name: gitea-admin-credentials
+      register: gitea_secret_result
+      until: gitea_secret_result.resources
       retries: 30
-      delay: 5
+      delay: 10
 
     - name: Set Gitea service details
       set_fact:
@@ -29,9 +32,9 @@
       vars:
         _gitea_details:
           gitea:
-            url: "https://gitea-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
-            username: "{{ gitea_admin_secret.data.username | b64decode }}"
-            password: "{{ gitea_admin_secret.data.password | b64decode }}"
+            url: "http://gitea:3000"
+            username: "{{ gitea_secret_result.resources[0].data.username | b64decode }}"
+            password: "{{ gitea_secret_result.resources[0].data.password | b64decode }}"
 
 - name: Initialize managed GitLab details
   when: '"gitlab" in managed_services'
@@ -125,7 +128,7 @@
   vars:
     _sonarqube_details:
       sonarqube:
-        url: "https://sonarqube-{{ ploigos_namespace }}.apps.{{ full_cluster_name }}"
+        url: "http://sonarqube:9000"
         username: admin
         password: admin
 
