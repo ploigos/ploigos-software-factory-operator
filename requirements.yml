@@ -4,3 +4,4 @@ collections:
     version: 1.2.1
   - name: operator_sdk.util
   - name: ploigos.service_configs
+    src: git+https://github.com/ploigos/ploigos-service-configs/,feature/nexus-npm
