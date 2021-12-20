@@ -112,7 +112,7 @@ Two APIs are offered:
     helmRepo:
       destinationRepoName: reference-quarkus-mvn-cloud-resources_workflow-typical
       sourceUrl: >-
-        https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
+        https://github.com/ploigos-reference-apps/reference-cloud-resources_operator.git
     serviceName: fruit
   EOF
 

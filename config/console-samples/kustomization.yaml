@@ -5,4 +5,5 @@ resources:
 - manifests/1-jenkins-platform.yaml
 - manifests/2-tekton-platform.yaml
 - manifests/3-private-platform.yaml
-- manifests/1-typical-pipeline.yaml
+- manifests/1-typical-pipeline-java.yaml
+- manifests/2-typical-pipeline-nodejs.yaml

@@ -1,10 +1,10 @@
 apiVersion: console.openshift.io/v1
 kind: ConsoleYAMLSample
 metadata:
-  name: 1-pipeline
+  name: 1-pipeline-java
 spec:
   description: >
-    PloigosPipeline using a reference application. This will migrate upstream app and helm
+    PloigosPipeline using a reference java application. This will migrate upstream app and helm
     repositories into your Gitea instance and start a new typical pipeline run against them.
   targetResource:
     apiVersion: redhatgov.io/v1alpha1
@@ -22,6 +22,6 @@ spec:
         sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn.git
         destinationRepoName: reference-quarkus-mvn
       helmRepo:
-        sourceUrl: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
+        sourceUrl: https://github.com/ploigos-reference-apps/reference-cloud-resources_operator.git
         destinationRepoName: reference-quarkus-mvn-cloud-resources_workflow-typical
       autoStartPipeline: true

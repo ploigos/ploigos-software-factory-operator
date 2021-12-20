@@ -5,7 +5,9 @@
     oc delete -n {{ ploigos_namespace }} all,configmap,pvc,serviceaccount,rolebinding -l app=jenkins-persistent || true
     oc delete -n {{ ploigos_namespace }} secret gitea-access-token || true
     oc delete -n {{ ploigos_namespace }} secret ploigos-platform-config-secrets || true
-    oc delete -n {{ ploigos_namespace }} cm ploigos-platform-config || true
+    oc delete -n {{ ploigos_namespace }} cm ploigos-platform-config-mvn || true
+    oc delete -n {{ ploigos_namespace }} cm ploigos-platform-config-npm || true
+
 
 - name: Remove CustomResources
   k8s:

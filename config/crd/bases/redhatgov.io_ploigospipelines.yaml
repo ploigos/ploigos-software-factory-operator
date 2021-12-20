@@ -72,7 +72,7 @@ spec:
                   sourceUrl:
                     description: Upstream repository for migration into platform-managed source control.
                     type: string
-                    default: https://github.com/ploigos-reference-apps/reference-quarkus-mvn-cloud-resources_operator.git
+                    default: https://github.com/ploigos-reference-apps/reference-cloud-resources_operator.git
                   destinationRepoName:
                     description: Name given to the newly-created repository migration in platform-managed source control.
                     type: string

@@ -104,29 +104,51 @@
 
 - name: Get secret template as base64
   set_fact:
-    ploigos_platform_config_secrets: "{{ lookup('template', 'ploigos-platform-config-secrets.yml.j2') | b64encode }}"
+    ploigos_platform_config_secrets_mvn: "{{ lookup('template', 'ploigos-platform-config-secrets-mvn.yml.j2') | b64encode }}"
+    ploigos_platform_config_secrets_npm: "{{ lookup('template', 'ploigos-platform-config-secrets-npm.yml.j2') | b64encode }}"
 
 - set_fact:
-    platform_secrets: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-platform-config-secrets') }}"
-    platform_config: "{{ lookup('k8s', kind='ConfigMap', namespace=ploigos_namespace, resource_name='ploigos-platform-config') }}"
+    platform_secrets_mvn: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-platform-config-secrets-mvn') }}"
+    platform_secrets_npm: "{{ lookup('k8s', kind='Secret', namespace=ploigos_namespace, resource_name='ploigos-platform-config-secrets-npm') }}"
+    platform_config_mvn: "{{ lookup('k8s', kind='ConfigMap', namespace=ploigos_namespace, resource_name='ploigos-platform-config-mvn') }}"
+    platform_config_npm: "{{ lookup('k8s', kind='ConfigMap', namespace=ploigos_namespace, resource_name='ploigos-platform-config-npm') }}"
 
-- name: 'Set ploigos-platform-config-secrets Secret to {{ cr_state }}'
+
+- name: 'Set ploigos-platform-config-secrets-mvn Secret to {{ cr_state }}'
   k8s:
     state: '{{ cr_state }}'
     definition: |
       apiVersion: v1
       kind: Secret
       metadata:
-        name: ploigos-platform-config-secrets
+        name: ploigos-platform-config-secrets-mvn
         namespace: '{{ ploigos_namespace }}'
       data:
-        config-secrets.yml: '{{ ploigos_platform_config_secrets }}'
-  when: not platform_secrets
+        config-secrets.yml: '{{ ploigos_platform_config_secrets_mvn }}'
+  when: not platform_secrets_mvn
 
-- name: 'Set ploigos-platform-config ConfigMap to {{ cr_state }}'
+- name: 'Set ploigos-platform-config-secrets-npm Secret to {{ cr_state }}'
   k8s:
-    definition: '{{ lookup("template", "ploigos-platform-config.yml.j2") }}'
-  when: not platform_config or cr_state=='absent'
+    state: '{{ cr_state }}'
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ploigos-platform-config-secrets-npm
+        namespace: '{{ ploigos_namespace }}'
+      data:
+        config-secrets.yml: '{{ ploigos_platform_config_secrets_npm }}'
+  when: not platform_secrets_npm
+
+- name: 'Set ploigos-platform-config-mvn ConfigMap to {{ cr_state }}'
+  k8s:
+    definition: '{{ lookup("template", "ploigos-platform-config-mvn.yml.j2") }}'
+  when: not platform_config_mvn or cr_state=='absent'
+
+- name: 'Set ploigos-platform-config-npm ConfigMap to {{ cr_state }}'
+  k8s:
+    definition: '{{ lookup("template", "ploigos-platform-config-npm.yml.j2") }}'
+  when: not platform_config_npm or cr_state=='absent'
 
 - name: Complete GitLab cleanup tasks, if enabled
   block:

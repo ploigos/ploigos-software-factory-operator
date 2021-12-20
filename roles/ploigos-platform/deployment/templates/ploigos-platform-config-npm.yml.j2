@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ploigos-platform-config
+  name: ploigos-platform-config-npm
   namespace: {{ ploigos_namespace }}
 data:
   config.yml: |
@@ -11,24 +11,6 @@ data:
 
       global-defaults:
         tls-verify: {{ platform_tls_verify }}
-        maven-servers:
-          internal-mirror:
-            id: maven-public
-            username: {{ ploigos_service_account.username }}
-          maven-releases:
-            id: maven-releases
-            username: {{ ploigos_service_account.username }}
-        maven-repositories:
-          maven-releases:
-            id: maven-releases
-            url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-releases/
-            snapshots: false
-            releases: true
-        maven-mirrors:
-          internal-mirror:
-            id: maven-public
-            url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-public/
-            mirror-of: '*'
         container-registries:
 {% if 'quay' in (all_services_details | list) %}
           {{ all_services_details.quay.url }}:
@@ -47,7 +29,7 @@ data:
           kube-app-domain: apps.{{ full_cluster_name }}
 
       generate-metadata:
-      - implementer: Maven
+      - implementer: Npm
       - implementer: Git
       - implementer: SemanticVersion
 
@@ -57,21 +39,25 @@ data:
           git-username: {{ ploigos_service_account.username }}
 
       unit-test:
-      - implementer: MavenTest
+      - implementer: NpmTest
+        config:
+          install-first: True
 
       package:
-      - implementer: MavenPackage
+      - implementer: NpmPackage
 
       static-code-analysis:
       - implementer: SonarQube
         config:
           url: {{ all_services_details.sonarqube.url }}/
           username: {{ ploigos_service_account.username }}
+
       push-artifacts:
-      - implementer: MavenDeploy
+      - implementer: NpmPushArtifacts
         config:
-          maven-push-artifact-repo-id: maven-releases
-          maven-push-artifact-repo-url: {{ all_services_details.nexus_artifacts.url }}/repository/maven-releases
+          npm-registry: {{ all_services_details.nexus_artifacts.url }}/repository/npm-internal/
+          npm-user: {{ ploigos_service_account.username }}
+
       create-container-image:
       - implementer: Buildah
 
@@ -101,13 +87,6 @@ data:
 
       validate-environment-configuration:
       - implementer: ConfiglintFromArgocd
-
-      uat:
-      - implementer: MavenIntegrationTest
-        config:
-          target-host-url-maven-argument-name: 'target.base.url'
-          maven-additional-arguments:
-          - -Dselenium.hub.url=http://selenium-grid.{{ ploigos_namespace }}.svc.cluster.local:4444
 
       report:
       - implementer: ResultArtifactsArchive
