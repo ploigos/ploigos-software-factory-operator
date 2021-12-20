@@ -9,7 +9,7 @@ spec:
   targetResource:
     apiVersion: redhatgov.io/v1alpha1
     kind: PloigosPipeline
-  title: Typical Pipeline
+  title: Typical Pipeline - NodeJS App
   yaml: |
     apiVersion: redhatgov.io/v1alpha1
     kind: PloigosPipeline
