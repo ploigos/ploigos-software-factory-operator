@@ -43,7 +43,7 @@ export OCP_USERNAME=replace
 export OCP_PASSWORD='replace'
 export QUAY_USERNAME=replace
 export QUAY_PASSWORD='replace'
-export OPERATOR_IMAGE=quay.io/replace/ploigos-operator:test
+export OPERATOR_IMAGE=quay.io/replace/ploigos-operator
 ```
 
 Make sure the repo provided is public for the env var OPERATOR_IMAGE
