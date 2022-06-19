@@ -7,6 +7,9 @@ spec:
   server:
     route:
       enabled: true
+      tls:
+        termination: reencrypt
+        insecureEdgeTerminationPolicy: Redirect
   rbac:
     defaultPolicy: 'role:readonly'
     policy: |
