@@ -28,7 +28,7 @@ managed_services: '{{ enabled_services | difference(external_services) }}'
 target_namespaces: ['{{ ploigos_namespace }}']
 
 ## GitLab Variables
-gitlab_chart_version: "5.3.0"
+gitlab_chart_version: "5.9.1"
 gitlab_url: "https://gitlab.apps{{ full_cluster_name }}"
 gitlab_ci_trustca_secret: "{{ ploigos_platform.services.continuous_integration.gitlab_ci.ca_secret | default(None) }}"
 cert_manager: "{{ ploigos_platform.services.source_control.gitlab.install_cert_manager }}"

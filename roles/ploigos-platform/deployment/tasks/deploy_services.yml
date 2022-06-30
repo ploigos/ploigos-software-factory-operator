@@ -27,15 +27,6 @@
         definition: '{{ lookup("template", "subscriptions/cert_manager.yml.j2") | from_yaml }}'
       when: cert_manager
 
-    - name: Apply Cert Manager Custom Resource
-      k8s:
-        definition: '{{ lookup("template", "gitlab-resources/cert_manager.yml.j2") | from_yaml }}'
-      register: deployment
-      until: not deployment.failed
-      retries: 5
-      delay: 10
-      when: cert_manager
-
     - name: Deploy GitLab Operator
       k8s:
         src: "{{ role_path }}/files/gitlab.yml"
