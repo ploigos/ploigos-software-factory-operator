@@ -107,7 +107,7 @@ data:
           mount_path = "/opt/platform-config/config-secrets.yml"
           sub_path = "config-secrets.yml"
 
-        {% if (platform_trust_bundle_config_map is defined) and (platform_trust_bundle_config_map|length != 0) %}
+        {% if (platform_trust_bundle_config_map is defined) and (platform_trust_bundle_config_map != '') and (platform_trust_bundle_config_map|length != 0) %}
         [[runners.kubernetes.volumes.config_map]]
           name = "{{ platform_trust_bundle_config_map }}"
           mount_path = "/etc/pki/ca-trust/source/anchors"

@@ -53,8 +53,8 @@
       shell: |
         oc='{{ oc_cli }}'
         set -eo pipefail
-        pod=$($oc get pods -n gitlab-system -l app=task-runner -o jsonpath='{.items[0].metadata.name}')
-        output=$($oc exec $pod -n gitlab-system -c task-runner -- gitlab-rails runner {{ gitlab_console_command }} 2>&1)
+        pod=$($oc get pods -n gitlab-system -l app=toolbox -o jsonpath='{.items[0].metadata.name}')
+        output=$($oc exec $pod -n gitlab-system -c toolbox -- gitlab-rails runner {{ gitlab_console_command }} 2>&1)
         if [ ! -z "$output" ]; then
           if echo "$output" | grep -q 'already exist'; then
               echo ok

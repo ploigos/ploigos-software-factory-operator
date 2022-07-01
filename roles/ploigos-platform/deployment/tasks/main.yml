@@ -155,8 +155,8 @@
     - name: Revoke access token for GitLab root user
       shell: |
         oc='{{ oc_cli }}'
-        pod=$($oc get pods -n gitlab-system -l app=task-runner -o jsonpath='{.items[0].metadata.name}')
-        $oc exec $pod -n gitlab-system -c task-runner -- gitlab-rails runner "token = PersonalAccessToken.find_by_token('{{ gitlab_root_token }}');token.revoke!"
+        pod=$($oc get pods -n gitlab-system -l app=toolbox -o jsonpath='{.items[0].metadata.name}')
+        $oc exec $pod -n gitlab-system -c toolbox -- gitlab-rails runner "token = PersonalAccessToken.find_by_token('{{ gitlab_root_token }}');token.revoke!"
       register: gitlab_revoke_token
       changed_when: gitlab_revoke_token.stdout_lines == []
   when: '"gitlab" in managed_services'
